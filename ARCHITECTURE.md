@@ -210,6 +210,115 @@ behind motion. The canvas wrapper is `aria-hidden`; all real controls are access
   only WebGPU-**only** features need an `renderer.isWebGPURenderer` branch (the optional traffic
   compute pass is the one extension point).
 
+## uSpeedScale ownership (motion engineer — DONE)
+
+`trafficMaterial.ts` exposes `uSpeedScale` (float, default 1). The **motion engineer owns it** via
+`src/motion/useTrafficSpeed.ts` and is the SINGLE writer of this uniform. Per-tier defaults:
+
+| Tier | uSpeedScale default | Rationale |
+|---|---|---|
+| low (touch/mobile) | 0.65 | Reduce frantic motion on small screens; easier on fragment fill |
+| medium | 0.85 | Moderate city pace |
+| high (desktop) | 1.0 | Full authoring intent |
+
+### setTrafficSpeed API (for the UI agent)
+
+```ts
+// Scene.tsx wires useTrafficSpeed and the returned api is available via:
+//   const speedScaleRef = useRef<FloatUniform | null>(null)
+//   const { setTrafficSpeed } = useTrafficSpeed(tier.tier, speedScaleRef)
+//   <Traffic ... speedScaleRef={speedScaleRef} />
+
+// Usage from the UI agent (e.g. a traffic speed slider):
+setTrafficSpeed(1.5)        // smooth tween to 1.5× over 0.8s (power2.inOut)
+setTrafficSpeed(0)          // smooth stop
+setTrafficSpeed(1, 0)       // immediate reset, no tween
+```
+
+The UI agent should add a `setTrafficSpeed` prop to Scene/App so the ControlPanel can call it
+when a future traffic-speed slider is dragged. The hook is already wired in `Scene.tsx` but the
+prop-chain to the panel still needs adding (one-line change in App.tsx + Scene props interface).
+
+## Camera rig contract (motion engineer — DONE)
+
+`camera/CameraRig.tsx` is the single owner of the camera transform. Rewritten by the motion
+engineer 2026-06-11. Key changes from the skeleton:
+
+### Damping constants (all MathUtils.damp lambdas)
+
+| Constant | Value | Rationale |
+|---|---|---|
+| LAMBDA_ORBIT | 7 | Desktop orbit: weighty but responsive; settles in ~3 frames at 60 fps |
+| LAMBDA_ORBIT_MOBILE | 5 | Coarse-pointer / touch: floatier, matches touch inertia feel |
+| LAMBDA_ORBIT_REDUCED | 14 | Reduced-motion: snappy so camera reacts to drag with minimal perceived motion |
+| LAMBDA_PARALLAX | 5 | Parallax offset drift: slow enough to read as atmospheric sway |
+| LAMBDA_PARALLAX_ACTIVE | 12 | Parallax weight ease: fades quickly when drag starts, back gradually when idle |
+
+### Parallax / idle drift design
+
+Parallax uses a **dedicated offset channel** (`parOffset`), not a perturbation of `desired`. This
+means it never accumulates and disabling it (on drag start or reduced-motion) eases to zero cleanly
+without shifting the actual orbit. The offset weight (`parActiveWeight`) damps to 0 while dragging
+and back to 1 when idle, using `LAMBDA_PARALLAX_ACTIVE = 12` (fast fade-on-drag, slower restore).
+
+Idle drift: applied to `desired.theta` only after `IDLE_THRESHOLD = 4s` of no pointer/wheel input,
+at `IDLE_DRIFT_SPEED = 0.018 rad/s` (slow pan). Disengages instantly on any input. Both features
+are disabled under `reduced = true`.
+
+### Touch
+
+Single-finger drag works via the PointerEvent API (same handler as mouse). Two-finger pinch zoom
+tracked via a `Map<pointerId, pos>` — distance delta drives `desired.radius`. Switching from pinch
+back to single-finger resets gracefully.
+
+### Inertia
+
+Velocity in (dTheta, dPhi) is accumulated per frame while dragging. On release it decays by
+`INERTIA_DECAY = 0.88 per frame at 60fps` (≈ full stop in ~1s). Micro-jitter is gated by a
+minimum threshold. Clamp keeps phi in bounds during inertia.
+
+### Fly-to preset API (for the UI agent)
+
+```ts
+import {
+  CameraRigHandle, FlyToPreset,
+  PRESET_STREET_DUSK,  // radius:60, near-horizontal, golden-hour orientation, 2.4s
+  PRESET_SKYLINE,      // radius:320, near-top-down, full city overview, 2.8s
+} from '../camera/CameraRig'
+
+// In Scene.tsx, a ref is created and passed to CameraRig:
+const rigHandle = useRef<CameraRigHandle | null>(null)
+<CameraRig ... handle={rigHandle} />
+
+// Trigger from the UI agent (e.g. a "Street level" button in ControlPanel):
+rigHandle.current?.flyTo(PRESET_STREET_DUSK)
+rigHandle.current?.flyTo({ radius: 120, theta: Math.PI * 0.5, phi: 1.1 }) // custom preset
+rigHandle.current?.cancelFly()  // immediately release back to user drag
+```
+
+The rigHandle ref is created in Scene.tsx but not yet forwarded to App/ControlPanel. The UI agent
+needs to add a `rigHandle` prop to Scene (or pass down via context) and wire it to the preset
+buttons in the panel. The CameraRig implementation is complete.
+
+### Reduced-motion verification
+
+`reduced` prop flows: `useReducedMotion()` in `App.tsx` → `Scene` → `CameraRig`. When true:
+- `enableIdleDrift` effect is a no-op (guarded by `if (!reduced)`).
+- `enableParallax` effect eases `parOffset` to zero (via `LAMBDA_PARALLAX_ACTIVE`).
+- `orbitLambda` switches to `LAMBDA_ORBIT_REDUCED = 14` (less motion for equal drag).
+- Inertia velocity still decays but is not accumulated (drag is still operable — reduced-motion
+  means less gratuitous motion, not less control).
+The wire is live end-to-end: `useReducedMotion` → `reduced: boolean` on Scene → CameraRig. No
+stray reduced-motion gap was found in the existing code.
+
+## Time-of-day scrub smoothing — decision (motion engineer)
+
+**No easing added.** The time-of-day `<input type="range">` is a direct-manipulation control:
+users expect the sky to track their thumb precisely. Adding an eased delay would make the light
+trail behind the slider, which feels broken for dragging. The "cinematic feel" goal applies to
+*programmatic* transitions (fly-to presets, auto-day speed), not to user-driven scrubs. The
+SimClock API `setDayPhase()` remains an instant authoritative jump.
+
 ## Extension points (what each agent does next)
 
 - **shader engineer** — DONE: procedural PBR materials replace all placeholders. Files live in
@@ -221,18 +330,21 @@ behind motion. The canvas wrapper is `aria-hidden`; all real controls are access
   `uSunDirection`/`uDaylight`/`uDayPhase`, with sun glow + hash stars; it draws in front of the
   driver's flat `scene.background` and is excluded from fog, so the driver's single-writer contract
   is untouched. Still-open optional: bloom post for night glow; WebGPU compute for traffic spacing.
-  **Material-local uniform exposed for the motion engineer:** `trafficMaterial.ts` returns
-  `uSpeedScale` (float, default 1) — a global traffic speed multiplier. It is material-owned, NOT a
-  shared sim uniform; the deterministic lane formula is preserved (uSpeedScale just scales `aSpeed`).
-  Currently no one drives it; the motion engineer MAY, per tier. **Tone-mapping exposure breathing was
-  deliberately NOT claimed** — `RendererConfig.toneMappingExposure` remains a constant owned by the
-  architect; left available if desired later.
-- **motion engineer** — tune the camera rig feel (damping, parallax, idle drift, zoom limits, optional
-  fly-to). Tune per-tier traffic speed if desired. Owns no uniforms the driver writes.
-- **ui engineer** — design the real control panel (layout, theming, traffic-density slider, maybe a
-  seed control), full responsive + touch + a11y pass; keep the documented wiring.
+  **Material-local uniform uSpeedScale now owned by the motion engineer** (see above).
+  **Tone-mapping exposure breathing was deliberately NOT claimed** — `RendererConfig.toneMappingExposure`
+  remains a constant owned by the architect; left available if desired later.
+- **motion engineer** — DONE. Camera rig feel tuned (damping, parallax, idle drift, zoom limits,
+  fly-to). Traffic speed wired per tier. See sections above for all APIs and constants.
+- **ui engineer** — design the real control panel (layout, theming, traffic-density slider, seed
+  control). Wire `rigHandle` from Scene to the panel for fly-to preset buttons. Wire `setTrafficSpeed`
+  from Scene to a future speed slider. Full responsive + touch + a11y pass; keep all existing wiring.
 - **perf auditor** — read-only audit against `references/performance-and-fallback.md`: draw-call count
   per tier, shadow cost, dpr, WebGPU→WebGL2 fallback, reduced-motion, the no-WebGL poster, a11y.
+  **Specific items to check from motion engineer:** (1) `gsap.to()` in `useTrafficSpeed` creates a
+  tween object per call — verify GSAP is not leaving dead tweens on rapid slider input (it kills the
+  previous tween, but verify GC pressure on mobile). (2) The `useEffect` in `useTrafficSpeed` that
+  flushes pending value runs every render — evaluate if this becomes a hot path and convert to a
+  `useLayoutEffect` with a dependency array if needed.
 - **pedestrians (stretch, high tier only)** — NOT built. Extension point lives in `Scene.tsx`: an
   instanced low-poly pedestrian mesh on sidewalk-derived walk paths, animated in TSL like Traffic,
   gated behind `tier.tier === 'high'`.

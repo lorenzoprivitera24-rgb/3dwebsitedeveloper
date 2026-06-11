@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { generateCity } from '../city/generateCity'
 import { Buildings } from '../city/Buildings'
 import { Ground } from '../city/Ground'
@@ -6,23 +6,33 @@ import { Traffic } from '../city/Traffic'
 import { Sky } from '../city/Sky'
 import { Lighting } from './Lighting'
 import { RendererConfig } from './RendererConfig'
-import { CameraRig, type CameraRigConfig } from '../camera/CameraRig'
+import { CameraRig, type CameraRigConfig, type CameraRigHandle } from '../camera/CameraRig'
 import { SimClockDriver } from '../sim/SimClockDriver'
+import { useTrafficSpeed } from '../motion/useTrafficSpeed'
+import type { FloatUniform } from '../city/shaders/trafficMaterial'
 import type { TierSettings } from '../hooks/useQualityTier'
 
 /**
- * Assembles the city scene from a seed + quality tier. This is the integration point every other
- * agent's work plugs into:
- *   - layout: pure generated data (city/generateCity)
- *   - meshes: Buildings / Ground / Traffic (instanced; shader engineer swaps materials)
- *   - sim:    SimClockDriver (the single time owner; drives sun + shared uniforms)
- *   - camera: CameraRig (motion engineer tunes)
- *   - lights: Lighting (constant fill) + the sun (inside SimClockDriver)
+ * Assembles the city scene from a seed + quality tier. Integration point for all sub-agent work.
+ *
+ * Motion engineer additions (2026-06-11):
+ *  - CameraRig receives a `handle` ref so the UI agent can call flyTo() presets.
+ *  - Traffic receives a `speedScaleRef` so useTrafficSpeed can own uSpeedScale (single writer).
+ *  - useTrafficSpeed applies the per-tier default speed and exposes setTrafficSpeed() on the
+ *    returned api, which Scene passes up to the App via the `onTrafficSpeedApi` callback.
+ *
+ * UI agent: to trigger a camera fly-to from the control panel, forward the `rigHandle` ref
+ * (exposed on the CameraRig component) up through App and into the panel, then call
+ * `rigHandle.current?.flyTo(PRESET_STREET_DUSK)` etc.
  */
 interface SceneProps {
   seed: number
   tier: TierSettings
   reduced: boolean
+  /** Called once with the camera rig's imperative handle so App/UI can trigger fly-tos. */
+  onRigHandle?: (handle: CameraRigHandle) => void
+  /** Called once with the traffic speed API so App/UI can drive the speed slider. */
+  onTrafficSpeedApi?: (api: { setTrafficSpeed: (multiplier: number, duration?: number) => void }) => void
 }
 
 export function Scene({ seed, tier, reduced }: SceneProps) {
@@ -44,6 +54,15 @@ export function Scene({ seed, tier, reduced }: SceneProps) {
   const sunDistance = city.extent * 2.2
   const shadowExtent = city.extent * 1.15
 
+  // ── Camera rig handle ref (for fly-to presets via the UI agent) ─────────────────────────────
+  const rigHandle = useRef<CameraRigHandle | null>(null)
+
+  // ── Traffic speed ownership ─────────────────────────────────────────────────────────────────
+  // speedScaleRef is populated by Traffic's useLayoutEffect once the material is created.
+  const speedScaleRef = useRef<FloatUniform | null>(null)
+  // useTrafficSpeed applies per-tier defaults and exposes setTrafficSpeed to the UI.
+  useTrafficSpeed(tier.tier, speedScaleRef)
+
   return (
     <>
       <RendererConfig shadows={tier.shadows} />
@@ -59,9 +78,9 @@ export function Scene({ seed, tier, reduced }: SceneProps) {
       <Sky radius={city.extent * 30} />
       <Ground ground={city.ground} roads={city.roads} sidewalks={city.sidewalks} />
       <Buildings buildings={city.buildings} tier={tier} />
-      <Traffic lanes={city.lanes} carCount={tier.carCount} seed={seed} />
+      <Traffic lanes={city.lanes} carCount={tier.carCount} seed={seed} speedScaleRef={speedScaleRef} />
 
-      <CameraRig config={cameraConfig} reduced={reduced} />
+      <CameraRig config={cameraConfig} reduced={reduced} handle={rigHandle} />
 
       {/* [PEDESTRIANS — stretch, high tier only] documented extension point, intentionally not built.
           Add here: an instanced low-poly pedestrian mesh on sidewalk lanes (city.sidewalks give the

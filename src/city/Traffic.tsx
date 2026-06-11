@@ -7,7 +7,7 @@ import {
 } from 'three'
 import type { Lane } from './types'
 import { buildCarInstances } from './buildCarInstances'
-import { makeTrafficMaterial } from './shaders/trafficMaterial'
+import { makeTrafficMaterial, type FloatUniform } from './shaders/trafficMaterial'
 
 /**
  * Traffic: a single InstancedMesh of car bodies, one draw call for all cars.
@@ -46,16 +46,31 @@ export function Traffic({
   lanes,
   carCount,
   seed,
+  speedScaleRef,
 }: {
   lanes: Lane[]
   carCount: number
   seed: number
+  /**
+   * Optional ref that will be populated with the material-local uSpeedScale uniform once the
+   * material is created. The motion engineer's useTrafficSpeed hook passes this in and becomes
+   * the single owner of that uniform value. Leave undefined if speed control is not needed.
+   */
+  speedScaleRef?: React.MutableRefObject<FloatUniform | null>
 }) {
   const meshRef = useRef<InstancedMesh>(null)
   const buffers = useMemo(() => buildCarInstances(lanes, carCount, seed), [lanes, carCount, seed])
   const geometry = useMemo(() => makeCarGeometry(), [])
   // The TSL car material: motion + heading + per-car colour + night head/tail lights, all on the GPU.
-  const { material } = useMemo(() => makeTrafficMaterial(), [])
+  const { material, uSpeedScale } = useMemo(() => makeTrafficMaterial(), [])
+
+  // Expose uSpeedScale to the motion engineer's hook (single writer = useTrafficSpeed).
+  useLayoutEffect(() => {
+    if (speedScaleRef) speedScaleRef.current = uSpeedScale
+    return () => {
+      if (speedScaleRef) speedScaleRef.current = null
+    }
+  }, [uSpeedScale, speedScaleRef])
 
   useLayoutEffect(() => {
     const mesh = meshRef.current
