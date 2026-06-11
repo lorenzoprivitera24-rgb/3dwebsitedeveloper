@@ -2,33 +2,81 @@ import { useMemo } from 'react'
 
 export type QualityTier = 'low' | 'medium' | 'high'
 
+/**
+ * Everything the scene needs to scale with device capability lives here, so there is
+ * exactly one place that decides "how big is the city" and "how heavy is the frame".
+ *
+ * Read by: city layout generator (gridSize), Traffic (carCount), the sun/shadow setup
+ * (shadows, shadowMapSize), the Canvas (dpr), and building geometry (buildingSegments).
+ */
 export interface TierSettings {
   tier: QualityTier
-  detail: number // geometry subdivision for the icosahedron
-  amplitude: number // max displacement amplitude
-  dpr: [number, number] // device pixel ratio range for the Canvas
+  /** City is a gridSize x gridSize array of blocks. Total buildings scale ~ gridSize^2. */
+  gridSize: number
+  /** Total cars distributed across all lanes. */
+  carCount: number
+  /** Whether the directional sun casts real shadows (the single shadow caster). */
+  shadows: boolean
+  /** Shadow map resolution for the sun, when shadows are on. */
+  shadowMapSize: number
+  /** Box segment count for building archetypes (facade detail headroom for the shader engineer). */
+  buildingSegments: number
+  /** Device pixel ratio clamp for the Canvas. Never uncapped; hard ceiling of 2. */
+  dpr: [number, number]
 }
 
-// Picks a quality tier from viewport, pointer coarseness (touch), and device memory.
-// Computed once on mount; for a production app you may want to recompute on resize/orientation.
-export function useQualityTier(): TierSettings {
-  return useMemo(() => {
-    if (typeof window === 'undefined') {
-      return { tier: 'medium', detail: 96, amplitude: 0.45, dpr: [1, 2] }
-    }
-    const w = window.innerWidth
-    const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4
-    const coarse = window.matchMedia('(pointer: coarse)').matches
+const TIERS: Record<QualityTier, TierSettings> = {
+  // Touch / small / low-memory. Keep draw + fragment work modest, no shadow pass.
+  low: {
+    tier: 'low',
+    gridSize: 6,
+    carCount: 60,
+    shadows: false,
+    shadowMapSize: 1024,
+    buildingSegments: 1,
+    dpr: [1, 1.5],
+  },
+  // Mid desktop / large tablet. Shadows on at a moderate map size.
+  medium: {
+    tier: 'medium',
+    gridSize: 9,
+    carCount: 160,
+    shadows: true,
+    shadowMapSize: 2048,
+    buildingSegments: 1,
+    dpr: [1, 2],
+  },
+  // Desktop with a real GPU. Bigger city, crisper shadows.
+  high: {
+    tier: 'high',
+    gridSize: 12,
+    carCount: 320,
+    shadows: true,
+    shadowMapSize: 4096,
+    buildingSegments: 2,
+    dpr: [1, 2],
+  },
+}
 
-    let tier: QualityTier = 'high'
-    if (coarse || w < 768 || mem <= 2) tier = 'low'
-    else if (w < 1280 || mem <= 4) tier = 'medium'
+/**
+ * Picks a tier from viewport width, pointer coarseness (touch) and device memory.
+ * Computed once on mount. A `quality override` from the control panel (see ARCHITECTURE.md)
+ * supersedes this; the override is plumbed at the App level, not inside this hook.
+ */
+export function pickTier(): QualityTier {
+  if (typeof window === 'undefined') return 'medium'
+  const w = window.innerWidth
+  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4
+  const coarse = window.matchMedia('(pointer: coarse)').matches
+  if (coarse || w < 768 || mem <= 2) return 'low'
+  if (w < 1280 || mem <= 4) return 'medium'
+  return 'high'
+}
 
-    const byTier: Record<QualityTier, TierSettings> = {
-      low: { tier: 'low', detail: 48, amplitude: 0.35, dpr: [1, 1.5] },
-      medium: { tier: 'medium', detail: 96, amplitude: 0.45, dpr: [1, 2] },
-      high: { tier: 'high', detail: 128, amplitude: 0.55, dpr: [1, 2] },
-    }
-    return byTier[tier]
-  }, [])
+export function tierSettings(tier: QualityTier): TierSettings {
+  return TIERS[tier]
+}
+
+export function useQualityTier(override?: QualityTier): TierSettings {
+  return useMemo(() => tierSettings(override ?? pickTier()), [override])
 }

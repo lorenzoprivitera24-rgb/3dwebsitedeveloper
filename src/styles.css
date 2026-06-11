@@ -4,23 +4,10 @@
   --fg: #eef1f7;
   --muted: #9aa3b2;
   --accent: #5b8cff;
+  --panel-bg: rgba(11, 14, 20, 0.72);
+  --panel-border: rgba(238, 241, 247, 0.14);
   --display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --body: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
-}
-
-/* --- Lenis base rules (so wrapping/anchors/stop behave) --- */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-.lenis.lenis-stopped {
-  overflow: hidden;
 }
 
 * {
@@ -28,129 +15,138 @@ html.lenis body {
 }
 
 html,
-body {
+body,
+#root {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 body {
-  background: radial-gradient(120% 120% at 50% 0%, var(--bg-2) 0%, var(--bg) 60%);
+  background: var(--bg);
   color: var(--fg);
   font-family: var(--body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow: hidden; /* fullscreen app: no page scroll */
 }
 
-/* fixed full-screen 3D layer behind the content */
-.canvas-layer {
+/* fullscreen app shell */
+.app {
   position: fixed;
+  inset: 0;
+}
+
+/* the 3D layer fills the viewport, sits behind the UI */
+.canvas-layer {
+  position: absolute;
   inset: 0;
   z-index: 0;
 }
 .canvas-layer canvas {
   display: block;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: none; /* let the camera rig own touch gestures (drag/zoom) */
 }
 
-/* scrollable content sits above the canvas */
-.content {
-  position: relative;
+/* --- control panel (UI agent restyles; wiring is fixed) --- */
+.panel {
+  position: absolute;
   z-index: 1;
+  top: max(1rem, env(safe-area-inset-top));
+  left: max(1rem, env(safe-area-inset-left));
+  width: min(20rem, calc(100vw - 2rem));
+  padding: 1rem 1.1rem 1.25rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
-/* the tall track that gives the scroll-driven morph its length */
-.scene-track {
-  height: 320vh;
-  position: relative;
-}
-
-/* hero is pinned in the middle of the track while the form morphs */
-.hero {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 0 6vw;
-  /* a scrim so text stays readable over a bright/moving 3D background */
-  background: radial-gradient(
-    80% 60% at 50% 50%,
-    transparent 0%,
-    rgba(7, 9, 13, 0.35) 70%,
-    rgba(7, 9, 13, 0.7) 100%
-  );
-}
-
-.hero__inner {
-  max-width: 46rem;
-  text-align: center;
-}
-
-.hero__eyebrow {
-  margin: 0 0 1.25rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.hero__title {
+.panel__title {
   margin: 0;
   font-family: var(--display);
-  font-weight: 360;
-  font-size: clamp(3rem, 11vw, 8.5rem);
-  line-height: 0.96;
+  font-weight: 420;
+  font-size: 1.5rem;
   letter-spacing: -0.01em;
-  font-optical-sizing: auto;
 }
 
-.hero__sub {
-  margin: 1.5rem auto 0;
-  max-width: 34rem;
-  font-size: clamp(1rem, 2.4vw, 1.2rem);
-  line-height: 1.5;
-  color: var(--muted);
+.panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.hero__cta {
-  display: inline-block;
-  margin-top: 2.5rem;
-  padding: 0.85rem 1.6rem;
-  border: 1px solid rgba(238, 241, 247, 0.25);
-  border-radius: 999px;
+.panel__clock {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.15rem;
   color: var(--fg);
-  text-decoration: none;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
-}
-.hero__cta:hover {
-  border-color: var(--accent);
-  background: rgba(91, 140, 255, 0.1);
 }
 
-/* outro: plain readable content after the morph */
-.outro {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 12vh 6vw;
-  background: var(--bg);
-}
-.outro__title {
-  font-family: var(--display);
-  font-weight: 380;
-  font-size: clamp(2rem, 6vw, 4rem);
-  margin: 0 0 1.25rem;
-}
-.outro__body {
-  max-width: 42rem;
-  font-size: clamp(1rem, 2.2vw, 1.15rem);
-  line-height: 1.65;
+.panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 0.82rem;
   color: var(--muted);
-  text-align: center;
+}
+.panel__field legend {
+  padding: 0;
 }
 
-/* no-WebGL poster */
+.panel__field input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.panel__btn,
+.panel__chip {
+  font: inherit;
+  color: var(--fg);
+  background: rgba(238, 241, 247, 0.06);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.panel__chip {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+}
+.panel__btn:hover,
+.panel__chip:hover {
+  background: rgba(91, 140, 255, 0.14);
+}
+.panel__btn[aria-pressed='true'],
+.panel__chip[aria-pressed='true'] {
+  background: rgba(91, 140, 255, 0.22);
+  border-color: var(--accent);
+}
+
+.panel__note {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* no-WebGL poster (fills the canvas layer) */
 .poster {
   position: absolute;
   inset: 0;
@@ -186,8 +182,6 @@ body {
   outline-offset: 3px;
 }
 
-/* belt-and-braces: also calm CSS transitions when reduced motion is requested
-   (the JS path already calms the 3D and the parallax) */
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;

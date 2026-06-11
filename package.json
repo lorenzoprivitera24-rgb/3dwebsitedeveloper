@@ -1,30 +1,28 @@
 {
-  "name": "web3d-2026-starter",
+  "name": "live-city-sim",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Scroll-driven and pointer-driven 3D hero. WebGPU + TSL + R3F v9 + GSAP + Lenis (June 2026).",
+  "description": "Live city simulator (realistic, fullscreen). WebGPU + TSL + R3F v9 + React 19 (June 2026). Procedural seeded city, day/night sim clock, instanced traffic.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
-  "//versions": "These are a verified floor (WebGPU is zero-config since three r171 / 0.171). After install, run the upgrade command in README.md to pull the latest stable.",
+  "//versions": "three pinned to 0.184.x to match the vendored read-only reference checkout under ./three.js. @types/three tracks the same minor. R3F v9 is React-19 compatible.",
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "three": "^0.171.0",
+    "three": "^0.184.0",
     "@react-three/fiber": "^9.0.0",
     "gsap": "^3.13.0",
-    "@gsap/react": "^2.1.0",
-    "lenis": "^1.3.0",
     "motion": "^12.0.0"
   },
-  "//optional": "Add when the brief needs them: @react-three/drei (loaders, Environment, controls), @react-three/postprocessing (bloom/DOF), @react-three/rapier + ecctrl (physics), @react-spring/three (spring-based 3D motion).",
+  "//optional": "Add only when actually needed: @react-three/drei (loaders, Environment helpers), @react-three/postprocessing (bloom/DOF for night glow). The camera rig is hand-rolled (see ARCHITECTURE.md), so drei is intentionally NOT a dependency yet.",
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/three": "^0.171.0",
+    "@types/three": "^0.184.0",
     "@vitejs/plugin-react": "^4.3.0",
     "typescript": "^5.6.0",
     "vite": "^6.0.0"

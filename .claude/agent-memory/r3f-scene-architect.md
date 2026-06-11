@@ -64,6 +64,51 @@ Stack date: June 2026. Three r184 (npm `three@^0.184.0`), R3F v9, React 19, TSL,
 - prefers-reduced-motion: pause idle camera drift + pointer parallax, freeze sim at current dayPhase
   (no auto day/night advance), keep panel fully operable so the user can still scrub manually.
 
+## Final concrete layout (built 2026-06-11, build green)
+
+File map (all under src/):
+- App.tsx (SimClockProvider + quality override state + CITY_SEED=1337 + shell)
+- sim/SimClock.tsx (ref + imperative SimClockApi via context; advanceClock pure fn),
+  sim/SimClockDriver.tsx (THE single time useFrame: advances clock, drives sun light + simUniforms
+  + scene fog/background), sim/uniforms.ts (shared simUniforms: uTime, uDayPhase, uDaylight,
+  uSunDirection — single writer = driver), sim/sun.ts (computeSun + computeSkyColor, pure).
+- city/types.ts (CityLayout/BuildingInstance/GroundQuad/Lane — plain data),
+  city/generateCity.ts (pure mulberry32; CITY_CONSTANTS: BLOCK 40, ROAD 12, SIDEWALK 3, CELL 52,
+  CAR_DECK_Y 0.4), city/buildCarInstances.ts (pure car buffers + motion formula doc),
+  city/Buildings.tsx (3 instanced archetypes, base-pivoted unit box, aFacade vec2 attr),
+  city/Ground.tsx (1 ground mesh + instanced roads/sidewalks unit planes), city/Traffic.tsx
+  (instanced box cars, attrs aLaneStart/aLaneDir/aLaneLength/aPhase/aSpeed/aCar, frustumCulled=false).
+- camera/CameraRig.tsx (hand-rolled damped Spherical orbit, pointerdown/move/up + wheel listeners,
+  ground-clamp maxPolar<PI/2). canvas/Stage.tsx (async WebGPU, error boundary, frameloop=always,
+  camera far=6000), canvas/Scene.tsx (generateCity + sizes camera/shadow to extent),
+  canvas/RendererConfig.tsx (ACES + PCFSoftShadowMap), canvas/Lighting.tsx (hemisphere+ambient fill),
+  canvas/Poster.tsx. ui/ControlPanel.tsx (accessible stub; ~4Hz setInterval label refresh, NOT a RAF).
+- REMOVED: scroll/ dir, canvas/MorphingForm.tsx, canvas/CameraRig.tsx (moved to camera/),
+  ui/Overlay.tsx. package.json: removed lenis + @gsap/react; kept gsap; name=live-city-sim;
+  three ^0.184.0, @types/three ^0.184.0 (installs 0.184.1).
+
+Car motion formula (handed to shader engineer; runs both backends):
+  d = mod(aPhase + uTime*aSpeed, aLaneLength); pos = aLaneStart + aLaneDir*d; heading=atan2(dir.x,dir.z).
+Buildings: instance matrix scales unit box to (w,height,d); positionGeometry.y is 0..1 up the facade.
+
+## Gotchas discovered this build
+
+- tsconfig.node.json (compiles vite.config.ts) needed a fix: vite.config used String.includes ->
+  required "lib":["ES2023"]/"target":"ES2023"; and "composite:true" + "noEmit:true" = TS6310 error.
+  Fix: drop noEmit, add outDir + tsBuildInfoFile under node_modules/.tmp. tsconfig.json (app) left
+  with include:["src"] untouched, so three.js/ stays out of the build.
+- vite manualChunks: function form `if (id.includes('/node_modules/three/')) return 'three'` (the
+  string `['three']` form does not reliably catch the three/webgpu + three/tsl subpath imports).
+  chunkSizeWarningLimit raised to 1500 (three chunk ~1.38MB / 373KB gzip).
+- instancedBufferAttribute(array|BufferAttribute) is the TSL accessor; attach InstancedBufferAttribute
+  to the geometry under a named key, read with attribute('name','type') or instancedBufferAttribute(attr).
+- StaticDrawUsage literal = 35044 (used .setUsage on instanced attrs without importing the constant).
+- Verified live from installed pkgs: three/tsl exports instancedBufferAttribute, attribute, range,
+  positionGeometry, normalWorld, mx_fractal_noise_float, mod, select, etc.; three/webgpu exports
+  WebGPURenderer, MeshStandardNodeMaterial, MeshPhysicalNodeMaterial, PostProcessing.
+- jsm/objects/SkyMesh.js (export class SkyMesh) exists in r184 for the procedural sky tip.
+
 ## Build/verify
 
 - `npm install` then `npm run build` (= `tsc -b && vite build`) must pass before finishing.
+- Last green build (2026-06-11): 69 modules, dist/three ~1381KB (gzip 373KB), app ~370KB (gzip 117KB).

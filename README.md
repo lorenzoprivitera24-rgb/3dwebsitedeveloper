@@ -1,83 +1,93 @@
-# web3d-2026-starter
+# live-city-sim
 
-Scaffold di un sito 3D in cui la forma si deforma allo scroll (desktop) e al tocco (mobile),
-generato dall'agent `r3f-scene-architect`. Stack giugno 2026: WebGPU + TSL, React Three Fiber v9
-su React 19, GSAP 3.13+ (ora gratuito), Lenis, Motion per la UI.
+Simulatore di citta dal vivo, stile realistico: un'app 3D a tutto schermo con citta procedurale a
+griglia, ciclo giorno/notte continuo e traffico. Scaffold generato dall'agent `r3f-scene-architect`.
+Stack giugno 2026: WebGPU + TSL, React Three Fiber v9 su React 19, Motion per la UI. Niente scroll,
+niente Lenis: il loop per-frame e quello di R3F (`useFrame`).
 
 ## Avvio
 
 ```bash
 npm install
-
-# consigliato subito dopo l'install: porta lo stack all'ultima stabile
-# (i numeri in package.json sono un floor verificato, WebGPU e zero-config da three r171)
-npm i three@latest @react-three/fiber@latest gsap@latest @gsap/react@latest lenis@latest motion@latest
-
 npm run dev
 ```
 
-Apri l'URL che stampa Vite. Scorri la pagina e muovi il cursore sulla forma. Su telefono, trascina il dito.
+Apri l'URL che stampa Vite. Trascina per orbitare la camera (mouse o dito), rotella per lo zoom.
+Usa il pannello in alto a sinistra per play/pausa, velocita, ora del giorno e qualita.
 
 ## Cosa fa, in breve
 
-- `Canvas` con renderer WebGPU inizializzato in modo asincrono (`await renderer.init()`), con
-  fallback automatico a WebGL2. Se manca anche WebGL, compare un poster statico al posto del canvas.
-- Un solo loop: Lenis guidato da `gsap.ticker`, ScrollTrigger aggiornato da Lenis.
-- Lo scroll scrive un progresso `0..1` in un ref (niente re-render per frame).
-- La forma (`MorphingForm`) è uno shader TSL che si deforma da due segnali smorzati: scroll e pointer.
-  Mouse e touch sono unificati da `state.pointer` di R3F.
-- Overlay DOM con Motion, parallax in sync, percorso `prefers-reduced-motion`.
-- Tier di qualita (low/medium/high) che abbassa suddivisione e ampiezza su mobile.
+- `Canvas` con renderer WebGPU inizializzato in modo asincrono (`await renderer.init()`), fallback
+  automatico a WebGL2. Senza WebGL compare un poster statico al posto del canvas.
+- Un solo driver per-frame: il loop interno di R3F. `SimClockDriver` (un solo `useFrame`) avanza
+  l'orologio della simulazione e guida sole, cielo, nebbia e gli uniform condivisi.
+- Citta generata in modo deterministico da un seed: blocchi, edifici come `InstancedMesh` (3
+  archetipi), strade, marciapiedi, corsie per il traffico.
+- Edifici, strade e auto sono istanziati (poche draw call). I materiali sono placeholder
+  `MeshStandardNodeMaterial`: lo shader engineer li sostituisce con PBR procedurale in TSL.
+- Camera a orbita smorzata e vincolata (min/max distanza, angolo polare che non scende sotto terra),
+  touch-friendly. Il motion engineer ne tara la sensazione.
+- Tier di qualita (low/medium/high) che scala dimensione citta, numero auto, ombre e dpr.
+- `prefers-reduced-motion`: il ciclo giorno/notte si congela ma il pannello resta operabile.
 
 ## Mappa file
 
 ```
-ARCHITECTURE.md                    il contratto condiviso (leggilo prima di estendere)
+ARCHITECTURE.md                  il contratto condiviso (leggilo prima di estendere)
 src/
-  App.tsx                          assembla scroll + canvas/poster + overlay
-  main.tsx                         entry React 19
-  styles.css                       tema dark editoriale, layer fisso, track di scroll
-  lib/webgl.ts                     supportsWebGL -> canvas vs poster
-  hooks/useReducedMotion.ts        prefers-reduced-motion live
-  hooks/useQualityTier.ts          tier di qualita da viewport/touch/memoria
-  scroll/SmoothScroll.tsx          ReactLenis + sync gsap.ticker (loop singolo)   [architect]
-  scroll/ScrollProgressDriver.tsx  ScrollTrigger -> ref di progresso              [motion]
-  canvas/Stage.tsx                 Canvas WebGPU async + extend + error boundary  [architect]
-  canvas/Scene.tsx                 luci + rig + forma                             [architect]
-  canvas/CameraRig.tsx             camera dallo scroll                            [motion]
-  canvas/MorphingForm.tsx          shader TSL displacement scroll + pointer       [shader + motion]
-  canvas/Poster.tsx                fallback no-WebGL                              [architect/ui]
-  ui/Overlay.tsx                   UI DOM con Motion + parallax + a11y            [ui]
+  App.tsx                        SimClockProvider + override qualita + seed + shell
+  main.tsx                       entry React 19
+  styles.css                     tema dark, layer canvas a tutto schermo, pannello
+  lib/webgl.ts                   supportsWebGL -> canvas vs poster
+  hooks/useReducedMotion.ts      prefers-reduced-motion live
+  hooks/useQualityTier.ts        tabella tier (griglia/auto/ombre/dpr) + override
+  sim/SimClock.tsx               orologio sim: ref + API imperativa (context)        [architect]
+  sim/SimClockDriver.tsx         IL proprietario del tempo: avanza clock, sole, uniform [architect]
+  sim/uniforms.ts                gli uniform TSL condivisi (un solo scrittore)        [architect->shader]
+  sim/sun.ts                     dayPhase -> direzione/colore sole + colore cielo (puro)
+  city/types.ts                  contratto dati citta (solo dati, niente three.js)    [architect]
+  city/generateCity.ts           generatore layout PURO con seed (mulberry32)         [architect]
+  city/buildCarInstances.ts      distribuzione auto -> buffer per-istanza + formula   [architect]
+  city/Buildings.tsx             3 archetipi istanziati + attr aFacade                [architect->shader]
+  city/Ground.tsx                suolo/strade/marciapiedi istanziati                  [architect->shader]
+  city/Traffic.tsx               auto istanziate + attr corsie (moto in TSL)          [architect->shader]
+  camera/CameraRig.tsx           orbita smorzata vincolata (skeleton)                 [architect->motion]
+  canvas/Stage.tsx               Canvas WebGPU async + extend + error boundary        [architect]
+  canvas/Scene.tsx               assembla citta + sim + camera                        [architect]
+  canvas/RendererConfig.tsx      ACES tone mapping + shadow map                       [architect]
+  canvas/Lighting.tsx            fill hemisphere + ambient (il sole e nel driver)     [architect]
+  canvas/Poster.tsx              fallback no-WebGL                                    [architect/ui]
+  ui/ControlPanel.tsx            pannello DOM accessibile (contratto provato)         [architect->ui]
 ```
 
 ## Usarlo con gli agent del kit
 
-Questo progetto e pensato per essere lavorato dai sub-agent di `web3d-2026-kit`. Per attivarli:
+Estendi seguendo i punti marcati nel codice e in `ARCHITECTURE.md`, ad esempio:
 
-1. Copia in questa cartella la directory `.claude/` del kit (con `agents/` e
-   `skills/web3d-integration-patterns/`).
-2. Apri la cartella con Claude Code (desktop Mac), lancia `/agents` per confermare il caricamento.
-3. Estendi seguendo i punti marcati nel codice e in `ARCHITECTURE.md`, ad esempio:
-   ```
-   Usa tsl-shader-engineer per arricchire MorphingForm: aggiungi ottave di rumore,
-   un colorNode cromatico e, se il device e WebGPU, un campo di particelle in compute.
-   ```
-   ```
-   Usa scroll-motion-engineer per trasformare ScrollProgressDriver in una timeline GSAP
-   con sezioni pinnate e taratura del damping per mobile.
-   ```
-   ```
-   Usa ui-overlay-a11y-engineer per costruire le sezioni reali, nav e CTA, con pass completo
-   di responsivita e accessibilita.
-   ```
-   ```
-   Fai un audit con perf-fallback-auditor prima del rilascio.
-   ```
+```
+Usa tsl-shader-engineer per sostituire i materiali placeholder con PBR procedurale: facciate con
+finestre illuminate di notte (da aFacade + uDayPhase), asfalto con strisce, e la moto delle auto nel
+positionNode (da uTime + gli attributi per-istanza). Aggiungi un SkyMesh procedurale su uSunDirection.
+```
+```
+Usa scroll-motion-engineer (qui: motion engineer) per tarare la camera: damping, parallax sul
+pointer, drift cinematico in idle, limiti di zoom, eventuale fly-to one-shot con GSAP.
+```
+```
+Usa ui-overlay-a11y-engineer per disegnare il pannello reale (tema, slider densita traffico, seed),
+con pass completo di responsivita e accessibilita.
+```
+```
+Fai un audit con perf-fallback-auditor prima del rilascio.
+```
 
 ## Note tecniche
 
-- `framer-motion-3d` NON e usato: discontinuato e incompatibile con React 19. Il 3D si anima con
-  `useFrame` + `MathUtils.damp`; Motion (`motion/react`) resta confinato alla UI in DOM.
-- Verifica sempre le versioni installate (`npm ls three @react-three/fiber`) invece di affidarti ai
-  numeri in package.json: lo stack evolve, ma ruoli e regole in `ARCHITECTURE.md` restano validi.
-- StrictMode doppio-monta in dev; useGSAP e ReactLenis gestiscono il cleanup, quindi e atteso.
+- `framer-motion-3d` NON e usato (discontinuato, incompatibile con React 19). Il 3D si anima con
+  `useFrame` + `MathUtils.damp` o in TSL; Motion (`motion/react`) resta confinato alla UI in DOM.
+- Un solo loop per-frame = R3F. GSAP e tenuto solo per tween one-shot su valori che nessun altro
+  guida per frame (es. un fly-to della camera). Mai due sistemi sulla stessa proprieta.
+- `three` e fissato a `0.184.x` per combaciare con la checkout di riferimento in `./three.js`
+  (sola lettura, NON importarla nel codice: l'app usa solo il pacchetto npm).
+- `npm run build` (= `tsc -b && vite build`) deve passare. La cartella `three.js/` resta fuori dalla
+  build dell'app (tsconfig include solo `src`).

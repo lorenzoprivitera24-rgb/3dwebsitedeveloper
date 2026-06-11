@@ -30,22 +30,33 @@ class CanvasErrorBoundary extends Component<
 interface StageProps {
   children: ReactNode
   dpr: [number, number]
+  fallback?: ReactNode
 }
 
-export function Stage({ children, dpr }: StageProps) {
+/**
+ * Fullscreen WebGPU stage.
+ *
+ * The `gl` prop is an async factory (R3F v9 supports a Promise) so WebGPURenderer can await
+ * init(); it falls back to WebGL2 automatically, so the same TSL materials run on both backends.
+ *
+ * frameloop="always": this is a LIVE simulation (day/night cycle + traffic), never idle, so
+ * on-demand rendering does not apply. Per-frame cost is controlled by the quality tier instead.
+ */
+export function Stage({ children, dpr, fallback }: StageProps) {
   return (
-    <CanvasErrorBoundary fallback={<Poster />}>
+    <CanvasErrorBoundary fallback={fallback ?? <Poster />}>
       <Canvas
-        // R3F v9: the gl prop may return a Promise, which lets WebGPURenderer await init().
-        // WebGPURenderer.init() falls back to WebGL2 automatically when WebGPU is unavailable.
         gl={async (props) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const renderer = new THREE.WebGPURenderer({ ...(props as any), antialias: true })
           await renderer.init()
           return renderer
         }}
-        camera={{ position: [0, 0, 6], fov: 45 }}
+        // A real perspective camera framed for a city; CameraRig takes ownership after mount.
+        camera={{ position: [120, 90, 120], fov: 50, near: 0.5, far: 6000 }}
         dpr={dpr}
+        frameloop="always"
+        shadows={false} // shadow map is configured imperatively in RendererConfig per tier
       >
         <Suspense fallback={null}>{children}</Suspense>
       </Canvas>
