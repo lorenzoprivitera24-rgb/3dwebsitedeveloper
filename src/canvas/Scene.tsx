@@ -100,7 +100,10 @@ export function Scene({ seed, tier, reduced, density = 'media', onRigHandle, onT
         shadowExtent={shadowExtent}
       />
 
-      <Sky radius={city.extent * 30} />
+      {/* Dome radius must stay inside the camera far plane (6000 in Stage) plus orbit headroom,
+          or its triangles get frustum-clipped on medium/high cities. 5000 still dwarfs the
+          largest city extent. */}
+      <Sky radius={Math.min(city.extent * 30, 5000)} />
       <Ground ground={city.ground} roads={city.roads} sidewalks={city.sidewalks} />
       <Buildings buildings={city.buildings} tier={tier} />
       <Traffic lanes={city.lanes} carCount={scaledCarCount} seed={seed} speedScaleRef={speedScaleRef} />

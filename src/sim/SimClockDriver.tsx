@@ -40,11 +40,13 @@ export function SimClockDriver({ reduced, shadows, shadowMapSize, sunDistance, s
     const prevFog = scene.fog
     const prevBg = scene.background
     scene.fog = fog
+    // Assigned once; the frame loop mutates this Color in place, so no per-frame scene write.
+    scene.background = skyColor
     return () => {
       scene.fog = prevFog
       scene.background = prevBg
     }
-  }, [scene])
+  }, [scene, skyColor])
 
   useFrame((_state, delta) => {
     // delta is already seconds; clamp to avoid huge jumps after a tab is backgrounded.
@@ -69,9 +71,9 @@ export function SimClockDriver({ reduced, shadows, shadowMapSize, sunDistance, s
       light.intensity = 0.05 + sun.intensity * 1.6
     }
 
-    // atmosphere: background + fog color track the time of day (single writer).
+    // atmosphere: background + fog color track the time of day (single writer). Both Color
+    // objects are already attached to the scene; mutate them in place.
     computeSkyColor(sun.daylight, skyColor)
-    scene.background = skyColor
     if (scene.fog && 'color' in scene.fog) (scene.fog.color as Color).copy(skyColor)
   })
 

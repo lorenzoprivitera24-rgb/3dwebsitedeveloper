@@ -54,7 +54,7 @@ export interface CameraRigConfig {
 
 // ── Fly-to preset API (used by the UI agent via the returned handle) ───────────────────────────
 export interface FlyToPreset {
-  /** Orbit radius (distance from target). */
+  /** Orbit radius (distance from target). Clamped to the rig's [minDistance, maxDistance]. */
   radius: number
   /** Azimuth theta in radians. */
   theta: number
@@ -193,7 +193,9 @@ export function CameraRig({
           phi: desired.current.phi,
         }
         flyTween.current = gsap.to(target, {
-          radius: preset.radius,
+          // Clamp like the per-frame constraint does, or the tween spends its whole duration
+          // fighting the clamp in useFrame and never visibly settles.
+          radius: MathUtils.clamp(preset.radius, config.minDistance, config.maxDistance),
           theta: preset.theta,
           phi: MathUtils.clamp(preset.phi, config.minPolar, config.maxPolar),
           duration: preset.duration ?? 2.0,
@@ -216,7 +218,7 @@ export function CameraRig({
     return () => {
       flyTween.current?.kill()
     }
-  }, [handle, config.minPolar, config.maxPolar])
+  }, [handle, config.minPolar, config.maxPolar, config.minDistance, config.maxDistance])
 
   // ── Pointer / touch / wheel event handling ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -411,6 +413,8 @@ const _posWork = new Vector3()
 /**
  * Street-level view at dusk: low angle, moderate zoom, golden-hour orientation.
  * The UI agent can trigger this via `rigHandle.current?.flyTo(PRESET_STREET_DUSK)`.
+ * On larger cities (medium/high tier) the radius lands on the rig's minDistance —
+ * i.e. "as close as the constraints allow" rather than a fixed 60m.
  */
 export const PRESET_STREET_DUSK: FlyToPreset = {
   radius: 60,

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import gsap from 'gsap'
 import type { FloatUniform } from '../city/shaders/trafficMaterial'
 import type { QualityTier } from '../hooks/useQualityTier'
@@ -104,17 +104,18 @@ export function useTrafficSpeed(
     },
   })
 
-  // Flush any pending value once the uniformRef becomes populated.
-  // We do this via a polling effect that runs every render. Since Traffic mounts once and
-  // the uniform is set synchronously in useLayoutEffect, one extra render pass is enough.
-  useEffect(() => {
+  // Flush any pending value once the uniformRef is populated. Traffic (a child) fills the ref
+  // in its useLayoutEffect, and child layout effects run before the parent's, so one pass on
+  // mount is enough — no need for an every-render effect. After mount the uniform exists for
+  // the lifetime of the Scene (tier/density changes remount the whole Scene, re-running this).
+  useLayoutEffect(() => {
     if (uniformRef.current && pendingValue.current !== null) {
       const val = pendingValue.current
       pendingValue.current = null
       uniformRef.current.value = val
       tweenProxy.current.value = val
     }
-  })
+  }, [uniformRef])
 
   return api.current
 }

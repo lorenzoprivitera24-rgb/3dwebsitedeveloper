@@ -103,6 +103,7 @@ export function Sky({ radius }: { radius: number }) {
     const m = new MeshBasicNodeMaterial()
     m.side = BackSide
     m.depthWrite = false
+    m.depthTest = false // the sky is the farthest surface by definition; renderOrder=-1 alone decides
     m.fog = false // the dome is the sky; scene fog must not tint it
     m.colorNode = skyColorNode()
     return m

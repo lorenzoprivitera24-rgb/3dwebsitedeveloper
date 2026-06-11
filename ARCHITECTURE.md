@@ -173,7 +173,7 @@ is live end-to-end; refer to the file for component markup.
 | Time-of-day slider (prominent) | `clock.setDayPhase(0..1)` | aria-valuetext announces "HH:MM — period"; poll paused while dragging |
 | Simulation speed chips (0.5×–10×) | `clock.setSpeed(x)` | |
 | Traffic density chips (Scarso / Normale / Intenso) | `onDensity('bassa'|'media'|'alta')` | Remounts Scene via key in App |
-| Traffic vehicle speed chips (Fermo / Lento / Normale / Veloce) | `trafficSpeedRef.current?.setTrafficSpeed(n)` | Forwards to `useTrafficSpeed` which tweens uSpeedScale |
+| Traffic vehicle speed chips (Fermo / Lento / Normale / Veloce) | `onTrafficSpeedIndex(idx)` + `trafficSpeedRef.current?.setTrafficSpeed(n)` | Selection (`trafficSpeedIndex`, null = tier default) lives in App and is re-applied by `handleTrafficSpeedApi` after every Scene remount, so chips and actual pace stay in sync |
 | Quality override chips (Auto / Bassa / Media / Alta) | `onQualityOverride(tier\|null)` | Remounts Scene via key in App |
 | Fly-to "Strada" | `rigHandleRef.current?.flyTo(PRESET_STREET_DUSK)` | Imported from `camera/CameraRig` |
 | Fly-to "Skyline" | `rigHandleRef.current?.flyTo(PRESET_SKYLINE)` | Imported from `camera/CameraRig` |
@@ -190,6 +190,10 @@ in place:
   App forwards it to ControlPanel.
 - `density` / `onDensity` — App owns the `TrafficDensity` state, passes both to ControlPanel.
 - `onNewSeed` — App creates it via `useCallback`, passes to ControlPanel.
+- `trafficSpeedIndex` / `onTrafficSpeedIndex` (audit fix P1-2) — App owns the vehicle-speed
+  preset selection (`number | null`, null = tier default / no chip pressed), mirrored in a ref so
+  the stable `handleTrafficSpeedApi` callback re-applies it (duration 0) whenever a remounted
+  Scene registers a fresh `TrafficSpeedApi`.
 
 ### Traffic density pattern (as implemented)
 
@@ -255,7 +259,7 @@ the panel mirrors only what it needs into local React state. **No browser storag
 |---|---|---|---|---|---|---|---|
 | low (touch/small/≤2GB) | 6 | ~30–70 | 60 | off | 1024 | 1 | [1, 1.5] |
 | medium (≤1280px/≤4GB) | 9 | ~80–160 | 160 | on | 2048 | 1 | [1, 2] |
-| high (desktop+GPU) | 12 | ~150–290 | 320 | on | 4096 | 2 | [1, 2] |
+| high (desktop+GPU) | 12 | ~150–290 | 320 | on | 2048 | 2 | [1, 2] |
 
 Building count is approximate (per-block subdivision + gaps are seeded). dpr is **never** uncapped;
 hard ceiling 2. Everything that scales with capability reads this one table.
@@ -362,9 +366,11 @@ rigHandle.current?.flyTo({ radius: 120, theta: Math.PI * 0.5, phi: 1.1 }) // cus
 rigHandle.current?.cancelFly()  // immediately release back to user drag
 ```
 
-The rigHandle ref is created in Scene.tsx but not yet forwarded to App/ControlPanel. The UI agent
-needs to add a `rigHandle` prop to Scene (or pass down via context) and wire it to the preset
-buttons in the panel. The CameraRig implementation is complete.
+`flyTo` clamps the preset `radius` AND `phi` to the rig's configured constraints before tweening
+(audit fix P0-2): a preset can never make the tween fight the per-frame clamp, and on larger
+cities `PRESET_STREET_DUSK` settles at `minDistance` ("as close as allowed") instead of a fixed
+60m. The rigHandle ref is created in Scene.tsx, forwarded to App via `onRigHandle`, and wired to
+the preset buttons in the panel (done by the UI agent).
 
 ### Reduced-motion verification
 

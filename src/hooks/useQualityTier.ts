@@ -52,7 +52,9 @@ const TIERS: Record<QualityTier, TierSettings> = {
     gridSize: 12,
     carCount: 320,
     shadows: true,
-    shadowMapSize: 4096,
+    // 2048 is already crisp over the ~700m shadow frustum (~1.5 px/m); 4096 would cost a 64 MB
+    // depth texture and risks allocation spikes on integrated GPUs that still land in this tier.
+    shadowMapSize: 2048,
     buildingSegments: 2,
     dpr: [1, 2],
   },

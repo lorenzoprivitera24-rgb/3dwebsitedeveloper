@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { Stage } from './canvas/Stage'
 import { Scene } from './canvas/Scene'
 import { Poster } from './canvas/Poster'
-import { ControlPanel } from './ui/ControlPanel'
+import { ControlPanel, TRAFFIC_SPEED_PRESETS } from './ui/ControlPanel'
 import { SimClockProvider } from './sim/SimClock'
 import { useReducedMotion } from './hooks/useReducedMotion'
 import { useQualityTier, type QualityTier } from './hooks/useQualityTier'
@@ -42,6 +42,16 @@ export default function App() {
   // Traffic density: controls how many car instances are created (remounts Scene on change).
   const [density, setDensity] = useState<TrafficDensity>('media')
 
+  // Vehicle-speed preset selection (panel chips). null = tier default, no chip pressed.
+  // Owned here (not in the panel) so it survives Scene remounts; mirrored into a ref so the
+  // stable handleTrafficSpeedApi callback can read the current value without re-creating.
+  const [trafficSpeedIndex, setTrafficSpeedIndexState] = useState<number | null>(null)
+  const trafficSpeedIndexRef = useRef<number | null>(null)
+  const handleTrafficSpeedIndex = useCallback((idx: number) => {
+    trafficSpeedIndexRef.current = idx
+    setTrafficSpeedIndexState(idx)
+  }, [])
+
   // Imperative handle refs: populated by Scene via callbacks, forwarded to ControlPanel.
   // These live in refs (not state) so they never trigger re-renders.
   const rigHandleRef = useRef<CameraRigHandle | null>(null)
@@ -53,6 +63,10 @@ export default function App() {
 
   const handleTrafficSpeedApi = useCallback((api: TrafficSpeedApi) => {
     trafficSpeedRef.current = api
+    // A fresh Scene resets the uniform to the tier default; re-apply the user's explicit
+    // selection (if any) so the panel chips and the actual pace stay in sync across remounts.
+    const idx = trafficSpeedIndexRef.current
+    if (idx !== null) api.setTrafficSpeed(TRAFFIC_SPEED_PRESETS[idx].value, 0)
   }, [])
 
   const handleNewSeed = useCallback(() => {
@@ -95,6 +109,8 @@ export default function App() {
           onDensity={setDensity}
           rigHandleRef={rigHandleRef}
           trafficSpeedRef={trafficSpeedRef}
+          trafficSpeedIndex={trafficSpeedIndex}
+          onTrafficSpeedIndex={handleTrafficSpeedIndex}
           onNewSeed={handleNewSeed}
         />
       </div>

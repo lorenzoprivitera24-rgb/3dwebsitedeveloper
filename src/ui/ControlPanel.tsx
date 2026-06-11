@@ -79,7 +79,13 @@ const DENSITY_LABELS: Record<TrafficDensity, string> = {
   alta: 'Intenso',
 }
 
-const TRAFFIC_SPEED_PRESETS = [
+/**
+ * Vehicle speed presets. The SELECTION lives in App (not here) so it survives the key-based
+ * Scene remounts (quality/density/seed changes), which reset the uniform to the tier default:
+ * App re-applies the user's selection when the fresh Scene registers its TrafficSpeedApi.
+ * `null` selection = tier default pace, no chip pressed.
+ */
+export const TRAFFIC_SPEED_PRESETS = [
   { value: 0, label: 'Fermo' },
   { value: 0.65, label: 'Lento' },
   { value: 1, label: 'Normale' },
@@ -124,6 +130,9 @@ export interface ControlPanelProps {
   rigHandleRef: React.MutableRefObject<CameraRigHandle | null>
   /** Ref forwarded from Scene via App. May be null until Traffic mounts. */
   trafficSpeedRef: React.MutableRefObject<TrafficSpeedApi | null>
+  /** Selected vehicle-speed preset index; null = tier default (no chip pressed). Lives in App. */
+  trafficSpeedIndex: number | null
+  onTrafficSpeedIndex: (idx: number) => void
   onNewSeed: () => void
 }
 
@@ -137,6 +146,8 @@ export function ControlPanel({
   onDensity,
   rigHandleRef,
   trafficSpeedRef,
+  trafficSpeedIndex,
+  onTrafficSpeedIndex,
   onNewSeed,
 }: ControlPanelProps) {
   const clock = useSimClock()
@@ -146,9 +157,6 @@ export function ControlPanel({
   const [paused, setPaused] = useState(() => clock.get().paused)
   const [speed, setSpeed] = useState(() => clock.get().speed)
   const [phase, setPhase] = useState(() => clock.get().dayPhase)
-
-  // Traffic speed slider local state (not synced back from the uniform — one-way)
-  const [trafficSpeedIndex, setTrafficSpeedIndex] = useState(2) // default "Normale" = index 2
 
   // ── Bottom-sheet open/close state (mobile only) ─────────────────────────────────────────────
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -210,10 +218,10 @@ export function ControlPanel({
 
   const handleTrafficSpeed = useCallback(
     (idx: number) => {
-      setTrafficSpeedIndex(idx)
+      onTrafficSpeedIndex(idx)
       trafficSpeedRef.current?.setTrafficSpeed(TRAFFIC_SPEED_PRESETS[idx].value)
     },
-    [trafficSpeedRef],
+    [trafficSpeedRef, onTrafficSpeedIndex],
   )
 
   // ── The panel controls markup (shared between desktop sidebar and mobile sheet) ─────────────
