@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Stage } from './canvas/Stage'
 import { Scene } from './canvas/Scene'
 import { Poster } from './canvas/Poster'
@@ -7,9 +7,27 @@ import { SimClockProvider } from './sim/SimClock'
 import { useReducedMotion } from './hooks/useReducedMotion'
 import { useQualityTier, type QualityTier } from './hooks/useQualityTier'
 import { supportsWebGL } from './lib/webgl'
+import type { CameraRigHandle } from './camera/CameraRig'
+import type { TrafficSpeedApi } from './motion/useTrafficSpeed'
 
-/** Fixed seed for a stable city across reloads. Swap to a UI control later if desired. */
-const CITY_SEED = 1337
+/**
+ * Traffic density levels. Each value is passed to Scene as the car count multiplier.
+ * 'bassa' = 0.4×, 'media' = 1×, 'alta' = 1.8× of the tier default count.
+ * Changing density remounts the Scene (key changes) because car instances are baked.
+ */
+export type TrafficDensity = 'bassa' | 'media' | 'alta'
+
+export const DENSITY_MULTIPLIER: Record<TrafficDensity, number> = {
+  bassa: 0.4,
+  media: 1.0,
+  alta: 1.8,
+}
+
+/**
+ * Initial seed. The user can randomise this via "Nuova città" button.
+ * Changing the seed remounts the Scene via key.
+ */
+const DEFAULT_SEED = 1337
 
 export default function App() {
   const reduced = useReducedMotion()
@@ -18,7 +36,33 @@ export default function App() {
   const [override, setOverride] = useState<QualityTier | null>(null)
   const tier = useQualityTier(override ?? undefined)
 
+  // City seed: randomised by "Nuova città" button.
+  const [seed, setSeed] = useState(DEFAULT_SEED)
+
+  // Traffic density: controls how many car instances are created (remounts Scene on change).
+  const [density, setDensity] = useState<TrafficDensity>('media')
+
+  // Imperative handle refs: populated by Scene via callbacks, forwarded to ControlPanel.
+  // These live in refs (not state) so they never trigger re-renders.
+  const rigHandleRef = useRef<CameraRigHandle | null>(null)
+  const trafficSpeedRef = useRef<TrafficSpeedApi | null>(null)
+
+  const handleRigHandle = useCallback((h: CameraRigHandle) => {
+    rigHandleRef.current = h
+  }, [])
+
+  const handleTrafficSpeedApi = useCallback((api: TrafficSpeedApi) => {
+    trafficSpeedRef.current = api
+  }, [])
+
+  const handleNewSeed = useCallback(() => {
+    setSeed(Math.floor(Math.random() * 2 ** 31))
+  }, [])
+
   const webglOk = supportsWebGL()
+
+  // Scene key: remount whenever baked-in values change (tier, seed, density).
+  const sceneKey = `${seed}-${tier.tier}-${density}`
 
   return (
     <SimClockProvider>
@@ -27,8 +71,15 @@ export default function App() {
         <div className="canvas-layer" aria-hidden="true">
           {webglOk ? (
             <Stage dpr={tier.dpr} fallback={<Poster />}>
-              {/* key remounts the Scene when the baked-in tier or seed changes (grid/car counts). */}
-              <Scene key={`${CITY_SEED}-${tier.tier}`} seed={CITY_SEED} tier={tier} reduced={reduced} />
+              <Scene
+                key={sceneKey}
+                seed={seed}
+                tier={tier}
+                reduced={reduced}
+                density={density}
+                onRigHandle={handleRigHandle}
+                onTrafficSpeedApi={handleTrafficSpeedApi}
+              />
             </Stage>
           ) : (
             <Poster />
@@ -36,7 +87,16 @@ export default function App() {
         </div>
 
         {/* Accessible DOM UI above the canvas. */}
-        <ControlPanel qualityOverride={override} onQualityOverride={setOverride} reduced={reduced} />
+        <ControlPanel
+          qualityOverride={override}
+          onQualityOverride={setOverride}
+          reduced={reduced}
+          density={density}
+          onDensity={setDensity}
+          rigHandleRef={rigHandleRef}
+          trafficSpeedRef={trafficSpeedRef}
+          onNewSeed={handleNewSeed}
+        />
       </div>
     </SimClockProvider>
   )
