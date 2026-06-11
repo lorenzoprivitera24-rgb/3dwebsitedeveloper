@@ -160,26 +160,92 @@ state and can fight a `useFrame`), avoids any browser storage, keeps the depende
 lets the motion engineer own all tuning in one place. drei can be added later if a specific helper is
 genuinely needed; it is intentionally **not** a dependency yet.
 
-## Control panel contract (UI agent owns the final design)
+## Control panel contract (UI agent — DONE 2026-06-11)
 
-`ui/ControlPanel.tsx` is a **functional, accessible stub** that proves the contract. Every control maps
-to a `SimClockApi` call (`sim/SimClock.tsx`) or the quality-override setter. Restyle/enrich freely; keep
-the wiring.
+`ui/ControlPanel.tsx` is the fully implemented, accessible DOM panel. The wiring contract below
+is live end-to-end; refer to the file for component markup.
 
-- **Play/Pause** → `clock.togglePaused()` / `setPaused(bool)`.
-- **Time-of-day slider** (0..1) → `clock.setDayPhase(p)` (re-bases sim time; the scrub is authoritative).
-- **Speed** → `clock.setSpeed(multiplier)`.
-- **Day length** (optional) → `clock.setSecondsPerDay(s)` (default 120s ≈ 2 real minutes/day).
-- **Quality override** → `onQualityOverride('low'|'medium'|'high'|null)`; `null` = auto. Changing it
-  **remounts the Scene** (App keys the Scene on `seed-tier`) because grid/car counts are baked at
-  generation time.
-- **Traffic density** (to add) → expose a setter App passes to `Scene → Traffic` to rebuild car
-  instances at a new count; remount via key like quality.
+### Controls implemented and their API wiring
+
+| Control | Wiring | Notes |
+|---|---|---|
+| Play / Pause button | `clock.togglePaused()` | `aria-pressed` reflects live state |
+| Time-of-day slider (prominent) | `clock.setDayPhase(0..1)` | aria-valuetext announces "HH:MM — period"; poll paused while dragging |
+| Simulation speed chips (0.5×–10×) | `clock.setSpeed(x)` | |
+| Traffic density chips (Scarso / Normale / Intenso) | `onDensity('bassa'|'media'|'alta')` | Remounts Scene via key in App |
+| Traffic vehicle speed chips (Fermo / Lento / Normale / Veloce) | `trafficSpeedRef.current?.setTrafficSpeed(n)` | Forwards to `useTrafficSpeed` which tweens uSpeedScale |
+| Quality override chips (Auto / Bassa / Media / Alta) | `onQualityOverride(tier\|null)` | Remounts Scene via key in App |
+| Fly-to "Strada" | `rigHandleRef.current?.flyTo(PRESET_STREET_DUSK)` | Imported from `camera/CameraRig` |
+| Fly-to "Skyline" | `rigHandleRef.current?.flyTo(PRESET_SKYLINE)` | Imported from `camera/CameraRig` |
+| Nuova città button | `onNewSeed()` | Randomises seed in App, remounts Scene |
+
+### Prop chain additions (what the UI agent changed)
+
+The architect's App.tsx already contained all props and ref wiring as of the motion-engineer
+handoff. **No new changes were needed to App.tsx or Scene.tsx** — the full prop chain was already
+in place:
+- `rigHandleRef` (MutableRefObject) — App creates it, Scene's useEffect populates it via
+  `onRigHandle`, App forwards it to ControlPanel.
+- `trafficSpeedRef` (MutableRefObject) — App creates it, Scene populates via `onTrafficSpeedApi`,
+  App forwards it to ControlPanel.
+- `density` / `onDensity` — App owns the `TrafficDensity` state, passes both to ControlPanel.
+- `onNewSeed` — App creates it via `useCallback`, passes to ControlPanel.
+
+### Traffic density pattern (as implemented)
+
+`TrafficDensity = 'bassa' | 'media' | 'alta'` (defined in App.tsx). `DENSITY_MULTIPLIER` maps:
+`bassa→0.4, media→1.0, alta→1.8`. App keys the Scene on `${seed}-${tier.tier}-${density}`, so
+changing density remounts the Scene and rebuilds car instances at the scaled count. This is the
+same pattern as quality override.
+
+### Layout: responsive strategy
+
+- **Desktop (≥ 641px):** left sidebar, always visible, fixed width `18rem`, scrollable if content
+  overflows, border-radius panel with backdrop blur.
+- **Mobile (≤ 640px):** panel hidden; a 56×56 FAB button (bottom-right, above safe-area) opens a
+  bottom sheet (max-height 78svh). Motion `AnimatePresence` + slide-up animation. Under
+  `reduced=true` all Motion transitions are `duration: 0` (instant).
+
+### Clock display (no RAF rule)
+
+~4 Hz `setInterval` (250 ms) polls `clock.get()` and mirrors `paused / speed / phase` into local
+React state. The interval is paused while the time-of-day slider is being dragged
+(`draggingTime` ref). **No `requestAnimationFrame`.** The HUD clock (`aria-hidden`) is a
+decorative readout; the accessible clock announcement is on the slider's `aria-valuetext`.
+
+### HUD
+
+Two decorative elements (`aria-hidden="true"` on the `.hud` wrapper):
+1. Top-right live clock (`phaseToClock(phase)`) — reads from the same polled state.
+2. Camera-controls hint (Italian) — fades out after the first `pointerdown` or `keydown` on
+   `window`. Fade driven by Motion `AnimatePresence`. Under `reduced=true` it appears
+   immediately (`opacity` initial = 1) and disappears instantly.
 
 **No extra RAF rule for the panel:** to display the auto-advancing clock the panel polls
 `clock.get()` at ~4 Hz via `setInterval` (a label refresh, paused while the slider is dragged). It must
 **not** start a `requestAnimationFrame`. Sim state lives in the clock ref (no per-frame React renders);
 the panel mirrors only what it needs into local React state. **No browser storage.**
+
+### Accessibility notes (ui-overlay-a11y-engineer)
+
+- Canvas wrapper `aria-hidden="true"` — confirmed present in App.tsx (unchanged).
+- All controls are real `<input>` or `<button>` elements with Italian `aria-label` strings.
+- Time-of-day range: `aria-valuetext` announces `"HH:MM — period"` (e.g. "18:30 — tramonto").
+- Bottom-sheet toggle: `aria-expanded` + `aria-controls="cp-sheet"`.
+- Focus managed on sheet open: `closeBtnRef` receives focus after 50ms (after animation starts).
+- Keyboard tab order: panel is in DOM source order after `.canvas-layer`; no conflicting tabindex.
+- `prefers-reduced-motion`: consumed from the app's `reduced` prop (from `useReducedMotion` in
+  App.tsx). Motion transitions collapse to `duration: 0`. CSS `@media (prefers-reduced-motion)`
+  also collapses all transition/animation durations to 0.01ms as a belt-and-suspenders safety net.
+- Contrast: panel background is `rgba(7,9,13,0.90)` with backdrop blur. Over the brightest day sky
+  horizon (~#b3c8df post ACES), effective luminance is very dark; `--fg` (#eef1f7) passes ≥ 12:1.
+  Over the night sky (#070b18), effective near-black; `--fg` passes ≥ 14:1. `--muted` (#9aa3b2)
+  passes ≥ 5.5:1 in both extremes (AA for body text).
+- HUD clock: decorative (`aria-hidden`). The accessible time announcement is on the range
+  input's `aria-valuetext`; updated by the same 4Hz poll (no RAF).
+- Touch targets: all buttons/chips have `min-height: 2.75rem` (44px). Range thumb is 20–24px
+  visual; the input element itself spans full width with `height: 1.75rem` for a large hit area.
+- Safe-area insets: `env(safe-area-inset-*)` used on panel position, FAB position, HUD clock.
 
 ## Quality tiers (`hooks/useQualityTier.ts`)
 
