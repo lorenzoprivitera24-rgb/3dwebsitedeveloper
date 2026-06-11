@@ -3,6 +3,7 @@ import { generateCity } from '../city/generateCity'
 import { Buildings } from '../city/Buildings'
 import { Ground } from '../city/Ground'
 import { Traffic } from '../city/Traffic'
+import { Sky } from '../city/Sky'
 import { Lighting } from './Lighting'
 import { RendererConfig } from './RendererConfig'
 import { CameraRig, type CameraRigConfig } from '../camera/CameraRig'
@@ -55,6 +56,7 @@ export function Scene({ seed, tier, reduced }: SceneProps) {
         shadowExtent={shadowExtent}
       />
 
+      <Sky radius={city.extent * 30} />
       <Ground ground={city.ground} roads={city.roads} sidewalks={city.sidewalks} />
       <Buildings buildings={city.buildings} tier={tier} />
       <Traffic lanes={city.lanes} carCount={tier.carCount} seed={seed} />

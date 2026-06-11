@@ -1,7 +1,17 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
-import { PlaneGeometry, Object3D, type InstancedMesh } from 'three'
-import { MeshStandardNodeMaterial } from 'three/webgpu'
+import {
+  PlaneGeometry,
+  Object3D,
+  InstancedBufferAttribute,
+  type InstancedMesh,
+  type Material,
+} from 'three'
 import type { GroundQuad } from './types'
+import {
+  makeRoadMaterial,
+  makeSidewalkMaterial,
+  makeGroundMaterial,
+} from './shaders/groundMaterials'
 
 /**
  * The horizontal surfaces: one big ground slab, plus instanced road and sidewalk quads.
@@ -10,9 +20,10 @@ import type { GroundQuad } from './types'
  * and sidewalks each become a single InstancedMesh (2 draw calls), so the whole street network
  * is cheap regardless of grid size.
  *
- * [shader engineer] OWNS these materials. Swap in procedural asphalt (lane markings via UV),
- * sidewalk concrete, and a ground tint. The placeholders below are flat colors. Geometry +
- * instance placement wiring stays as-is.
+ * [shader engineer] Materials are now procedural TSL (groundMaterials.ts): asphalt + dashed lane
+ * markings, sidewalk concrete, dark ground slab. The road material reads a per-instance `aQuad`
+ * attribute = [sizeX, sizeZ] (the strip's world footprint) so it can find the run-axis and draw the
+ * centre line; that attribute is uploaded here. Geometry + instance placement wiring is unchanged.
  */
 
 function makeUnitPlane(): PlaneGeometry {
@@ -31,10 +42,9 @@ export function Ground({
   sidewalks: GroundQuad[]
 }) {
   const groundGeo = useMemo(() => makeUnitPlane(), [])
-  const groundMat = useMemo(
-    () => new MeshStandardNodeMaterial({ color: '#2b2f36', roughness: 1.0, metalness: 0.0 }),
-    [],
-  )
+  const groundMat = useMemo(() => makeGroundMaterial(), [])
+  const roadMat = useMemo(() => makeRoadMaterial(), [])
+  const sidewalkMat = useMemo(() => makeSidewalkMaterial(), [])
 
   return (
     <group name="ground-and-streets">
@@ -48,29 +58,26 @@ export function Ground({
         name="ground"
       />
 
-      <QuadInstances quads={roads} color="#15171c" roughness={0.9} name="roads" />
-      <QuadInstances quads={sidewalks} color="#4a4f57" roughness={0.95} name="sidewalks" />
+      {/* roads carry the aQuad size attribute for the lane-marking shader */}
+      <QuadInstances quads={roads} material={roadMat} name="roads" withQuadAttr />
+      <QuadInstances quads={sidewalks} material={sidewalkMat} name="sidewalks" />
     </group>
   )
 }
 
 function QuadInstances({
   quads,
-  color,
-  roughness,
+  material,
   name,
+  withQuadAttr = false,
 }: {
   quads: GroundQuad[]
-  color: string
-  roughness: number
+  material: Material
   name: string
+  withQuadAttr?: boolean
 }) {
   const meshRef = useRef<InstancedMesh>(null)
   const geometry = useMemo(() => makeUnitPlane(), [])
-  const material = useMemo(
-    () => new MeshStandardNodeMaterial({ color, roughness, metalness: 0.0 }),
-    [color, roughness],
-  )
 
   useLayoutEffect(() => {
     const mesh = meshRef.current
@@ -86,7 +93,19 @@ function QuadInstances({
     }
     mesh.instanceMatrix.needsUpdate = true
     mesh.computeBoundingSphere()
-  }, [quads])
+
+    if (withQuadAttr) {
+      // per-instance world footprint so the road shader knows its run-axis + short width.
+      const arr = new Float32Array(quads.length * 2)
+      for (let i = 0; i < quads.length; i++) {
+        arr[i * 2 + 0] = quads[i].size[0]
+        arr[i * 2 + 1] = quads[i].size[1]
+      }
+      const attr = new InstancedBufferAttribute(arr, 2)
+      attr.setUsage(35044 /* StaticDrawUsage */)
+      mesh.geometry.setAttribute('aQuad', attr)
+    }
+  }, [quads, withQuadAttr])
 
   return (
     <instancedMesh

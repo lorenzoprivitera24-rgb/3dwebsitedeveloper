@@ -102,9 +102,21 @@ Per-instance vertex attributes already attached to the instanced geometries (rea
   Suggested use: hash `facadeSeed` into a window grid + tint; multiply night emissive by `litBias`
   and `uDaylight.oneMinus()`. The instance matrix already scales the unit box to (w, height, d), so
   `positionGeometry.y` in 0..1 maps up the facade — convenient for floor banding.
+  **Shader note (implemented):** the facade material derives the window grid in WORLD space
+  (`positionWorld`, meters) rather than object space, because the InstancedMesh path bakes the
+  per-instance matrix into `positionLocal`, leaving mesh-level `modelScale` at identity (so it can
+  NOT report a building's real size). World space gives meter-accurate, size-independent cells.
 - **Cars** (`city/Traffic.tsx` via `city/buildCarInstances.ts`):
   `aLaneStart` vec3, `aLaneDir` vec3 (unit), `aLaneLength` float, `aPhase` float (start offset, m),
   `aSpeed` float (m/s), `aCar` vec2 `[colorSeed, sizeSeed]`.
+  **Shader note (implemented):** car instance matrices are set to **identity**; the material's
+  `positionNode` owns the full transform (lane motion + heading + per-car scale) built from
+  `positionGeometry` (the raw unit box), so there is no double transform with the instance matrix.
+- **Roads** (`city/Ground.tsx`, ADDED by shader engineer): `aQuad` = **vec2** `[sizeX, sizeZ]`, the
+  road strip's world footprint. The asphalt material uses it to find the run-axis (longer dimension)
+  and short width so it can draw a centred dashed lane line along the road in real meters. Only the
+  roads InstancedMesh carries it (sidewalks/ground do not need it). Local to Ground.tsx; touches no
+  shared uniform.
 
 ## Lane / traffic motion contract (shader engineer implements in TSL)
 
@@ -200,11 +212,21 @@ behind motion. The canvas wrapper is `aria-hidden`; all real controls are access
 
 ## Extension points (what each agent does next)
 
-- **shader engineer** — replace the placeholder `MeshStandardNodeMaterial`s with procedural PBR:
-  facades (windows/lit windows/tint from `aFacade` + `uDayPhase`), asphalt + lane markings, sidewalk
-  concrete, and the **car motion `positionNode`** (+ headlights/taillights). Optionally add a procedural
-  `SkyMesh` (jsm/objects/SkyMesh.js, node-based, keyed off `uSunDirection`) and bloom for night glow.
-  Optional WebGPU compute for traffic spacing.
+- **shader engineer** — DONE: procedural PBR materials replace all placeholders. Files live in
+  `city/shaders/` (`tslHelpers.ts` shared hash/value-noise; `trafficMaterial.ts`; `buildingMaterial.ts`;
+  `groundMaterials.ts`) plus `city/Sky.tsx`. Facades = world-space window grid + progressive dusk
+  window lighting from `aFacade` + `uDaylight`; roads = asphalt + dashed lane markings (via `aQuad`);
+  sidewalk + ground concrete; cars = in-shader lane motion + heading + night head/tail lights.
+  Sky = an owned origin-centred dome (NOT SkyMesh, NOT `scene.backgroundNode`) reading
+  `uSunDirection`/`uDaylight`/`uDayPhase`, with sun glow + hash stars; it draws in front of the
+  driver's flat `scene.background` and is excluded from fog, so the driver's single-writer contract
+  is untouched. Still-open optional: bloom post for night glow; WebGPU compute for traffic spacing.
+  **Material-local uniform exposed for the motion engineer:** `trafficMaterial.ts` returns
+  `uSpeedScale` (float, default 1) — a global traffic speed multiplier. It is material-owned, NOT a
+  shared sim uniform; the deterministic lane formula is preserved (uSpeedScale just scales `aSpeed`).
+  Currently no one drives it; the motion engineer MAY, per tier. **Tone-mapping exposure breathing was
+  deliberately NOT claimed** — `RendererConfig.toneMappingExposure` remains a constant owned by the
+  architect; left available if desired later.
 - **motion engineer** — tune the camera rig feel (damping, parallax, idle drift, zoom limits, optional
   fly-to). Tune per-tier traffic speed if desired. Owns no uniforms the driver writes.
 - **ui engineer** — design the real control panel (layout, theming, traffic-density slider, maybe a

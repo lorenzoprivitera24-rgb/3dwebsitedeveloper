@@ -5,9 +5,9 @@ import {
   Object3D,
   type InstancedMesh,
 } from 'three'
-import { MeshStandardNodeMaterial } from 'three/webgpu'
 import type { BuildingArchetype, BuildingInstance } from './types'
 import type { TierSettings } from '../hooks/useQualityTier'
+import { makeBuildingMaterial } from './shaders/buildingMaterial'
 
 /**
  * Buildings: one InstancedMesh per archetype (3 draw calls total for the whole skyline).
@@ -34,11 +34,6 @@ function makeBaseBox(segments: number): BoxGeometry {
   const g = new BoxGeometry(1, 1, 1, segments, segments, segments)
   g.translate(0, 0.5, 0) // move pivot to the base
   return g
-}
-
-function placeholderMaterial(): MeshStandardNodeMaterial {
-  // Neutral concrete-ish stand-in. The shader engineer replaces the node graph in place.
-  return new MeshStandardNodeMaterial({ color: '#9aa3ad', roughness: 0.82, metalness: 0.0 })
 }
 
 const ARCH_ORDER: BuildingArchetype[] = ['lowrise', 'midrise', 'tower']
@@ -82,7 +77,8 @@ function BuildingArchetypeMesh({
 }) {
   const meshRef = useRef<InstancedMesh>(null)
   const geometry = useMemo(() => makeBaseBox(segments), [segments])
-  const material = useMemo(() => placeholderMaterial(), [])
+  // Procedural PBR facade material, tuned per archetype (window proportions, wall albedo, lit ratio).
+  const material = useMemo(() => makeBuildingMaterial(archetype), [archetype])
 
   // per-instance facade attribute: vec2 [facadeSeed, litBias]
   const facadeArray = useMemo(() => {
