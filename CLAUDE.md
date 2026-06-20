@@ -63,6 +63,13 @@ Chain them: e.g. "Use the tsl-shader-engineer to build the displacement material
 scroll-motion-engineer to drive its uniforms from scroll and pointer." Run independent research
 in parallel where it helps, but keep edits serialized to avoid conflicts.
 
+**Auto-dispatch (every prompt).** A `UserPromptSubmit` hook (`.claude/hooks/agents-autostart.py`)
+reads each request and injects the matching specialist so delegation happens on its own — engaging
+the specialist is the default, not something to ask permission for. It also reminds: independent
+research can run in parallel, but **serialize edits** (one owner per property, one RAF loop); use
+`isolation: worktree` for parallel branches. Same non-negotiables apply (no `framer-motion-3d`, one
+loop, ease everything, mobile + a11y in "done").
+
 ### Tips
 
 - Let agents accumulate knowledge: `r3f-scene-architect` and (optionally) others use project

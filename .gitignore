@@ -1,0 +1,13 @@
+# Dipendenze e build
+node_modules/
+dist/
+
+# Cache TypeScript / Vite
+*.tsbuildinfo
+
+# Ambiente e segreti
+.env
+.env.*
+
+# Sistema
+.DS_Store

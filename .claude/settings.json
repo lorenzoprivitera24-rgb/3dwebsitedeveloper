@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/agents-autostart.py\"",
+            "timeout": 10,
+            "statusMessage": "3D specialists router: analyzing request…"
+          }
+        ]
+      }
+    ]
+  }
+}
