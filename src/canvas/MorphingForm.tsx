@@ -1,6 +1,6 @@
 import { useMemo, type MutableRefObject } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { MathUtils } from 'three'
+import { MathUtils, Vector3 } from 'three'
 import { MeshStandardNodeMaterial } from 'three/webgpu'
 import {
   uniform,
@@ -32,7 +32,7 @@ export function MorphingForm({ scrollProgress, reduced, detail, amplitude }: Pro
 
   const { material, uScroll, uPointer } = useMemo(() => {
     const uScroll = uniform(0)
-    const uPointer = uniform(vec3(0, 0, 0))
+    const uPointer = uniform(new Vector3(0, 0, 0))
     const uAmplitude = uniform(amplitude)
 
     const m = new MeshStandardNodeMaterial({

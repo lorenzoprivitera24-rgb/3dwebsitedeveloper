@@ -1,0 +1,8 @@
+/* Anton — self-hosted (Google Fonts via gwfh). No runtime CDN. */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./files/anton-v27-latin_latin-ext-regular.woff2') format('woff2');
+}

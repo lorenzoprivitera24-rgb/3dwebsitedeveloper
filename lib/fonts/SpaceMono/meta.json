@@ -1,0 +1,20 @@
+{
+  "id": "space-mono",
+  "family": "Space Mono",
+  "role": "Mono",
+  "category": "monospace",
+  "version": "v17",
+  "subsets": [
+    "latin",
+    "latin-ext"
+  ],
+  "weights": [
+    "regular",
+    "700"
+  ],
+  "italics": false,
+  "license": "OFL-1.1",
+  "files": 2,
+  "source": "Google Fonts via google-webfonts-helper",
+  "fetched": "2026-07-01"
+}

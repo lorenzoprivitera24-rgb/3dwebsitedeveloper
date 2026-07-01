@@ -23,6 +23,22 @@ above the canvas without fighting it.
   `@gsap/react` `useGSAP` and ScrollTrigger / ScrollSmoother.
 - **3D object motion**: `useFrame` (with `MathUtils.damp`), `@react-spring/three`, or GSAP.
 - **DOM UI motion**: **Motion** (`motion/react`). DOM only.
+- **Gestures**: `@use-gesture/react` (drag/pinch/hover/wheel). **Lightweight GLSL backgrounds**: `ogl`.
+- **Interactivity layer**: **React Bits** — 134 copy-paste interactive components vendored in
+  `lib/react-bits/` (catalog `lib/react-bits/CATALOG.md`). Pick + copy + tune; don't hand-roll what
+  it ships. See the `interaction-engineer` agent.
+- **Design-asset shelves** (same copy-first, offline, GDPR model — see `STACK.md` §2/§2b):
+  `lib/componentry/` (51 MIT components: WebGL backgrounds, magnetic UI, kinetic text — DOM layer),
+  `lib/patterns/` (87 Hero Patterns SVG **CC BY 4.0** + pattern.css MIT — section backdrops),
+  `lib/fonts/` (30 self-hosted Google Fonts + `scripts/add-font.mjs` — **never** the CDN, GDPR),
+  `lib/illustrations/` (~2,960 SVG — unDraw 1362 editorial + DiceBear 1488 + Open Doodles 33 CC0 +
+  Humaaans — for hero/empty-state art; CC-BY sets + Humaaans need attribution, unDraw has its own
+  no-repack/no-AI license → `lib/illustrations/ATTRIBUTION.md`). **Mobbin** is reference-only (paid, copyrighted
+  screenshots — nothing to vendor): `docs/inspiration/mobbin.md`. Each shelf has its own catalog.
+- **Realism**: PBR + real KTX2 textures, triplanar anti-tiling, IBL/HDRI, post FX, organic TSL
+  geometry. **`STACK.md`** is the one-page stack; the skill's `references/realism-and-interactivity.md`
+  and `references/interactive-components.md` are the playbooks. A green build is **not** proof —
+  verify in a real browser preview (the WebGPU/TSL gotchas there pass `tsc`/`vite` and break on screen).
 
 ### Non-negotiable rules
 
@@ -56,8 +72,12 @@ Sub-agents cannot spawn sub-agents, so this main session is the orchestrator. De
    camera, build the ScrollTrigger timeline, tune the damping for desktop and mobile.
 4. `@agent-ui-overlay-a11y-engineer`: the DOM overlay with Motion, responsive and touch-friendly,
    with the reduced-motion path and ARIA.
-5. `@agent-perf-fallback-auditor`: read-only audit (draw calls, instancing, DPR, fallback,
-   reduced-motion, accessibility); returns a prioritized report that 1 to 4 apply.
+5. `@agent-interaction-engineer`: the interactivity layer — pick + copy + wire React Bits components
+   (`lib/react-bits/`) and bespoke GSAP/Motion/Lenis/`@use-gesture` effects (animated headlines,
+   scroll reveals, cursor/hover effects, animated menus, galleries, animated backgrounds), without
+   breaking the single loop or a11y.
+6. `@agent-perf-fallback-auditor`: read-only audit (draw calls, instancing, DPR, fallback,
+   reduced-motion, accessibility); returns a prioritized report that the others apply.
 
 Chain them: e.g. "Use the tsl-shader-engineer to build the displacement material, then the
 scroll-motion-engineer to drive its uniforms from scroll and pointer." Run independent research

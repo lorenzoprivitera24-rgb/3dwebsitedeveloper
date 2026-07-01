@@ -1,0 +1,588 @@
+[
+  {
+    "name": "animated-gradient",
+    "type": "registry:ui",
+    "description": "Component for animated-gradient",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "animated-gradient.tsx",
+      "webgl-error-boundary.tsx"
+    ]
+  },
+  {
+    "name": "auth-modal",
+    "type": "registry:ui",
+    "description": "A premium, animated authentication modal with social login options.",
+    "dependencies": [
+      "framer-motion",
+      "lucide-react"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "auth-modal.tsx"
+    ]
+  },
+  {
+    "name": "border-beam",
+    "type": "registry:ui",
+    "description": "A moving gradient beam that travels along the border of its container.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "border-beam.tsx"
+    ]
+  },
+  {
+    "name": "bouncy-accordion",
+    "type": "registry:ui",
+    "description": "Component for bouncy-accordion",
+    "dependencies": [
+      "framer-motion",
+      "lucide-react"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "bouncy-accordion.tsx",
+      "ease.ts"
+    ]
+  },
+  {
+    "name": "circuit-board",
+    "type": "registry:ui",
+    "description": "An interactive circuit board layout component with animated electricity paths that pulse between connected nodes. Fully theme-aware with automatic light/dark mode support.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "circuit-board.tsx"
+    ]
+  },
+  {
+    "name": "closing-plasma",
+    "type": "registry:ui",
+    "description": "Premium plasma background with customizable motion, palette, and interaction.",
+    "dependencies": [
+      "clsx",
+      "tailwind-merge"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "closing-plasma.tsx"
+    ]
+  },
+  {
+    "name": "collection-surfer",
+    "type": "registry:ui",
+    "description": "",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "collection-surfer.tsx"
+    ]
+  },
+  {
+    "name": "command-menu",
+    "type": "registry:ui",
+    "description": "A macOS Spotlight-style command menu with animated search, keyboard navigation, and customizable groups. Features backdrop blur, smooth animations, and full keyboard support.",
+    "dependencies": [
+      "cmdk",
+      "framer-motion",
+      "lucide-react"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "command-menu.tsx"
+    ]
+  },
+  {
+    "name": "cursor-driven-particle-typography",
+    "type": "registry:ui",
+    "description": "Component for cursor-driven-particle-typography",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "cursor-driven-particle-typography.tsx"
+    ]
+  },
+  {
+    "name": "dither-gradient",
+    "type": "registry:ui",
+    "description": "An animated dithered gradient background effect using canvas with Bayer matrix dithering.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "dither-gradient.tsx"
+    ]
+  },
+  {
+    "name": "dither-prism-hero",
+    "type": "registry:ui",
+    "description": "A stunning WebGL hero background featuring advanced dithering patterns, prismatic color refraction, holographic iridescence, and center-focused ripple energy.",
+    "dependencies": [
+      "@react-three/fiber",
+      "@react-three/drei",
+      "three",
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "dither-prism-hero.tsx",
+      "webgl-error-boundary.tsx"
+    ]
+  },
+  {
+    "name": "eye-tracking",
+    "type": "registry:ui",
+    "description": "Component for eye-tracking",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "eye-tracking.tsx"
+    ]
+  },
+  {
+    "name": "flight-status-card",
+    "type": "registry:ui",
+    "description": "A detailed flight status widget with dot-matrix airport codes, progress tracking, and ETA information.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "flight-status-card.tsx"
+    ]
+  },
+  {
+    "name": "github-calendar",
+    "type": "registry:ui",
+    "description": "A premium, customizable visualization of GitHub contribution graphs with variants and scaling support.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "github-calendar.tsx"
+    ]
+  },
+  {
+    "name": "hero-geometric",
+    "type": "registry:ui",
+    "description": "A geometric hero section with a shader background and premium typography.",
+    "dependencies": [
+      "framer-motion",
+      "lucide-react",
+      "three",
+      "@react-three/fiber",
+      "@react-three/drei"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "hero-geometric.tsx"
+    ]
+  },
+  {
+    "name": "hyper-text",
+    "type": "registry:ui",
+    "description": "A text effect that scrambles and cycles characters before revealing the final text, inspired by cyberpunk aesthetics.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "hyper-text.tsx"
+    ]
+  },
+  {
+    "name": "image-ripple-effect",
+    "type": "registry:ui",
+    "description": "A cursor-driven WebGL ripple distortion effect for image cards.",
+    "dependencies": [
+      "three",
+      "@types/three",
+      "@react-three/fiber",
+      "@react-three/drei"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "image-ripple-effect.tsx",
+      "webgl-error-boundary.tsx"
+    ]
+  },
+  {
+    "name": "image-trail",
+    "type": "registry:ui",
+    "description": "Component for image-trail",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "image-trail.tsx"
+    ]
+  },
+  {
+    "name": "infinite-image-field",
+    "type": "registry:ui",
+    "description": "An endless, cursor-driven photo canvas. Images tile infinitely in all directions — move your cursor to pan the field, and it glides fluidly toward where you point.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "infinite-image-field.tsx"
+    ]
+  },
+  {
+    "name": "interactive-hover-button",
+    "type": "registry:ui",
+    "description": "A button that reveals text and an arrow icon on hover.",
+    "dependencies": [
+      "lucide-react"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "interactive-hover-button.tsx"
+    ]
+  },
+  {
+    "name": "kinetic-text-reveal",
+    "type": "registry:ui",
+    "description": "Directional text reveal with soft blur and configurable word, character, or line stagger timing.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "kinetic-text-reveal.tsx"
+    ]
+  },
+  {
+    "name": "layered-stack",
+    "type": "registry:ui",
+    "description": "Component for layered-stack",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "layered-stack.tsx"
+    ]
+  },
+  {
+    "name": "letter-cascade",
+    "type": "registry:ui",
+    "description": "Component for letter-cascade",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "letter-cascade.tsx"
+    ]
+  },
+  {
+    "name": "liquid-blob",
+    "type": "registry:ui",
+    "description": "Animated liquid morphing blob shapes with mouse interaction that create a beautiful organic background effect.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "liquid-blob.tsx"
+    ]
+  },
+  {
+    "name": "liquid-chrome",
+    "type": "registry:ui",
+    "description": "Component for liquid-chrome",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "liquid-chrome.tsx"
+    ]
+  },
+  {
+    "name": "mac-keyboard",
+    "type": "registry:ui",
+    "description": "Component for mac-keyboard",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "mac-keyboard.tsx"
+    ]
+  },
+  {
+    "name": "magnet-lines",
+    "type": "registry:ui",
+    "description": "A grid of lines that rotate to face the cursor, creating a magnetic field effect.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "magnet-lines.tsx"
+    ]
+  },
+  {
+    "name": "magnetic-dock",
+    "type": "registry:ui",
+    "description": "A macOS-style magnetic dock with smooth scaling animations, spring physics, and premium micro-interactions. Supports both light and dark modes.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "magnetic-dock.tsx"
+    ]
+  },
+  {
+    "name": "matrix-rain",
+    "type": "registry:ui",
+    "description": "",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "matrix-rain.tsx"
+    ]
+  },
+  {
+    "name": "music-player",
+    "type": "registry:ui",
+    "description": "Component for music-player",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "music-player.tsx"
+    ]
+  },
+  {
+    "name": "noise-texture",
+    "type": "registry:ui",
+    "description": "An animated noise/grain texture overlay effect with customizable grain size and blend modes.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "noise-texture.tsx"
+    ]
+  },
+  {
+    "name": "orbit-card-stack",
+    "type": "registry:ui",
+    "description": "Premium hover card deck that fans outward and lifts the active card without changing its color or angle.",
+    "dependencies": [
+      "framer-motion",
+      "lucide-react"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "orbit-card-stack.tsx"
+    ]
+  },
+  {
+    "name": "particle-galaxy",
+    "type": "registry:ui",
+    "description": "",
+    "dependencies": [
+      "three"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "particle-galaxy.tsx",
+      "webgl-error-boundary.tsx"
+    ]
+  },
+  {
+    "name": "pixel-canvas",
+    "type": "registry:ui",
+    "description": "An interactive pixel grid with smooth trailing effects that lights up on hover and decays over time.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "pixel-canvas.tsx"
+    ]
+  },
+  {
+    "name": "pulsating-button",
+    "type": "registry:ui",
+    "description": "A button with a pulsating glow effect.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "pulsating-button.tsx"
+    ]
+  },
+  {
+    "name": "scroll-based-velocity",
+    "type": "registry:ui",
+    "description": "Text that scrolls across the screen and skews/speeds up based on the users scroll velocity.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "scroll-based-velocity.tsx"
+    ]
+  },
+  {
+    "name": "scroll-choreography",
+    "type": "registry:ui",
+    "description": "Component for scroll-choreography",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "scroll-choreography.tsx"
+    ]
+  },
+  {
+    "name": "scroll-split-card",
+    "type": "registry:ui",
+    "description": "Component for scroll-split-card",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "scroll-split-card.tsx"
+    ]
+  },
+  {
+    "name": "scrub-input",
+    "type": "registry:ui",
+    "description": "An inline slider input styled as a pill, perfect for adjusting variables smoothly.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "scrub-input.tsx"
+    ]
+  },
+  {
+    "name": "shimmer-button",
+    "type": "registry:ui",
+    "description": "A button with a shimmering light effect.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "shimmer-button.tsx"
+    ]
+  },
+  {
+    "name": "showcase-card",
+    "type": "registry:ui",
+    "description": "A premium showcase card component with 3D tilt effect, parallax image, micro-interactions, and multiple variants. Perfect for portfolios, agency sites, and product showcases.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "showcase-card.tsx"
+    ]
+  },
+  {
+    "name": "signature",
+    "type": "registry:ui",
+    "description": "Component for signature",
+    "dependencies": [
+      "framer-motion",
+      "opentype.js"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "signature.tsx"
+    ]
+  },
+  {
+    "name": "silk-aurora",
+    "type": "registry:ui",
+    "description": "Component for silk-aurora",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "silk-aurora.tsx",
+      "webgl-error-boundary.tsx"
+    ]
+  },
+  {
+    "name": "split-flap-display",
+    "type": "registry:ui",
+    "description": "Component for split-flap-display",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "split-flap-display.tsx"
+    ]
+  },
+  {
+    "name": "spotlight-card",
+    "type": "registry:ui",
+    "description": "Interactive cards with cursor-following spotlight effects, animated gradient borders, and 3D tilt animations.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "spotlight-card.tsx"
+    ]
+  },
+  {
+    "name": "sticky-scroll-cards",
+    "type": "registry:ui",
+    "description": "Component for sticky-scroll-cards",
+    "dependencies": [
+      "framer-motion",
+      "lenis"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "sticky-scroll-cards.tsx"
+    ]
+  },
+  {
+    "name": "testimonial-marquee",
+    "type": "registry:ui",
+    "description": "A smooth, infinite scrolling marquee component for showcasing social proof and testimonials.",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "testimonial-marquee.tsx"
+    ]
+  },
+  {
+    "name": "text-animate",
+    "type": "registry:ui",
+    "description": "",
+    "dependencies": [
+      "framer-motion"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "text-animate.tsx"
+    ]
+  },
+  {
+    "name": "text-repel",
+    "type": "registry:ui",
+    "description": "Component for text-repel",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "text-repel.tsx"
+    ]
+  },
+  {
+    "name": "webgl-liquid",
+    "type": "registry:ui",
+    "description": "Premium WebGL liquid hero background with customizable flow, palette, reveal, and grain.",
+    "dependencies": [
+      "clsx",
+      "tailwind-merge"
+    ],
+    "registryDependencies": [],
+    "files": [
+      "webgl-liquid.tsx",
+      "webgl-error-boundary.tsx"
+    ]
+  },
+  {
+    "name": "gradient-hero-01",
+    "type": "registry:block",
+    "description": "A simple centered hero with a warm cinematic gradient, compact badge, short copy, and two actions.",
+    "dependencies": [],
+    "registryDependencies": [],
+    "files": [
+      "gradient-hero-01.tsx"
+    ]
+  }
+]

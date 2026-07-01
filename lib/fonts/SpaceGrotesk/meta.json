@@ -1,0 +1,23 @@
+{
+  "id": "space-grotesk",
+  "family": "Space Grotesk",
+  "role": "Sans",
+  "category": "sans-serif",
+  "version": "v22",
+  "subsets": [
+    "latin",
+    "latin-ext"
+  ],
+  "weights": [
+    "300",
+    "regular",
+    "500",
+    "600",
+    "700"
+  ],
+  "italics": false,
+  "license": "OFL-1.1",
+  "files": 5,
+  "source": "Google Fonts via google-webfonts-helper",
+  "fetched": "2026-07-01"
+}

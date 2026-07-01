@@ -1,0 +1,22 @@
+{
+  "id": "instrument-sans",
+  "family": "Instrument Sans",
+  "role": "Sans",
+  "category": "sans-serif",
+  "version": "v4",
+  "subsets": [
+    "latin",
+    "latin-ext"
+  ],
+  "weights": [
+    "regular",
+    "500",
+    "600",
+    "700"
+  ],
+  "italics": false,
+  "license": "OFL-1.1",
+  "files": 4,
+  "source": "Google Fonts via google-webfonts-helper",
+  "fetched": "2026-07-01"
+}

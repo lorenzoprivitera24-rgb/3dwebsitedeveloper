@@ -1,0 +1,19 @@
+{
+  "id": "anton",
+  "family": "Anton",
+  "role": "Display",
+  "category": "sans-serif",
+  "version": "v27",
+  "subsets": [
+    "latin",
+    "latin-ext"
+  ],
+  "weights": [
+    "regular"
+  ],
+  "italics": false,
+  "license": "OFL-1.1",
+  "files": 1,
+  "source": "Google Fonts via google-webfonts-helper",
+  "fetched": "2026-07-01"
+}

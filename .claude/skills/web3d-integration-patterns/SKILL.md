@@ -49,6 +49,22 @@ Read this first. Several patterns from the old skill are now wrong.
 | Scroll/timeline anim | `gsap` 3.13+ + `@gsap/react` + ScrollTrigger/ScrollSmoother | Scrubbed sequences, pinning, text reveals | The driver for scroll-linked 3D and marketing sections |
 | 3D motion | `useFrame` / `@react-spring/three` / GSAP | Object animation, gestures, springs | NOT framer-motion-3d |
 | DOM UI motion | `motion` (`motion/react`) | Overlay micro-interactions, layout, exit transitions | DOM only, never the canvas |
+| Pointer/gesture | `@use-gesture/react` | Drag, pinch, hover, wheel gestures | Interactive UI/3D |
+| Lightweight GLSL | `ogl` | Cheap full-screen shader backgrounds without three | Background-only / no full 3D |
+| **UI component library** | **React Bits** (vendored, `lib/react-bits/`) | 134 copy-paste interactive components (text/animation/UI/background) | The interactivity layer — see below |
+
+**Two references were added for the realism + interactivity gap** (the things that make a build
+"green" yet look fake or feel dead). Read them when the brief is "realistic" or "interactive":
+
+- `references/realism-and-interactivity.md` — PBR + real KTX2 textures, **triplanar anti-tiling**,
+  IBL, post FX, organic TSL geometry, physics/gesture, AND the WebGPU/TSL **runtime gotchas that
+  pass the build and break on screen** (drei `useKTX2` crashes on WebGPU; GTAO `RedFormat` turns the
+  scene red; clickable drei `<Html>` needs a portal above the content; verify in a real preview).
+- `references/interactive-components.md` — how to pick + wire React Bits components from
+  `lib/react-bits/` (catalog in `lib/react-bits/CATALOG.md`) without breaking the single scroll loop
+  or accessibility.
+
+The repo-root **`STACK.md`** is the one-page summary of this whole stack.
 
 ## Decision matrix: which combination for which brief
 
@@ -217,3 +233,9 @@ Detailed references live in `references/`:
 - `webgpu-tsl.md`: WebGPU + TSL + R3F v9 setup, node materials, compute shaders, backend detection, fallback.
 - `scroll-pointer-driven.md`: the full scroll + pointer + touch deformation pattern, Lenis/ScrollTrigger sync, raycasting, parallax.
 - `performance-and-fallback.md`: performance budget, instancing, on-demand rendering, DPR, mobile, prefers-reduced-motion, graceful degradation.
+- `realism-and-interactivity.md`: PBR + real KTX2 textures, triplanar anti-tiling, IBL, post FX, organic geometry, physics/gesture, and the WebGPU/TSL runtime gotchas that pass the build and break on screen. **Read before claiming a 3D scene looks real.**
+- `interactive-components.md`: the React Bits library (`lib/react-bits/`, catalog in `CATALOG.md`) — picking + wiring interactive components without breaking the loop or a11y.
+- `realistic-foliage.md`: **verified (cited) state-of-the-art for vegetation** — why procedural box hedges look bad, and the real standard: instanced alpha-tested LEAF CARDS + leaf atlas, `alphaHash` + temporal AA, two-sided transmission SSS, multi-layer TSL wind, native `InstancedMesh`/`BatchedMesh`, CC0 leaf-atlas sources, and the honest realistic ceiling. **Read before doing hedges/grass/trees.**
+- `photoreal-3d-research-dossier.md`: **the broad, cross-cutting consolidation of the 110-agent deep research** (33 sources, adversarially verified + a second fact-check pass) — the 9 verified findings, 12 cross-cutting realism principles, the reference-benchmark roster + per-project realism-bar protocol, and the refuted/do-NOT-use table. `realistic-foliage.md` is one slice of it. **Read before any "make it realistic" 3D brief.** The repo-root **`ROADMAP.md`** turns it into the kit's development plan toward excellence.
+
+The repo-root `STACK.md` is the one-page summary of the whole stack.

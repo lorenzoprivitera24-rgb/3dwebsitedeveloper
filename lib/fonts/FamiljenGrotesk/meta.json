@@ -1,0 +1,22 @@
+{
+  "id": "familjen-grotesk",
+  "family": "Familjen Grotesk",
+  "role": "Display",
+  "category": "sans-serif",
+  "version": "v11",
+  "subsets": [
+    "latin",
+    "latin-ext"
+  ],
+  "weights": [
+    "regular",
+    "500",
+    "600",
+    "700"
+  ],
+  "italics": false,
+  "license": "OFL-1.1",
+  "files": 4,
+  "source": "Google Fonts via google-webfonts-helper",
+  "fetched": "2026-07-01"
+}

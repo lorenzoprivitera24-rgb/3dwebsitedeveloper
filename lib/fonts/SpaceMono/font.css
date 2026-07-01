@@ -1,0 +1,15 @@
+/* Space Mono — self-hosted (Google Fonts via gwfh). No runtime CDN. */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./files/space-mono-v17-latin_latin-ext-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./files/space-mono-v17-latin_latin-ext-regular.woff2') format('woff2');
+}

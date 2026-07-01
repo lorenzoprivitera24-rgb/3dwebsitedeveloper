@@ -1,0 +1,8 @@
+/* Fragment Mono — self-hosted (Google Fonts via gwfh). No runtime CDN. */
+@font-face {
+  font-family: 'Fragment Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./files/fragment-mono-v6-latin_latin-ext-regular.woff2') format('woff2');
+}

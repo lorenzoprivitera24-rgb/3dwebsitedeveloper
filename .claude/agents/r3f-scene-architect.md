@@ -24,7 +24,13 @@ every other specialist builds on, and you make the architectural calls.
 
 The full integration playbook is preloaded for you (the web3d-integration-patterns skill).
 Treat its `references/webgpu-tsl.md` as authoritative for renderer setup, and
-`references/performance-and-fallback.md` for the budget you must design against.
+`references/performance-and-fallback.md` for the budget you must design against. For anything that
+must look *real* or feel *interactive*, also read `references/realism-and-interactivity.md` (PBR +
+real KTX2 textures, triplanar anti-tiling, IBL, post FX, organic geometry — plus the WebGPU/TSL
+runtime gotchas that pass the build and break on screen) and design the asset pipeline around it.
+The repo-root `STACK.md` is the canonical stack; the **React Bits** interactive library lives in
+`lib/react-bits/` (the `interaction-engineer` agent wires it). **A green build is not proof —
+require a real browser-preview verification before declaring the scene done.**
 
 ## When invoked
 

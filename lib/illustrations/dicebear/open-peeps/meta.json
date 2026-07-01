@@ -1,0 +1,12 @@
+{
+  "style": "open-peeps",
+  "title": "Open Peeps",
+  "creator": "Pablo Stanley",
+  "source": "https://www.openpeeps.com/",
+  "homepage": "https://twitter.com/pablostanley",
+  "license": {
+    "name": "CC0 1.0",
+    "url": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "count": 48
+}

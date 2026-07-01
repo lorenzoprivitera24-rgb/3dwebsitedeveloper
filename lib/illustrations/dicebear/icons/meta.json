@@ -1,0 +1,12 @@
+{
+  "style": "icons",
+  "title": "Bootstrap Icons",
+  "creator": "The Bootstrap Authors",
+  "source": "https://github.com/twbs/icons",
+  "homepage": "https://getbootstrap.com/",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/twbs/icons/blob/main/LICENSE"
+  },
+  "count": 48
+}

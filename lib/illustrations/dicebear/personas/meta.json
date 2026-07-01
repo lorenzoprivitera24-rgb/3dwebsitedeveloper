@@ -1,0 +1,12 @@
+{
+  "style": "personas",
+  "title": "Personas by Draftbit",
+  "creator": "Draftbit - draftbit.com",
+  "source": "https://personas.draftbit.com/",
+  "homepage": "https://draftbit.com/",
+  "license": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "count": 48
+}
