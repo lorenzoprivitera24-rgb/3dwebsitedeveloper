@@ -90,6 +90,32 @@ research can run in parallel, but **serialize edits** (one owner per property, o
 `isolation: worktree` for parallel branches. Same non-negotiables apply (no `framer-motion-3d`, one
 loop, ease everything, mobile + a11y in "done").
 
+## The factory: from client request to shipped site
+
+Client work runs through an 8-stage pipeline. **`PIPELINE_STATUS.md` is the first thing every
+session reads**; advancing it is part of each stage's "done". Human gates (G) need an explicit OK.
+
+```
+S0 intake (skill client-intake)   → brief/brief.md                    (G)
+S1 creative-director              → brief/direction.md + tokens block (G)
+S2 scroll-storyboarder            → brief/storyboard.md               (G)
+S3 copy-chief                     → content/*.json
+S4 asset-wrangler                 → public/assets/* + assets-manifest.json
+S5 blueprint-librarian + specialists → sections from /registry (+ CUSTOM)
+S6 visual-qa-operator             → qa/issues.md → fix loop (max 3 rounds)
+S7 perf-fallback-auditor          → qa/perf-report.md (G) → deploy
+```
+
+**The golden rule: before writing any section from scratch, consult `/registry`** (INDEX.md).
+Compose and parameterize blueprints; write custom only for what the registry doesn't cover, then
+promote it. No stage starts without the previous stage's artifact.
+
+Factory commands: `npm run tokens:build` (direction.md → tokens.css + tokens.generated.ts) ·
+`npm run assets:encode` · `npm run qa:verify` (single-shot: real backend + console + screenshot) ·
+`npm run qa:shoot` (per-section × 390/834/1440) · `npm run perf:check` (budget gate).
+Verification runs on playwright-core + the cached Chrome for Testing — NOT the user's Chrome
+(it cannot reach local servers on this machine) and NOT the preview MCP from a worktree.
+
 ### Tips
 
 - Let agents accumulate knowledge: `r3f-scene-architect` and (optionally) others use project
