@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu'
 import { Canvas, extend, type ThreeToJSXElements } from '@react-three/fiber'
 import { Component, Suspense, type ReactNode } from 'react'
 import { Poster } from './Poster'
+import { DevPerf } from './DevPerf'
 
 // Make the WebGPU build's primitives and node materials available as JSX elements.
 declare module '@react-three/fiber' {
@@ -58,6 +59,7 @@ export function Stage({ children, dpr, toneMappingExposure = 1 }: StageProps) {
         dpr={dpr}
       >
         <Suspense fallback={null}>{children}</Suspense>
+        <DevPerf />
       </Canvas>
     </CanvasErrorBoundary>
   )
