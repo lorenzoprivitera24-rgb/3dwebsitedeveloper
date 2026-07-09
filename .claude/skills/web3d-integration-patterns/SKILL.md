@@ -43,7 +43,7 @@ Read this first. Several patterns from the old skill are now wrong.
 | Shaders | `three/tsl` | Node-based materials, vertex displacement, compute | Renderer-agnostic, compiles to WGSL + GLSL |
 | React layer | `@react-three/fiber` v9 (React 19) | Declarative scene graph | `gl` async factory for WebGPU; `state.renderer` |
 | Helpers | `@react-three/drei` | Loaders, controls, `Environment`, `useTexture`, `Html` | High-level R3F helpers |
-| Post FX | `@react-three/postprocessing` (pmndrs/postprocessing) | Bloom, DOF, chromatic aberration | Some effects need WebGPU/TSL variants |
+| Post FX | **native node graph**: `RenderPipeline` (`three/webgpu`) + `three/addons/tsl/display/*` | Bloom, GTAO, SMAA/TRAA, DoF, LUT/grade on the WebGPU path | `@react-three/postprocessing` (pmndrs) is for **WebGL2-only builds only** — it targets the WebGL pipeline and fights WebGPURenderer. See `references/webgpu-tsl.md` §6 |
 | Physics | `@react-three/rapier` (+ `ecctrl` for character control) | Rigid bodies, colliders as JSX | Only if the brief needs real physics |
 | Scroll engine | `lenis` (darkroom.engineering) | Smooth scroll, single RAF source | First-class React adapter `lenis/react` |
 | Scroll/timeline anim | `gsap` 3.13+ + `@gsap/react` + ScrollTrigger/ScrollSmoother | Scrubbed sequences, pinning, text reveals | The driver for scroll-linked 3D and marketing sections |

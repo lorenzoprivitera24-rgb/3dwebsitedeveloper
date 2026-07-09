@@ -12,7 +12,8 @@ cd my-3d-site
 npm i three @react-three/fiber@^9 @react-three/drei
 npm i gsap @gsap/react lenis
 # optional, only if the brief needs them:
-npm i @react-three/postprocessing
+# (post FX on the WebGPU path is NATIVE three — RenderPipeline + three/addons/tsl/display — no extra package.
+#  @react-three/postprocessing is ONLY for deliberate WebGL2-only builds; it fights WebGPURenderer.)
 npm i @react-three/rapier ecctrl
 npm i @react-spring/three
 npm i motion          # DOM UI only (this is the package formerly known as framer-motion)
@@ -166,7 +167,15 @@ On WebGL2, replace this with a smaller instanced points cloud animated in `useFr
 
 ## 6. Post-processing
 
-Drei's `EffectComposer` wraps `pmndrs/postprocessing`. Some effects need WebGPU/TSL variants or behave differently under WebGPU. Keep post FX optional and measure: bloom and DOF are the most common cost spikes. Apply the backend check before enabling compute-heavy passes.
+**On the WebGPU path, post FX is native three — no pmndrs.** Build the chain with `RenderPipeline` from `three/webgpu` (`PostProcessing` is its deprecated r183 alias) plus the TSL display nodes in `three/addons/tsl/display/`: `BloomNode`, `GTAONode` (the only AO node on WebGPU — no HBAO exists), `SMAANode`, `TRAAPassNode`, `FXAANode`, `DepthOfFieldNode`, `Lut3DNode`.
+
+Pattern: `const scenePass = pass(scene, camera)` with MRT (`output` + `normalView`) → GTAO (compose as `color.mul(vec3(ao.r))` — the AO target is RedFormat) → bloom → AA → tonemap → grade → assign to `postProcessing.outputNode`. In R3F, render the chain from a `useFrame` with `renderPriority = 1` so it owns the frame instead of the default render.
+
+Do **not** use drei's `EffectComposer` / `@react-three/postprocessing` on WebGPURenderer: it wraps `pmndrs/postprocessing`, which targets the WebGL pipeline and fights the node renderer. It stays legitimate **only** on a deliberate WebGL2-only build.
+
+**Anti-aliasing is a decision, not a dogma.** `antialias: true` on `WebGPURenderer` maps to `samples: 4` and the scene `PassNode` honors it — MSAA *does* multisample the off-screen scene pass. Pick per project: MSAA for geometry edges (default), `SMAANode`/TRAA when shader/alpha aliasing dominates (thin animated alpha edges want alphaHash + TAA). Never hardcode `antialias: false` "because post".
+
+Keep the chain tier-gated (full / medium / off): grain and vignette are almost free, bloom costs, DoF is hero-shot only, no chain at all on the low tier. Measure with r3f-perf before shipping.
 
 ## 7. Loading 3D assets
 
