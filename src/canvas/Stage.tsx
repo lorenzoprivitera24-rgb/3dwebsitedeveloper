@@ -30,18 +30,28 @@ class CanvasErrorBoundary extends Component<
 interface StageProps {
   children: ReactNode
   dpr: [number, number]
+  /** Artistic exposure dial for the house tonemapper (AgX). 1 = neutral. */
+  toneMappingExposure?: number
 }
 
-export function Stage({ children, dpr }: StageProps) {
+export function Stage({ children, dpr, toneMappingExposure = 1 }: StageProps) {
   return (
     <CanvasErrorBoundary fallback={<Poster />}>
       <Canvas
         // R3F v9: the gl prop may return a Promise, which lets WebGPURenderer await init().
         // WebGPURenderer.init() falls back to WebGL2 automatically when WebGPU is unavailable.
         gl={async (props) => {
+          // AA decision (verified): antialias:true → WebGPURenderer samples=4, and the scene
+          // PassNode honors it, so MSAA also multisamples the off-screen pass when post FX
+          // arrives. Swap to SMAA/TRAA in post only when shader/alpha aliasing dominates —
+          // never hardcode antialias:false "because post".
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const renderer = new THREE.WebGPURenderer({ ...(props as any), antialias: true })
           await renderer.init()
+          // House output transform: AgX tonemapping (neutral filmic highlights; ACESFilmic is
+          // the documented alternative) + exposure as the one artistic dial. Set AFTER init().
+          renderer.toneMapping = THREE.AgXToneMapping
+          renderer.toneMappingExposure = toneMappingExposure
           return renderer
         }}
         camera={{ position: [0, 0, 6], fov: 45 }}
