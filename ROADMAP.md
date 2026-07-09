@@ -59,16 +59,24 @@ Each line: `[area] (effort · impact)`. Effort S/M/L from the briefs.
 
 ### NOW (0–2 weeks) — unblock + fix what's broken
 
-- [ ] **Resolve the post-FX contradiction**: stop recommending `@react-three/postprocessing`/drei EffectComposer on WebGPU in SKILL.md + webgpu-tsl.md; point to RenderPipeline + native node graph. `[post] (S · high)`
-- [ ] **Wire KTX2-on-WebGPU loader + IBL**: `src/lib/ktx2.ts` using **three's own `KTX2Loader`** via `useLoader`, self-host `/public/basis/`, add drei `<Environment>` self-hosted HDRI to `Scene.tsx`. `[materials/lighting/assets] (M · high)`
+> **Chiuso il 9 lug 2026 su branch `w1-foundations`** (verifica in browser reale: backend WebGPU,
+> 0 errori console, screenshot). Correzioni emerse sul campo: **r3f-perf 7.x crasha su
+> WebGPURenderer** (GLPerf.initGpu presume WebGL; il canvas cade sul poster) → `DevPerf.tsx` ibrido
+> (HUD interno su WebGPU, r3f-perf solo sul fallback WebGL2); **scrollerProxy non serve** con Lenis
+> in root-mode (scroll nativo) — documentato in `SmoothScroll.tsx`. Bonus fuori lista: font portati
+> self-host (index.html violava la regola GDPR del kit), `scripts/encode-assets.mjs` anticipato dal
+> NEXT, `scripts/verify-preview.mjs` come seme di shoot.mjs.
+
+- [x] **Resolve the post-FX contradiction**: stop recommending `@react-three/postprocessing`/drei EffectComposer on WebGPU in SKILL.md + webgpu-tsl.md; point to RenderPipeline + native node graph. `[post] (S · high)`
+- [x] **Wire KTX2-on-WebGPU loader + IBL**: `src/lib/ktx2.ts` using **three's own `KTX2Loader`** via `useLoader`, self-host `/public/basis/`, add drei `<Environment>` self-hosted HDRI to `Scene.tsx`. `[materials/lighting/assets] (M · high)`
    - *Correction baked in:* drei `useKTX2` is a thin wrapper over three's loader and calls `detectSupport(gl)`; the real constraint is **call it after `await renderer.init()`** (deprecated `detectSupportAsync`), not a mythical `extensions.has` crash. Prefer three's loader for control, but the "crash" framing in the docs must be rewritten.
-- [ ] **Set tonemapping + exposure**: `gl.toneMapping = THREE.AgXToneMapping` (ACES as documented alt), expose `toneMappingExposure`. Both confirmed selectable on WebGPURenderer 0.184. `[lighting/post] (S · high)`
-- [ ] **Flip the AA default**: do **not** hardcode `antialias:false`. *Correction:* WebGPURenderer wires `antialias:true → samples=4` and PassNode honors it, so MSAA **does** apply to the off-screen scene pass. Choose MSAA-via-samples vs SMAA/TRAA on perf/quality grounds, documented. `[post/perf] (S · high)`
-- [ ] **Self-hosted HDRI convention**: `/public/hdri/`, commit a 1–2k CC0 Poly Haven `.hdr`, document `<Lightformer>` studio alt. `[lighting/assets] (S · high)`
-- [ ] **Install profiling**: add `r3f-perf` (dev), mount `<Perf/>` behind `import.meta.env.DEV`. Makes the auditor's rubric runnable. `[perf] (S · high)`
-- [ ] **Replace broken CI**: delete `webpack.yml`; add `ci.yml` (Node 20/22, `npm ci`, `tsc -b && vite build`, lint). Add ESLint flat config with `@react-three/eslint-plugin` + `react-hooks`. `[tooling] (S · high)`
-- [ ] **Kill the ScrollReveal hazard**: add a Lenis↔ScrollTrigger `scrollerProxy` bridge in `SmoothScroll.tsx`; document the rule that copied React Bits scroll components must NOT call `ScrollTrigger.getAll().forEach(t=>t.kill())` (it destroys the kit's own driver) and must use the Lenis scroller. `[interactivity] (M · high)`
-- [ ] **Robust quality tier**: convert `useMemo([])` to state recomputed on debounced resize/orientation; stop trusting `deviceMemory` alone (undefined on Safari/iOS → fall back to viewport + `pointer:coarse` + `hardwareConcurrency`); add `postLevel`/`particleCount`/`physicsEnabled`/`windOctaves`/`shadowMapSize` fields. `[perf/animation] (S · high)`
+- [x] **Set tonemapping + exposure**: `gl.toneMapping = THREE.AgXToneMapping` (ACES as documented alt), expose `toneMappingExposure`. Both confirmed selectable on WebGPURenderer 0.184. `[lighting/post] (S · high)`
+- [x] **Flip the AA default**: do **not** hardcode `antialias:false`. *Correction:* WebGPURenderer wires `antialias:true → samples=4` and PassNode honors it, so MSAA **does** apply to the off-screen scene pass. Choose MSAA-via-samples vs SMAA/TRAA on perf/quality grounds, documented. `[post/perf] (S · high)`
+- [x] **Self-hosted HDRI convention**: `/public/hdri/`, commit a 1–2k CC0 Poly Haven `.hdr`, document `<Lightformer>` studio alt. `[lighting/assets] (S · high)`
+- [x] **Install profiling**: add `r3f-perf` (dev), mount `<Perf/>` behind `import.meta.env.DEV`. Makes the auditor's rubric runnable. `[perf] (S · high)`
+- [x] **Replace broken CI**: delete `webpack.yml`; add `ci.yml` (Node 20/22, `npm ci`, `tsc -b && vite build`, lint). Add ESLint flat config with `@react-three/eslint-plugin` + `react-hooks`. `[tooling] (S · high)`
+- [x] **Kill the ScrollReveal hazard**: add a Lenis↔ScrollTrigger `scrollerProxy` bridge in `SmoothScroll.tsx`; document the rule that copied React Bits scroll components must NOT call `ScrollTrigger.getAll().forEach(t=>t.kill())` (it destroys the kit's own driver) and must use the Lenis scroller. `[interactivity] (M · high)`
+- [x] **Robust quality tier**: convert `useMemo([])` to state recomputed on debounced resize/orientation; stop trusting `deviceMemory` alone (undefined on Safari/iOS → fall back to viewport + `pointer:coarse` + `hardwareConcurrency`); add `postLevel`/`particleCount`/`physicsEnabled`/`windOctaves`/`shadowMapSize` fields. `[perf/animation] (S · high)`
 
 ### NEXT (1–2 months) — the realistic-environment disciplines
 
@@ -81,7 +89,7 @@ Each line: `[area] (effort · impact)`. Effort S/M/L from the briefs.
 - [ ] **Reusable PostFX module** `PostFX.tsx`: `RenderPipeline` + `pass` + MRT(`output`,`normalView`) → GTAO (`ao` node, RedFormat-safe `color.mul(vec3(ao.r))`) → bloom → SMAA → tonemap → grade. Tier-gated (full/medium/off). `[post] (L · high)`
 - [ ] **Multi-layer TSL wind node** `tsl/wind.ts` (global sway masked by height + gust fronts + per-instance turbulence) + a `FoliageField.tsx` consumer. Makes the foliage doc's "concrete next step" runnable. `[animation/materials] (M · high)`
 - [ ] **Grounding shadows** `Ground.tsx`: drei `<AccumulativeShadows>`+`<RandomizedLight>` (static hero) / `<ContactShadows>` (moving), one PCFSoft sun caster with tight frustum + normalBias, tier-gated resolution. Smoke-test under WebGPURenderer. `[lighting] (M · high)`
-- [ ] **Asset-encode script** `scripts/encode-assets.mjs` (gltf-transform: dedup/weld/quantize/draco|meshopt + KTX2 ETC1S albedo / UASTC normals+alpha). Confirmed gltf-transform does both in one scripted pipeline (KTX2 via the CLI `toktx` transform; needs KTX-Software binary). `[assets] (M · high)`
+- [x] *(anticipato in w1-foundations, 9 lug 26)* **Asset-encode script** `scripts/encode-assets.mjs` (gltf-transform: dedup/weld/quantize/draco|meshopt + KTX2 ETC1S albedo / UASTC normals+alpha). Confirmed gltf-transform does both in one scripted pipeline (KTX2 via the CLI `toktx` transform; needs KTX-Software binary). `[assets] (M · high)`
 - [ ] **Add `@react-three/rapier` (+ ecctrl)** to deps — confirmed **absent today** — and `PhysicsStage.tsx`: `<Physics>` stepped inside the R3F frame, 1–2 `<RigidBody>` heroes, optional character. Rapier is the **sole** owner of body transforms (never also damped). `[animation] (M · high)`
    - *Correction baked in:* ecctrl is a **floating-rigidbody** controller (spring + damping + shapecast), **not** rapier's `KinematicCharacterController`. Document it as one valid choice (BVHEcctrl is a physics-free alternative).
 - [ ] **Make `@use-gesture/react` real**: one worked `useDrag`/`usePinch` → `MathUtils.damp` → single consumer (uniform or impulse). `[interactivity/animation] (S · medium)`
@@ -192,7 +200,7 @@ Each line: `[area] (effort · impact)`. Effort S/M/L from the briefs.
 **Target:** a tiered roster + per-project realism bar in `ARCHITECTURE.md` + repeatable A/B capture + scored perceptual checklist + an agent that owns the realism gate.
 **Steps:** roster doc → realism-bar protocol → A/B workflow → scored checklist → agent ownership → runtime fidelity capture in the verify loop.
 **Touchpoints:** NEW `references/reference-benchmarks.md`, `ARCHITECTURE.md` realism-bar block, `realism-and-interactivity.md` §A.7/§E, `perf-fallback-auditor.md`.
-**Verified:** False Earth = compute + storage + indirect + ~80% GPU cull — **but "AAA grass requires compute" is refuted**; classic InstancedMesh still does ~1M blades. AgX & ACES both in 0.184. r3f-perf usable on the stack.
+**Verified:** False Earth = compute + storage + indirect + ~80% GPU cull — **but "AAA grass requires compute" is refuted**; classic InstancedMesh still does ~1M blades. AgX & ACES both in 0.184. ~~r3f-perf usable on the stack~~ **CORRETTO (verifica in browser, 9 lug 26): r3f-perf 7.x crasha su WebGPURenderer** (GLPerf.initGpu presume un contesto WebGL e il canvas cade sul poster) — vale solo sul fallback WebGL2; su WebGPU il kit usa l'HUD interno di `DevPerf.tsx` (fps + renderer.info).
 
 ### 9. Interactivity & DOM/overlay
 **Current:** single-loop wiring correct (Lenis `autoRaf:false`→`gsap.ticker`, scroll-in-a-ref, Motion DOM-only); React Bits vendored-not-integrated; **`ScrollReveal` cleanup kills ALL ScrollTriggers**; several cursor/bg comps self-RAF; overlay is a hero skeleton; `@use-gesture` unused; `<Html>` portal fix is prose.
@@ -234,7 +242,7 @@ Each line: `[area] (effort · impact)`. Effort S/M/L from the briefs.
 | ogl 1.x | Lightweight GLSL backgrounds | **in-stack** | Gate OFF on low; never stack with the WebGPU canvas. |
 | maath | random/easing for WebGL2 fallback fields | **in-stack** | — |
 | three-mesh-bvh | Raycast/spatial queries vs instanced/merged | **evaluate** | Only if picking/collision needed; confirm WebGPU compat. |
-| r3f-perf | Dev overlay (draw calls/tris/GPU time) | **add (dev)** | Makes the auditor rubric runnable. |
+| r3f-perf | Dev overlay (draw calls/tris/GPU time) | **added (dev) — WebGL2 only** | CRASHA su WebGPURenderer (GLPerf.initGpu, verificato in browser lug26): su WebGPU usare l'HUD interno di `DevPerf.tsx`. |
 | `@playwright/test` | Headless WebGPU smoke + screenshot diff | **add** | Machine backing for "green build is not proof." |
 | eslint + `@react-three/eslint-plugin` + react-hooks | Static R3F/hook checks | **add** | Can mechanically enforce the framer-motion-3d ban. |
 | renovate / dependabot | Grouped 3D-cluster cadence | **add** | Gated by CI + smoke. |

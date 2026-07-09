@@ -55,6 +55,12 @@ export function Stage({ children, dpr, toneMappingExposure = 1 }: StageProps) {
           // the documented alternative) + exposure as the one artistic dial. Set AFTER init().
           renderer.toneMapping = THREE.AgXToneMapping
           renderer.toneMappingExposure = toneMappingExposure
+          // True backend flag: renderer.isWebGPURenderer stays true even on the WebGL2
+          // fallback; only backend.isWebGPUBackend tells the truth. Logged for verification
+          // (browser QA reads this instead of guessing from visuals).
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const backend = (renderer as any).backend
+          console.info('[kit] renderer backend:', backend?.isWebGPUBackend ? 'WebGPU' : 'WebGL2')
           return renderer
         }}
         camera={{ position: [0, 0, 6], fov: 45 }}

@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <title>Form in Motion</title>
+    <!-- keeps QA console clean until a real favicon lands -->
+    <link rel="icon" href="data:," />
 
-    <!-- Distinctive type, not generic system fonts. Display: Fraunces (variable serif). Body: Schibsted Grotesk. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Schibsted+Grotesk:wght@400..700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Type is SELF-HOSTED from lib/fonts (imported in src/main.tsx): loading from
+         fonts.googleapis.com at runtime leaks visitor IPs (GDPR, Munich 3 O 17493/20).
+         Display: Fraunces (serif). Body: Schibsted Grotesk. -->
   </head>
   <body>
     <div id="root"></div>
