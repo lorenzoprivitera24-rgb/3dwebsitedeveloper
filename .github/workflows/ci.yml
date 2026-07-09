@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      # NOTE: GitHub runners have no GPU — this validates types/bundle and (at most) the
+      # WebGL2/SwiftShader path. Real WebGPU verification stays a browser-preview step
+      # (see CLAUDE.md: a green build is not proof).

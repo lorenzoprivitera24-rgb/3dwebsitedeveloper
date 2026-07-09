@@ -6,6 +6,8 @@ import { DevPerf } from './DevPerf'
 
 // Make the WebGPU build's primitives and node materials available as JSX elements.
 declare module '@react-three/fiber' {
+  // Canonical R3F v9 augmentation: the "empty" interface IS the declaration merge.
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface ThreeElements extends ThreeToJSXElements<typeof THREE> {}
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
