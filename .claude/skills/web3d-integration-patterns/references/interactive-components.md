@@ -36,6 +36,15 @@ React Bits already ships well — copy and tune.
 ## Integration rules (or it fights the host)
 - **One scroll loop.** A scroll-reactive component must read the host's Lenis-smoothed scroll
   (bind GSAP ScrollTrigger to the existing Lenis); never add a second `requestAnimationFrame`.
+- **Kill only your own triggers.** A copied component's cleanup must NEVER call
+  `ScrollTrigger.getAll().forEach(t => t.kill())` — that destroys every trigger on the page,
+  including the kit's scroll driver. Keep references to the tweens the component created and kill
+  those (`tween.scrollTrigger?.kill(); tween.kill()`). The vendored `ScrollReveal` upstream had
+  exactly this bug; our copy is patched — re-apply the patch if you re-vendor. Audit every scroll
+  component you copy for this pattern BEFORE wiring it.
+- **Use the page scroller.** With the kit's Lenis in `root` mode the native window scroll is the
+  source of truth, so ScrollTrigger's default `scroller: window` is correct — don't pass a custom
+  `scrollContainerRef` unless the host actually scrolls a wrapper element.
 - **Reduced motion.** Gate every effect on `prefers-reduced-motion` — keep the content, drop the
   motion. Backgrounds especially must calm down.
 - **Contrast.** Animated backgrounds are busy and moving → text on a scrim, ≥4.5:1, 44px targets.
