@@ -9,7 +9,11 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint src",
-    "assets:encode": "node scripts/encode-assets.mjs"
+    "assets:encode": "node scripts/encode-assets.mjs",
+    "tokens:build": "node scripts/build-tokens.mjs",
+    "qa:verify": "node scripts/verify-preview.mjs",
+    "qa:shoot": "node scripts/shoot.mjs",
+    "perf:check": "node scripts/perf-check.mjs"
   },
   "//versions": "Verified floor (June 2026), matching the audited build (three 0.184, R3F 9.6). WebGPU is zero-config since three r171/0.171. After install, pull the latest stable. See STACK.md for the full stack and lib/react-bits/ for the interactive component library.",
   "dependencies": {

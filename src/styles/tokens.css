@@ -1,0 +1,15 @@
+/* GENERATED da scripts/build-tokens.mjs ← brief/direction.md — NON EDITARE A MANO */
+:root {
+  --bg: #07090d;
+  --bg-2: #0b0e14;
+  --fg: #eef1f7;
+  --muted: #9aa3b2;
+  --accent: #5b8cff;
+  --display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --body: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'Fragment Mono', ui-monospace, 'SF Mono', monospace;
+  --size-display: clamp(2.8rem, 1rem + 9vw, 9rem);
+  --size-eyebrow: 0.78rem;
+  --motion-micro: 0.18s;
+  --motion-base: 0.6s;
+}
