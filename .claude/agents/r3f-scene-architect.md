@@ -71,3 +71,9 @@ require a real browser-preview verification before declaring the scene done.**
   conventions you discover, so later sessions stay consistent.
 
 Be decisive and concrete. Produce runnable structure, not prose about structure.
+
+## Factory rule (added w2)
+
+Before implementing ANY page section, read `brief/storyboard.md` and consult `/registry`
+(`INDEX.md` + meta.json): compose and parameterize existing blueprints — do not reinvent what the
+registry covers. Custom work follows the storyboard's CUSTOM spec and is a promotion candidate.

@@ -49,6 +49,35 @@ CATEGORIES = [
      r"performance|prestazion|\baudit\b|\bottimizz|scatta|\blag\b|\bfps\b|frame\s*budget|draw\s*call|"
      r"instanc|budget\s+mobile|prima\s+del\s+rilasci|verifica\s+il\s+fallback|il\s+sito\s+(scatta|va\s+lento)",
      "Performance/fallback/accessibilità (PRIMA del rilascio) -> `@agent-perf-fallback-auditor` (READ-ONLY: draw call, instancing, DPR, fallback WebGPU->WebGL2, poster no-WebGL, reduced-motion, a11y -> report prioritizzato che 1-4 applicano)."),
+
+    # ---- fabbrica (pipeline cliente S0-S7, vedi PIPELINE_STATUS.md) ----
+    ("intake",
+     r"\bbrief\b|\bintake\b|nuovo\s+client|richiesta\s+(del\s+)?client|preventivo\s+(del\s+)?sito",
+     "Nuovo progetto/brief (S0) -> skill `client-intake` + template `brief/_templates/brief.template.md`; il gate S0 e umano."),
+
+    ("direction",
+     r"direzione\s+creativ|art\s*direction|\bdirection\.md\b|coppia\s+tipografic|palette\s+(del\s+)?sito|vocabolario\s+di\s+motion",
+     "Art direction (S1) -> `@agent-creative-director` (UNA direzione opinionata + blocco tokens eseguibile; font solo dallo scaffale self-host)."),
+
+    ("storyboard",
+     r"\bstoryboard\b|sceneggiatur|scaletta\s+(delle\s+)?sezion|coreografia\s+(della\s+)?pagin",
+     "Storyboard dello scroll (S2) -> `@agent-scroll-storyboarder` (scena UNA e persistente, blueprint dal registro o CUSTOM, mobile+reduced per sezione)."),
+
+    ("copy",
+     r"\bcopy\b|\bheadline\b|\beyebrow\b|microcopy|testi\s+del\s+sito|riempi\s+i\s+contenut",
+     "Copy (S3) -> `@agent-copy-chief` (slot ESATTI dallo storyboard in content/*.json; headline <6 parole; niente testo orfano)."),
+
+    ("assets",
+     r"\bglb\b|\bgltf\b|\bktx2?\b|\bhdri?\b|asset[-\s]?(3d|manifest|wrangler)|comprimi\s+(i\s+)?(modell|glb|texture)|\bmeshy\b|\btripo\b|poly\s*haven",
+     "Asset 3D/texture/HDRI (S4) -> `@agent-asset-wrangler` (npm run assets:encode, budget 5MB/2048px, manifest con licenza per OGNI asset)."),
+
+    ("registry",
+     r"\bregistro\b|\bblueprint\b|composition[-\s]?plan|\bcomponi\s+(il\s+sito|le\s+sezioni)|promuovi\s+a\s+blueprint",
+     "Composizione dal registro (S5) -> `@agent-blueprint-librarian` (mappa storyboard->blueprint, props dai token, CUSTOM instradati agli specialisti; a fine progetto promuove)."),
+
+    ("visual-qa",
+     r"\bqa\b|screenshot\s+(delle\s+)?sezion|verifica\s+(a\s+)?video|issues\.md|guarda\s+il\s+sito|qa:shoot|shoot\.mjs",
+     "QA visiva (S6) -> `@agent-visual-qa-operator` (npm run qa:verify + qa:shoot, GUARDA gli screenshot vs storyboard/direction, scrive qa/issues.md; max 3 giri; non corregge codice)."),
 ]
 
 
@@ -94,7 +123,9 @@ def main() -> int:
         "3. Scroll progress in un ref (mai state); EASE tutto con MathUtils.damp prima di uniform/camera.\n"
         "4. Mobile first-class (dpr<=2, instancing, ampiezza/suddivisioni ridotte); accessibilita parte del 'done'.\n"
         "5. Niente browser storage nel layer canvas. Definition of done: vedi CLAUDE.md.\n"
-        "Dettaglio: CLAUDE.md (Orchestration) + skill `web3d-integration-patterns`.\n"
+        "6. Lavoro cliente = pipeline S0-S7: leggi PIPELINE_STATUS.md prima di agire; REGOLA D'ORO:\n"
+        "   consulta /registry (INDEX.md) prima di scrivere qualunque sezione da zero.\n"
+        "Dettaglio: CLAUDE.md (Orchestration + The factory) + skill `web3d-integration-patterns`.\n"
         "</agents-autostart>"
     )
     return 0

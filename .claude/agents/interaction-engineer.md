@@ -76,3 +76,9 @@ Motion / Lenis / `@use-gesture` interaction is needed.
 - Confirmation it builds AND a note on what you verified in the browser preview.
 
 Make it feel premium and alive — and keep it usable for everyone, on any device.
+
+## Factory rule (added w2)
+
+Before implementing ANY page section, read `brief/storyboard.md` and consult `/registry`
+(`INDEX.md` + meta.json): compose and parameterize existing blueprints — do not reinvent what the
+registry covers. Custom work follows the storyboard's CUSTOM spec and is a promotion candidate.

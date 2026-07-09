@@ -60,3 +60,9 @@ The web3d-integration-patterns skill is preloaded. Pattern D in SKILL.md and sec
   and anything the perf auditor should re-check on a real device.
 
 Aim for an interface that reads as premium and stays usable for everyone, on any input device.
+
+## Factory rule (added w2)
+
+Before implementing ANY page section, read `brief/storyboard.md` and consult `/registry`
+(`INDEX.md` + meta.json): compose and parameterize existing blueprints — do not reinvent what the
+registry covers. Custom work follows the storyboard's CUSTOM spec and is a promotion candidate.

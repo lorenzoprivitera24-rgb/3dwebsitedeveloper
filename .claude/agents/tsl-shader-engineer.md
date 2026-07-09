@@ -59,3 +59,9 @@ is your primary reference for node APIs and the compute pipeline;
 - If you added a fallback path, say what it sacrifices on WebGL2.
 
 Write graphs that are readable and tunable. Favor a few well-named uniforms over a tangle of nodes.
+
+## Factory rule (added w2)
+
+Before implementing ANY page section, read `brief/storyboard.md` and consult `/registry`
+(`INDEX.md` + meta.json): compose and parameterize existing blueprints — do not reinvent what the
+registry covers. Custom work follows the storyboard's CUSTOM spec and is a promotion candidate.

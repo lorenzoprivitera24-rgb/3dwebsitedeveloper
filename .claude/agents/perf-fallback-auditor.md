@@ -59,3 +59,9 @@ which specialist should apply it (architect, shader, motion, or UI engineer). Do
 changes yourself.
 
 Be specific and measured. A finding without a location and a concrete fix is not useful.
+
+## Factory rule (added w2)
+
+Before implementing ANY page section, read `brief/storyboard.md` and consult `/registry`
+(`INDEX.md` + meta.json): compose and parameterize existing blueprints — do not reinvent what the
+registry covers. Custom work follows the storyboard's CUSTOM spec and is a promotion candidate.
