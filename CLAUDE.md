@@ -79,6 +79,19 @@ Sub-agents cannot spawn sub-agents, so this main session is the orchestrator. De
 6. `@agent-perf-fallback-auditor`: read-only audit (draw calls, instancing, DPR, fallback,
    reduced-motion, accessibility); returns a prioritized report that the others apply.
 
+Engaged per brief, when their domain appears (July 2026 additions):
+
+7. `@agent-brand-alchemist`: the client's existing brand turned into animated 3D (SVG extrusion,
+   particle decomposition, fluid) + the brand motion system. Needs `brief/brand-kit.json`
+   (`node scripts/extract-brand.mjs`); cookbook in the `brand-to-3d` skill.
+8. `@agent-world-builder`: background depth and living ecosystems — depth planes, fog/atmosphere,
+   ambient particles/boids (TSL compute), tier-gated density. The world never steals focus.
+9. `@agent-gameplay-engineer`: gamification — playable physics (rapier, added per brief), easter
+   eggs, cursor-as-instrument, scroll progression. Every mechanic ships a non-game a11y path.
+10. `@agent-device-parity-director`: parity of impact mobile/desktop at DESIGN time (S2/S5):
+    `brief/parity-plan.md` (wow-moment map, input mapping hover→touch/gyro, per-breakpoint
+    budgets). Complements — does not replace — the S7 auditor.
+
 Chain them: e.g. "Use the tsl-shader-engineer to build the displacement material, then the
 scroll-motion-engineer to drive its uniforms from scroll and pointer." Run independent research
 in parallel where it helps, but keep edits serialized to avoid conflicts.
@@ -108,7 +121,15 @@ S7 perf-fallback-auditor          → qa/perf-report.md (G) → deploy
 
 **The golden rule: before writing any section from scratch, consult `/registry`** (INDEX.md).
 Compose and parameterize blueprints; write custom only for what the registry doesn't cover, then
-promote it. No stage starts without the previous stage's artifact.
+promote it (template: `registry/_template/`). No stage starts without the previous stage's artifact.
+
+**Three intake doors (S0)** — all converge on `brief/brief.md` + the human gate (see the
+`client-intake` skill): **S0a** prompt/questionnaire only (machine defaults marked `[DEFAULT]`);
+**S0b** reference image + prompt → `brief/reference-analysis.md` (direction constraints, never
+assets to copy); **S0c** existing site to redo + prompt → `node scripts/site-autopsy.mjs <url>` →
+`brief/legacy-audit.md` + `legacy-tokens.json`, plus `node scripts/extract-brand.mjs <logo>` →
+`brief/brand-kit.json` when a logo exists. **Taste**: the creative-director consults the
+`taste-lug-2026` skill at S1 and visual-qa uses it at S6 — refreshed quarterly via recon.
 
 Factory commands: `npm run tokens:build` (direction.md → tokens.css + tokens.generated.ts) ·
 `npm run assets:encode` · `npm run qa:verify` (single-shot: real backend + console + screenshot) ·

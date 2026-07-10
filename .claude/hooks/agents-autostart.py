@@ -78,6 +78,27 @@ CATEGORIES = [
     ("visual-qa",
      r"\bqa\b|screenshot\s+(delle\s+)?sezion|verifica\s+(a\s+)?video|issues\.md|guarda\s+il\s+sito|qa:shoot|shoot\.mjs",
      "QA visiva (S6) -> `@agent-visual-qa-operator` (npm run qa:verify + qa:shoot, GUARDA gli screenshot vs storyboard/direction, scrive qa/issues.md; max 3 giri; non corregge codice)."),
+
+    # ---- specialisti per-brief (aggiunte lug 2026) ----
+    ("brand",
+     r"\blogo\b|\bmarchio\b|\bbrand\b.*(3d|anima|scompon|motion)|anima\s+il\s+(logo|marchio)|"
+     r"logo\s+(3d|in\s+particelle|fluido)|scompon.*(logo|marchio|brand)|estrusion|brand\s+motion|brand[-\s]?kit",
+     "Brand/logo esistente -> 3D animato -> `@agent-brand-alchemist` (prima `node scripts/extract-brand.mjs <logo>` -> brief/brand-kit.json; cookbook skill `brand-to-3d`; a riposo il logo resta IL logo)."),
+
+    ("world",
+     r"sfondo\s+(vivo|animato|profond)|profondit|ecosistem|atmosfer|mondo\s+(che\s+respira|vivo)|"
+     r"particell.*(ambient|sfondo)|\bboids?\b|\bflock|nebbia|\bfog\b|god\s*rays|volumetric|un\s+luogo",
+     "Profondita/ecosistemi/atmosfera -> `@agent-world-builder` (piani+fog, particelle/boids TSL compute con densita per tier, god rays per tier; il mondo non ruba mai il focus ai contenuti)."),
+
+    ("gameplay",
+     r"gamific|gioc(o|abile|are)|easter\s*egg|esplorabil|mini[-\s]?gioco|\bfisica\b|\brapier\b|"
+     r"trascina|lancia\s+(gli\s+)?oggett|premia\s+chi\s+esplora|konami",
+     "Gamification -> `@agent-gameplay-engineer` (rapier per-brief, easter egg, cursor-game, progressione; OGNI meccanica ha il percorso non-gioco accessibile e non blocca mai contenuti/CTA)."),
+
+    ("parity",
+     r"\bmobile\b|telefon|smartphone|\btouch\b|\btablet\b|parit|stesso\s+impatto|tutti\s+i\s+dispositiv|"
+     r"versione\s+mobile|\bgyro|responsive\s+3d",
+     "Parita di impatto mobile/desktop -> `@agent-device-parity-director` (brief/parity-plan.md a S2/S5: mappa wow-moment, input mapping hover->touch/gyro, budget per breakpoint; l'auditor S7 resta il gate)."),
 ]
 
 

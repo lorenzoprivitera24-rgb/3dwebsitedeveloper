@@ -1,0 +1,10 @@
+{
+  "id": "NN-nome-blueprint",
+  "descrizione": "Una riga: cosa fa la sezione e qual è il suo momento-firma",
+  "trigger": ["parole", "che il librarian", "matcha dallo storyboard"],
+  "props": { "copy": "tipo/slot", "reduced": "bool", "altroParametro": "tipo, default, note" },
+  "slotCopy": ["eyebrow", "headline"],
+  "perfTier": "A|B|C — A=solo DOM, B=canvas leggero, C=tocca la scena persistente",
+  "mobileFallback": "cosa cambia sotto 768px e nel percorso reduced-motion",
+  "dipendenze": ["pacchetti o moduli src/ condivisi (progressMap, CameraDirector, …)"]
+}

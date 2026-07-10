@@ -1,11 +1,13 @@
 ---
 name: client-intake
 description: >
-  Il questionario S0 e come compilarne brief/brief.md: le domande giuste al cliente (obiettivo,
-  3+1 riferimenti, asset, vincoli), cosa NON chiedere, e il gate di completezza che apre la
-  pipeline. Usare a ogni nuovo progetto sito / nuova richiesta cliente, PRIMA di qualunque
-  proposta creativa o tecnica. Trigger: "nuovo cliente", "nuovo sito", "brief", "cosa chiedo al
-  cliente", "preventivo sito".
+  Il questionario S0 e come compilarne brief/brief.md, nelle TRE porte d'ingresso della fabbrica:
+  S0a solo prompt/questionario (obiettivo, 3+1 riferimenti, asset, vincoli), S0b immagine di
+  riferimento + prompt (estrazione di direzione da screenshot/moodboard), S0c sito esistente da
+  rifare + prompt (autopsia con scripts/site-autopsy.mjs). Cosa NON chiedere, e il gate di
+  completezza che apre la pipeline. Usare a ogni nuovo progetto sito / nuova richiesta cliente,
+  PRIMA di qualunque proposta creativa o tecnica. Trigger: "nuovo cliente", "nuovo sito",
+  "brief", "rifai questo sito", "parti da questa immagine", "preventivo sito".
 ---
 
 # Client intake (S0) — le domande che salvano la pipeline
@@ -13,6 +15,39 @@ description: >
 Output: `brief/brief.md` dal template `brief/_templates/brief.template.md`. Il gate S0 è umano:
 il brief lo conferma il cliente (o Lorenzo per lui). Finché il brief non è completo, S1 non parte
 — un brief vago costa 3 giri di QA dopo.
+
+## Le tre porte d'ingresso
+
+L'input di un progetto arriva in una di tre forme. Tutte convergono su `brief/brief.md` e sul
+gate umano; cambiano solo gli artefatti di supporto che S1 riceve come vincoli.
+
+### S0a — Solo prompt (o call classica)
+
+Il flusso base qui sotto. Se non c'è un cliente in call e il progetto nasce da un prompt di
+Lorenzo, compila comunque TUTTO il brief: dove il prompt non risponde, scegli un default sensato
+e marcalo **`[DEFAULT]`** nel brief — il gate umano deve vedere cosa ha deciso la macchina, non
+scoprirlo in S6.
+
+### S0b — Immagine/screenshot + prompt
+
+L'immagine è un riferimento di direzione, NON il sito da copiare. Analizzala (visione diretta) e
+compila `brief/reference-analysis.md` dal template `brief/_templates/reference-analysis.template.md`:
+palette percepita con ruoli, coppia tipografica implicita, griglia/layout, mood e motion implicito
+(cosa si muoverebbe), materiali/profondità 3D suggeriti, e — fondamentale — **cosa NON prendere**
+dal riferimento. Poi il brief si compila come in S0a; `reference-analysis.md` va a S1 come
+vincolo dichiarato. Diritti: il riferimento ispira token e regia, mai asset copiati (regola del
+creative-director).
+
+### S0c — Sito esistente da rifare + prompt
+
+Esegui **`node scripts/site-autopsy.mjs <url>`** → `brief/legacy-audit.md` +
+`brief/legacy-tokens.json`: contenuti e informazione architettura riusabili, token estratti dai
+computed styles reali, asset brand (logo!), stack rilevato, verdetto Tieni/Butta/Reinventa
+(proposta per il gate umano). Se c'è un logo → subito anche
+**`node scripts/extract-brand.mjs <logo>`** → `brief/brand-kit.json` (per S1 e per l'agente
+brand-alchemist). Nel brief, la sezione asset si compila dall'autopsia; al cliente si chiede solo
+cosa CONFERMA di voler tenere (contenuti, tono) e cosa lo ha spinto a rifare il sito (il "perché
+adesso" è la direzione).
 
 ## Come si conduce (call o form, 20 minuti)
 
