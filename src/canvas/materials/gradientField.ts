@@ -22,8 +22,11 @@ export function makeGradientFieldMaterial() {
     const n1 = mx_noise_float(vec3(p, time.mul(uFlow)))
     const n2 = mx_noise_float(vec3(p.mul(2.0), time.mul(uFlow).add(7.0)))
     // .rgb porta i nodi 'color' a 'vec3' (vec3(colorNode) rompe i generics dei types r184)
-    const base = mix(colorA.rgb, colorB.rgb, n1.mul(0.5).add(0.5))
-    return mix(base, colorC.rgb, n2.mul(0.25).add(0.25))
+    // Dominante SCURA con vene di colore (QA giri 1-2): mx_noise vive in un range stretto
+    // attorno a 0, quindi la MEDIA del mix decide tutto — 0.22 tiene la notte della
+    // direction, il clamp evita l'estrapolazione di mix() sotto 0.
+    const base = mix(colorA.rgb, colorB.rgb, n1.mul(0.45).add(0.22).clamp(0, 1))
+    return mix(base, colorC.rgb, n2.mul(0.35).add(0.06).clamp(0, 1))
   })()
 
   material.opacityNode = uMix
