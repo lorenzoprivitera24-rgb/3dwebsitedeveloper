@@ -11,11 +11,14 @@ import { Hero3dSplit } from '../registry/02-hero-3d-split/Hero3dSplit'
 import { MeshGradientField } from '../registry/03-mesh-gradient-field/MeshGradientField'
 import { PinnedSceneScrub } from '../registry/05-pinned-scene-scrub/PinnedSceneScrub'
 import { KineticType } from '../registry/06-kinetic-type/KineticType'
+import { PointerRig3d } from '../registry/04-pointer-rig-3d/PointerRig3d'
+import { RigSatellite } from '../registry/04-pointer-rig-3d/RigSatellite'
 // Copy: S3, uno slot-file per sezione (content/README.md)
 import heroCopy from '../content/01-hero.json'
 import gradientCopy from '../content/03-gradient.json'
 import scrubCopy from '../content/05-scrub.json'
 import kineticCopy from '../content/06-kinetic.json'
+import pointerCopy from '../content/04-pointer.json'
 import outroCopy from '../content/07-outro.json'
 
 export default function App() {
@@ -37,6 +40,8 @@ export default function App() {
               amplitude={amplitude}
               flowScale={tier === 'low' ? 0.5 : 1}
             />
+            {/* blueprint 04: satellite pointer-rig — proprio useFrame, mai la camera */}
+            <RigSatellite reduced={reduced} />
           </Stage>
         ) : (
           <Poster />
@@ -50,6 +55,7 @@ export default function App() {
         <MeshGradientField copy={gradientCopy} reduced={reduced} />
         <PinnedSceneScrub copy={scrubCopy} reduced={reduced} />
         <KineticType copy={kineticCopy} reduced={reduced} />
+        <PointerRig3d copy={pointerCopy} reduced={reduced} />
 
         <section id="outro" className="outro">
           <div className="outro__inner">

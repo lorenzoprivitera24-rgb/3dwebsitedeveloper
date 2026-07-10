@@ -1,6 +1,6 @@
 # Registro — indice dei blueprint
 
-Stato: **5/12 implementati** (01·02·03·05·06, lug 2026 — composti nella demo del kit, vedi
+Stato: **6/12 implementati** (01·02·03·04·05·06, lug 2026 — composti nella demo del kit, vedi
 `brief/composition-plan.md`). Backlog extra dalla ricognizione lug 2026 in coda.
 
 | # | id | Copre | Stato |
@@ -8,7 +8,7 @@ Stato: **5/12 implementati** (01·02·03·05·06, lug 2026 — composti nella de
 | 01 | `preloader-progress` | caricamento asset reale, counter, sipario | ✅ implementato |
 | 02 | `hero-3d-split` | split editoriale + GLB prodotto | ✅ implementato |
 | 03 | `mesh-gradient-field` | gradient TSL animato full screen | ✅ implementato |
-| 04 | `pointer-rig-3d` | oggetto che segue il puntatore | pianificato |
+| 04 | `pointer-rig-3d` | oggetto che segue il puntatore | ✅ implementato |
 | 05 | `pinned-scene-scrub` | sezione pinnata, scena che si trasforma | ✅ implementato |
 | 06 | `kinetic-type` | SplitText, display gigante | ✅ implementato |
 | 07 | `editorial-gallery` | griglia magazine + parallax + reveal | pianificato |

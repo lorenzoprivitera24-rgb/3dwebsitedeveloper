@@ -273,6 +273,30 @@ body {
   display: block;
 }
 
+/* ============ 04 pointer-rig-3d ============ */
+
+.bp-pointer {
+  height: 160vh;
+  position: relative;
+}
+.bp-pointer__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  align-items: center;
+  justify-items: start;
+  padding: 0 6vw;
+}
+@media (max-width: 767px) {
+  .bp-pointer__sticky {
+    align-items: end;
+    justify-items: center;
+    padding-bottom: 12vh;
+    text-align: center;
+  }
+}
+
 /* ============ outro (custom, non da registro) ============ */
 
 .outro {
