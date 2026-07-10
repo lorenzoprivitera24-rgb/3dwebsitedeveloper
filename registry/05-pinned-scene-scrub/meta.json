@@ -1,0 +1,10 @@
+{
+  "id": "05-pinned-scene-scrub",
+  "descrizione": "Sezione pinnata con timeline scrubbed: la scena persistente si trasforma (morph+orbita camera) mentre l'utente scrolla; caption a soglie di progress",
+  "trigger": ["scroll to continue", "trasformazione", "morph", "pin", "la scena cambia scrollando"],
+  "props": { "copy": "ScrubCopy (eyebrow/steps[])", "reduced": "bool", "pinVh": "durata pin desktop (default 250, mobile 180)" },
+  "slotCopy": ["eyebrow", "steps"],
+  "perfTier": "C",
+  "mobileFallback": "pin ridotto a 180vh; reduced-motion = nessun pin, colonna statica",
+  "dipendenze": ["gsap/ScrollTrigger (pin+scrub+matchMedia)", "src/scroll/progressMap", "capitolo camera 'scrub' nel CameraDirector"]
+}

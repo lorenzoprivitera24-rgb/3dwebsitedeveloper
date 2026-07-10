@@ -1,16 +1,16 @@
 # Registro — indice dei blueprint
 
-Stato: **0/12 implementati** (i primi 5 sono il target della Settimana 3). Backlog extra dalla
-ricognizione lug 2026 in coda.
+Stato: **5/12 implementati** (01·02·03·05·06, lug 2026 — composti nella demo del kit, vedi
+`brief/composition-plan.md`). Backlog extra dalla ricognizione lug 2026 in coda.
 
 | # | id | Copre | Stato |
 |---|---|---|---|
-| 01 | `preloader-progress` | caricamento asset reale, counter, sipario | pianificato (S3) |
-| 02 | `hero-3d-split` | split editoriale + GLB prodotto | pianificato (S3) |
-| 03 | `mesh-gradient-field` | gradient TSL animato full screen | pianificato (S3) |
+| 01 | `preloader-progress` | caricamento asset reale, counter, sipario | ✅ implementato |
+| 02 | `hero-3d-split` | split editoriale + GLB prodotto | ✅ implementato |
+| 03 | `mesh-gradient-field` | gradient TSL animato full screen | ✅ implementato |
 | 04 | `pointer-rig-3d` | oggetto che segue il puntatore | pianificato |
-| 05 | `pinned-scene-scrub` | sezione pinnata, scena che si trasforma | pianificato (S3) |
-| 06 | `kinetic-type` | SplitText, display gigante | pianificato (S3) |
+| 05 | `pinned-scene-scrub` | sezione pinnata, scena che si trasforma | ✅ implementato |
+| 06 | `kinetic-type` | SplitText, display gigante | ✅ implementato |
 | 07 | `editorial-gallery` | griglia magazine + parallax + reveal | pianificato |
 | 08 | `spec-sheet-latex` | KaTeX + footnote | pianificato |
 | 09 | `interaction-card` | decode/scramble, flip, magnetic | pianificato |

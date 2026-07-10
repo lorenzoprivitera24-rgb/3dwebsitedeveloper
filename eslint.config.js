@@ -11,7 +11,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['src/**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}', 'registry/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks, '@react-three': r3f },
     rules: {
       'react-hooks/rules-of-hooks': 'error',

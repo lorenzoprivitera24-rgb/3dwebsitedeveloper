@@ -1,0 +1,10 @@
+{
+  "id": "06-kinetic-type",
+  "descrizione": "Display type gigante rivelato a maschera per riga (SplitText 2025: mask+autoSplit), entrata toggle reversibile; la scena si calma dietro il testo",
+  "trigger": ["tipografia cinetica", "testo gigante", "reveal testo", "statement", "display type"],
+  "props": { "copy": "KineticCopy (eyebrow/lines[])", "reduced": "bool" },
+  "slotCopy": ["eyebrow", "lines"],
+  "perfTier": "A",
+  "mobileFallback": "identico (clamp fluido); reduced = testo visibile senza reveal",
+  "dipendenze": ["gsap/SplitText (gratuito da 3.13)", "gsap/ScrollTrigger", "src/scroll/useSectionProgress"]
+}

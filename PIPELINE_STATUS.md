@@ -4,8 +4,9 @@
 > "done" dello stadio. Le regole e i comandi della fabbrica sono in `CLAUDE.md` § The factory.
 
 - **Progetto**: demo starter interno («Form in Motion»)
-- **Stadio corrente**: fabbrica operativa — **in attesa di S0** (nessun brief cliente attivo)
-- **Ultimo aggiornamento**: 2026-07-09 (branch `w2-factory`)
+- **Stadio corrente**: **S6/S7 sulla demo interna** — 5 blueprint composti (S2 storyboard ✓,
+  S3 content ✓, S5 composizione ✓ da `brief/composition-plan.md`); nessun brief CLIENTE attivo
+- **Ultimo aggiornamento**: 2026-07-10 (branch `w34-blueprints`)
 
 | Stadio | Owner | Artefatto | Stato | Gate |
 |---|---|---|---|---|

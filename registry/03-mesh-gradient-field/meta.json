@@ -1,0 +1,10 @@
+{
+  "id": "03-mesh-gradient-field",
+  "descrizione": "Mesh gradient TSL animato full screen (3 colori dai token, rumore MaterialX, pointer-aware) dentro la scena persistente + pannello copy sticky",
+  "trigger": ["gradient", "sfondo animato", "campo di colore", "powered by", "mesh gradient"],
+  "props": { "copy": "GradientCopy (eyebrow/headline/sub)", "reduced": "bool" },
+  "slotCopy": ["eyebrow", "headline", "sub"],
+  "perfTier": "B",
+  "mobileFallback": "identico; flow dimezzato su tier low, fermo su reduced",
+  "dipendenze": ["src/canvas/GradientBackdrop (nella scena)", "src/canvas/materials/gradientField", "src/scroll/useSectionProgress", "tokens (gradient.a/b/c/flow)"]
+}

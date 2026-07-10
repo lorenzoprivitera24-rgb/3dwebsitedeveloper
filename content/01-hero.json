@@ -1,0 +1,7 @@
+{
+  "section": "hero",
+  "eyebrow": "WEBGPU / TSL / R3F V9",
+  "headline": "Form in Motion",
+  "sub": "Scroll, or move your cursor across the shape. On a phone, drag your finger.",
+  "cta": { "label": "Keep scrolling", "href": "#gradient" }
+}

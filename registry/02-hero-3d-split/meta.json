@@ -1,0 +1,10 @@
+{
+  "id": "02-hero-3d-split",
+  "descrizione": "Hero split editoriale sopra la scena persistente: copy a sinistra, oggetto hero 3D a destra via posa camera del capitolo; entrate one-shot, fade-out scrubbato",
+  "trigger": ["hero", "apertura", "split editoriale", "prodotto in hero", "landing"],
+  "props": { "copy": "HeroCopy (eyebrow/headline/sub/cta)", "reduced": "bool" },
+  "slotCopy": ["eyebrow", "headline", "sub", "cta"],
+  "perfTier": "B",
+  "mobileFallback": "split → stack centrato (CSS), stessa scena",
+  "dipendenze": ["motion/react", "gsap/ScrollTrigger", "src/scroll/useSectionProgress", "capitolo camera 'hero' nel CameraDirector"]
+}

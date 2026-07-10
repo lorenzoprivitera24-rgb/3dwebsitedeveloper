@@ -1,0 +1,10 @@
+{
+  "id": "01-preloader-progress",
+  "descrizione": "Preloader con progresso reale degli asset (useProgress/LoadingManager), counter, sipario GSAP; blocca Lenis finché carica; failsafe 4s",
+  "trigger": ["preloader", "loading", "caricamento", "counter", "sipario"],
+  "props": { "minShowMs": "numero, anti-flash su cache", "reduced": "bool" },
+  "slotCopy": [],
+  "perfTier": "A",
+  "mobileFallback": "identico (solo DOM)",
+  "dipendenze": ["@react-three/drei useProgress", "lenis/react", "gsap"]
+}

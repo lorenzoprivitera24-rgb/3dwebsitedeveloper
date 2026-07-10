@@ -1,0 +1,6 @@
+{
+  "section": "outro",
+  "headline": "Built to extend",
+  "body": "One render loop, one owner per property, WebGPU with a WebGL2 fallback, a no-WebGL poster, reduced-motion support, and a documented uniform contract. The shader, motion, UI, and audit agents build on top from here.",
+  "footnote": "Demo composed from registry blueprints 01 · 02 · 03 · 05 · 06 — factory pipeline, stage S5."
+}

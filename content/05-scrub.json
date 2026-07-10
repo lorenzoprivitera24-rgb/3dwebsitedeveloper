@@ -1,0 +1,9 @@
+{
+  "section": "scrub",
+  "eyebrow": "SCROLLTRIGGER / PIN 250VH",
+  "steps": [
+    "The form opens as you scrub.",
+    "The camera orbits. One owner, damped.",
+    "Peak displacement. Release to settle."
+  ]
+}

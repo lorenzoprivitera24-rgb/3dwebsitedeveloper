@@ -1,4 +1,6 @@
 :root {
+  /* fallback — i valori veri arrivano da src/styles/tokens.css (generato da direction.md,
+     importato DOPO questo file: stesso selettore, vince lui) */
   --bg: #07090d;
   --bg-2: #0b0e14;
   --fg: #eef1f7;
@@ -6,6 +8,7 @@
   --accent: #5b8cff;
   --display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --body: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'Fragment Mono', ui-monospace, 'SF Mono', monospace;
 }
 
 /* --- Lenis base rules (so wrapping/anchors/stop behave) --- */
@@ -57,61 +60,18 @@ body {
   z-index: 1;
 }
 
-/* the tall track that gives the scroll-driven morph its length */
-.scene-track {
-  height: 320vh;
-  position: relative;
-}
+/* ============ pezzi condivisi dei blueprint ============ */
 
-/* hero is pinned in the middle of the track while the form morphs */
-.hero {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 0 6vw;
-  /* a scrim so text stays readable over a bright/moving 3D background */
-  background: radial-gradient(
-    80% 60% at 50% 50%,
-    transparent 0%,
-    rgba(7, 9, 13, 0.35) 70%,
-    rgba(7, 9, 13, 0.7) 100%
-  );
-}
-
-.hero__inner {
-  max-width: 46rem;
-  text-align: center;
-}
-
-.hero__eyebrow {
+.bp-eyebrow {
   margin: 0 0 1.25rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.32em;
+  font-family: var(--mono);
+  font-size: var(--size-eyebrow, 0.78rem);
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
-.hero__title {
-  margin: 0;
-  font-family: var(--display);
-  font-weight: 360;
-  font-size: clamp(3rem, 11vw, 8.5rem);
-  line-height: 0.96;
-  letter-spacing: -0.01em;
-  font-optical-sizing: auto;
-}
-
-.hero__sub {
-  margin: 1.5rem auto 0;
-  max-width: 34rem;
-  font-size: clamp(1rem, 2.4vw, 1.2rem);
-  line-height: 1.5;
-  color: var(--muted);
-}
-
-.hero__cta {
+.bp-cta {
   display: inline-block;
   margin-top: 2.5rem;
   padding: 0.85rem 1.6rem;
@@ -123,18 +83,208 @@ body {
   letter-spacing: 0.02em;
   transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
 }
-.hero__cta:hover {
+.bp-cta:hover {
   border-color: var(--accent);
-  background: rgba(91, 140, 255, 0.1);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
-/* outro: plain readable content after the morph */
+/* ============ 01 preloader-progress ============ */
+
+.bp-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: var(--bg);
+}
+.bp-preloader__counter {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 360;
+  font-size: clamp(3rem, 10vw, 7rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.bp-preloader__counter span {
+  font-size: 0.35em;
+  color: var(--muted);
+  margin-left: 0.1em;
+}
+
+/* ============ 02 hero-3d-split ============ */
+
+.bp-hero {
+  height: 140vh;
+  position: relative;
+}
+.bp-hero__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  align-items: center;
+  padding: 0 6vw;
+}
+.bp-hero__copy {
+  position: relative;
+  max-width: 40rem;
+}
+/* scrim locale: il copy resta leggibile dove attraversa il bordo luminoso della forma
+   (fix by-design dell'issue QA del giro precedente) */
+.bp-hero__copy::before {
+  content: '';
+  position: absolute;
+  inset: -3rem -4rem;
+  z-index: -1;
+  background: radial-gradient(60% 60% at 40% 50%, rgba(7, 9, 13, 0.55), transparent 75%);
+}
+.bp-hero__title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 360;
+  font-size: var(--size-display, clamp(3rem, 11vw, 8.5rem));
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  font-optical-sizing: auto;
+}
+.bp-hero__sub {
+  margin: 1.5rem 0 0;
+  max-width: 34rem;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  line-height: 1.5;
+  color: var(--muted);
+}
+@media (max-width: 767px) {
+  .bp-hero__sticky {
+    justify-items: center;
+    text-align: center;
+  }
+  .bp-hero__copy {
+    margin: 0 auto;
+  }
+}
+
+/* ============ 03 mesh-gradient-field ============ */
+
+.bp-gradient {
+  height: 170vh;
+  position: relative;
+}
+.bp-gradient__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  align-items: center;
+  justify-items: end;
+  padding: 0 6vw;
+}
+.bp-panel {
+  max-width: 34rem;
+  padding: 2rem 2.2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(238, 241, 247, 0.08);
+  background: rgba(7, 9, 13, 0.35);
+  backdrop-filter: blur(6px);
+}
+.bp-h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 380;
+  font-size: clamp(2.2rem, 6vw, 4.4rem);
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.bp-sub {
+  margin: 1.2rem 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+@media (max-width: 767px) {
+  .bp-gradient__sticky {
+    justify-items: center;
+  }
+}
+
+/* ============ 05 pinned-scene-scrub ============ */
+
+.bp-scrub {
+  height: 100vh;
+  position: relative;
+  display: grid;
+  align-items: end;
+  padding: 0 6vw 12vh;
+}
+.bp-scrub__steps {
+  position: relative;
+  min-height: 6.5rem;
+  max-width: 40rem;
+}
+.bp-scrub__step {
+  position: absolute;
+  inset: auto auto 0 0;
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  line-height: 1.15;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.bp-scrub__step.is-active {
+  opacity: 1;
+  transform: none;
+}
+/* reduced-motion: niente pin, colonna statica */
+.bp-scrub--static {
+  height: auto;
+  min-height: 60vh;
+  align-items: center;
+  padding: 16vh 6vw;
+}
+.bp-scrub--static .bp-scrub__step {
+  position: static;
+  opacity: 1;
+  transform: none;
+  margin-bottom: 1rem;
+}
+
+/* ============ 06 kinetic-type ============ */
+
+.bp-kinetic {
+  min-height: 130vh;
+  display: grid;
+  place-content: center;
+  padding: 20vh 6vw;
+}
+.bp-kinetic__title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 390;
+  font-size: clamp(3rem, 12vw, 10rem);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  visibility: hidden; /* anti-FOUC: la mostra onSplit (o il path reduced) */
+}
+.bp-kinetic__line {
+  display: block;
+}
+
+/* ============ outro (custom, non da registro) ============ */
+
 .outro {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 12vh 6vw;
   background: var(--bg);
+}
+.outro__inner {
+  max-width: 46rem;
+  text-align: center;
 }
 .outro__title {
   font-family: var(--display);
@@ -143,11 +293,16 @@ body {
   margin: 0 0 1.25rem;
 }
 .outro__body {
-  max-width: 42rem;
   font-size: clamp(1rem, 2.2vw, 1.15rem);
   line-height: 1.65;
   color: var(--muted);
-  text-align: center;
+}
+.outro__footnote {
+  margin-top: 2rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 
 /* no-WebGL poster */
@@ -162,6 +317,7 @@ body {
 }
 .poster__eyebrow {
   color: var(--accent);
+  font-family: var(--mono);
   letter-spacing: 0.28em;
   text-transform: uppercase;
   font-size: 0.78rem;
@@ -187,7 +343,7 @@ body {
 }
 
 /* belt-and-braces: also calm CSS transitions when reduced motion is requested
-   (the JS path already calms the 3D and the parallax) */
+   (the JS path already calms the 3D and the entrances) */
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;
