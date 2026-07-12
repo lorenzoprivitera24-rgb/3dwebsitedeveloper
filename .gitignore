@@ -9,5 +9,11 @@ dist/
 .env
 .env.*
 
+# Worktree degli agenti (mai committare)
+.claude/worktrees/
+
+# Artefatti QA one-shot
+verify-preview.png
+
 # Sistema
 .DS_Store

@@ -116,12 +116,27 @@ Factory commands: `npm run tokens:build` (direction.md → tokens.css + tokens.g
 Verification runs on playwright-core + the cached Chrome for Testing — NOT the user's Chrome
 (it cannot reach local servers on this machine) and NOT the preview MCP from a worktree.
 
+### The recon corpus (lug 2026) — where this architecture comes from
+
+The factory (registry, stages, visual-QA loop, perf gate) descends from a reverse-engineering
+pass on the genre leaders — framer.com, threejs.paris, poch.studio, ylem.watch (8–9 lug 2026).
+That corpus is tracked in-repo and is the project's strategic memory:
+`docs/dossier-reverse-engineering-web3d.md` (how Framer/Webflow/Relume/v0 produce on demand) ·
+`docs/playbook-web3d-kit-claude-code.md` (the changes it prescribed) ·
+`docs/gap-analysis-2026-07-09.md` (20-variable have/gap map + the agreed sequence) ·
+`docs/deep-dive-stack-e-librerie-asset.md` · `recon/` reports + `scripts/recon-fingerprint.mjs`
+(re-runnable). Consult it before changing the stack; re-run the fingerprint when evaluating a
+new library or a genre shift.
+
 ### Tips
 
 - Let agents accumulate knowledge: `r3f-scene-architect` and (optionally) others use project
   memory under `.claude/agent-memory/`. Ask them to consult and update it.
 - For heavy isolated work on a branch, an agent can run with `isolation: worktree`.
 - `ARCHITECTURE.md` is the shared source of truth for the component contract. Keep it current.
+- **This repo is canonical for the shared kit**: the global copies of the 6 specialist agents and
+  of the `web3d-integration-patterns` skill in `~/.claude/` are regenerated with
+  `npm run sync:global` — never edit the global copies by hand.
 
 ## Definition of done
 

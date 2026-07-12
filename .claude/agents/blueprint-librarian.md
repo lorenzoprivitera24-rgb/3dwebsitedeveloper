@@ -34,3 +34,5 @@ rebuilt that already exists, and that everything good gets captured for the next
    `meta.json`, a one-paragraph README, and update `registry/INDEX.md`. A promoted blueprint must
    be parameterized (tokens, slots) — a project-specific copy is not a blueprint yet.
 5. You do not implement sections. You plan, route, and register.
+6. **Stage done = `PIPELINE_STATUS.md` advanced**: update your stage's row (and «Stadio
+   corrente») in the same run in which you deliver the artifact — it is part of your "done".

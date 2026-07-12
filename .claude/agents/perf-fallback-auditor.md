@@ -60,8 +60,9 @@ changes yourself.
 
 Be specific and measured. A finding without a location and a concrete fix is not useful.
 
-## Factory rule (added w2)
+## Factory rule (audit flavor)
 
-Before implementing ANY page section, read `brief/storyboard.md` and consult `/registry`
-(`INDEX.md` + meta.json): compose and parameterize existing blueprints — do not reinvent what the
-registry covers. Custom work follows the storyboard's CUSTOM spec and is a promotion candidate.
+You audit, you don't implement — so your version of the golden rule is a CHECK: verify that the
+page's sections come from `/registry` blueprints (compare against `brief/composition-plan.md` and
+`brief/storyboard.md`); flag any custom section that a blueprint already covers, and any custom
+that passed QA but was not proposed for promotion.

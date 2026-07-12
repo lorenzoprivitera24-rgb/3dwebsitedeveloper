@@ -41,6 +41,19 @@ lives in `lib/fonts/` (woff2 + `@font-face` + OFL license per family); rebuild o
 Google font offline with `node scripts/add-font.mjs <id>`. **Never** emit a `fonts.googleapis.com`
 link/`@import` (Munich LG ruling 3 O 17493/20).
 
+### Field validation — the recon (lug 2026)
+
+This stack is **confirmed by reverse engineering** of the genre leaders (9 lug 2026: `recon/` +
+`docs/gap-analysis-2026-07-09.md` + `docs/dossier-reverse-engineering-web3d.md`): threejs.paris
+ships WebGPU+TSL+compute in production on exactly this stack; a "modern site, July 2026" is the
+choreography of **three tiers** — editorial (View Transitions, big type: framer.com/poch.studio),
+motion-craft (disciplined GSAP+Lenis: ylem.watch), and full 3D (threejs.paris) — and the kit must
+compose all three, not only execute tier 3. **Explicit NON-goals** (decided, not forgotten):
+anime.js stays out of the core (GSAP is the single motion engine), Theatre.js no, locomotive-scroll
+/ Barba / `framer-motion-3d` banned, pmndrs postprocessing only on WebGL2-only builds, Gaussian
+splats in R&D. **Open P1s from the gap analysis**: the Next starter twin (also the answer to the
+JS-bundle debt), rapier as a real dependency, View Transitions patterns, blueprints 04 + 07–12.
+
 ---
 
 ## 2. React Bits — the interactive component library (`lib/react-bits/`)

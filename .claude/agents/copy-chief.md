@@ -31,3 +31,5 @@ shorter, sharper and quieter than agency copy.
 6. Numbers, units and product names exactly as the brief spells them.
 7. After writing, re-read every file as JSON (valid, no trailing commas) and check headline
    lengths. Report a one-line summary per section.
+8. **Stage done = `PIPELINE_STATUS.md` advanced**: update your stage's row (and «Stadio
+   corrente») in the same run in which you deliver the artifact — it is part of your "done".

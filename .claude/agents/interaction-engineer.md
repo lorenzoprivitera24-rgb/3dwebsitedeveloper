@@ -37,7 +37,8 @@ Motion / Lenis / `@use-gesture` interaction is needed.
   (51 MIT components — WebGL backgrounds, magnetic UI, kinetic text; DOM layer, assumes Tailwind v4),
   `lib/patterns/CATALOG.md` (87 Hero Patterns SVG **CC BY 4.0** + pattern.css — section backdrops),
   `lib/fonts/FONTS.md` (30 self-hosted fonts + `scripts/add-font.mjs`; never the Google CDN — GDPR),
-  `lib/illustrations/CATALOG.md` (744 DiceBear SVG + Humaaans; CC-BY sets → `ATTRIBUTION.md`).
+  `lib/illustrations/CATALOG.md` (~2.960 SVG: unDraw 1362 + DiceBear 1488 + Open Doodles 33 +
+  Humaaans; CC-BY sets + Humaaans → `ATTRIBUTION.md`, unDraw no-repack/no-AI).
 - `ARCHITECTURE.md` — the host's scroll/loop/contract so your additions don't fight it.
 
 ## When invoked

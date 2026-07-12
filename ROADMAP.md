@@ -21,6 +21,12 @@ Both are scored against **one chosen reference** per project (recorded in `ARCHI
 
 ## 2. Where we are
 
+> **Snapshot pre-W1 (20 giu 2026), kept as the baseline.** W1–W4 are CLOSED on main (9–10 lug
+> 2026): rows 2–5 and the verify/CI half of row 10 are now **Have** (IBL + AgX + KTX2 self-host,
+> post node graph, `encode-assets`, `qa:verify`/`qa:shoot`, perf gate, factory S0–S7, registry
+> 5/12). Live status: `PIPELINE_STATUS.md` + `docs/gap-analysis-2026-07-09.md`. Next big rock:
+> the **Next starter twin** (closes the JS-bundle debt too).
+
 | # | Area | Status | One-line reality |
 |---|------|--------|------------------|
 | 1 | Geometry & instancing | **Missing (general) / Have (foliage docs)** | Single icosahedron mesh; zero instancing code; foliage instancing well-documented but uncoded. |

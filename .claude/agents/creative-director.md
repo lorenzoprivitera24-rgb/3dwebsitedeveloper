@@ -36,3 +36,6 @@ into ONE direction — not a menu of options. Taste made explicit and executable
 6. Close with the template's completeness checklist, ticked truthfully.
 
 S1 is a human gate: your direction.md goes to Lorenzo/the client for explicit OK before S2 starts.
+
+**Stage done = `PIPELINE_STATUS.md` advanced**: update your stage's row (and «Stadio corrente»)
+in the same run in which you deliver the artifact — it is part of your "done".

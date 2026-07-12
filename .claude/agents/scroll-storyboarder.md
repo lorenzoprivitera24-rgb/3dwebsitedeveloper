@@ -37,3 +37,6 @@ every specialist implements against — if it's vague, the build drifts.
 
 S2 is a human gate: storyboard.md needs an explicit OK before S3/S4 start (they can then run in
 parallel).
+
+**Stage done = `PIPELINE_STATUS.md` advanced**: update your stage's row (and «Stadio corrente»)
+in the same run in which you deliver the artifact — it is part of your "done".

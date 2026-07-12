@@ -42,3 +42,6 @@ licenses actually purchased, generative output on a PAID plan (Meshy/Tripo priva
 client-supplied. CC-BY only with a line in `CREDITS.md`. Forbidden: game rips, real branded
 products as the product, "free" assets without a stated license, Shadertoy-default shader code.
 Every manifest entry carries its license string — an asset without one does not ship.
+
+**Stage done = `PIPELINE_STATUS.md` advanced**: update your stage's row (and «Stadio corrente»)
+in the same run in which you deliver the artifact — it is part of your "done".
