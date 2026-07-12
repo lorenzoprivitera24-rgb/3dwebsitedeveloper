@@ -12,6 +12,7 @@
     "assets:encode": "node scripts/encode-assets.mjs",
     "tokens:build": "node scripts/build-tokens.mjs",
     "qa:verify": "node scripts/verify-preview.mjs",
+    "sync:global": "node scripts/sync-global-kit.mjs",
     "qa:shoot": "node scripts/shoot.mjs",
     "perf:check": "node scripts/perf-check.mjs"
   },
@@ -28,7 +29,7 @@
     "ogl": "^1.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "three": "^0.184.0"
+    "three": "^0.185.1"
   },
   "//optional": "Add per brief: @react-three/rapier + ecctrl (physics — Lanyard/Ballpit), @react-three/postprocessing (WebGL only; on WebGPU use three's node PostProcessing/RenderPipeline), @react-spring/three (spring 3D motion). KTX2: self-host the Basis transcoder from three/examples/jsm/libs/basis into public/basis/. React Bits components pull their own deps per component (gsap/motion/ogl/three) — install per use.",
   "devDependencies": {
@@ -39,7 +40,7 @@
     "@react-three/eslint-plugin": "^0.1.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/three": "^0.184.0",
+    "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^4.3.0",
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
