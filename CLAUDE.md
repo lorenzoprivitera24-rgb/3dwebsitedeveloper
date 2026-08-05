@@ -40,55 +40,60 @@ above the canvas without fighting it.
   and `references/interactive-components.md` are the playbooks. A green build is **not** proof —
   verify in a real browser preview (the WebGPU/TSL gotchas there pass `tsc`/`vite` and break on screen).
 
-### Non-negotiable rules
+### Non-negotiable rules — and who enforces each one
 
-1. **`framer-motion-3d` is banned.** It is discontinued and breaks on React 19. Never import it,
-   never use `motion.mesh`. Animate 3D via `useFrame` / React Spring / GSAP. Motion is DOM-only.
-2. **One animation owner per property.** A given uniform, camera, or object property is driven by
-   exactly one system. Mixing causes jitter.
-3. **One scroll/RAF loop.** Lenis + `gsap.ticker` is the single source. No stray
-   `requestAnimationFrame` on scroll-linked things.
-4. **Scroll progress lives in a ref**, not React state. No per-frame re-renders.
-5. **Ease everything.** Scroll and pointer values pass through `MathUtils.damp`
-   (framerate-independent) before reaching uniforms or the camera.
-6. **Mobile is first-class.** Cap `dpr` at 2, instance repeats, reduce amplitude and subdivisions
-   on small viewports, use the quality tiers in the skill.
-7. **Accessibility is part of "done".** `prefers-reduced-motion` path, canvas `aria-hidden`,
-   interactive controls mirrored in accessible DOM, contrast over the moving background, intact
-   keyboard order.
-8. **No browser storage** in the canvas layer; transient state in refs/React state.
+A rule a machine can check does not need to live in your context. Most of these are now enforced;
+what remains in prose is what still needs judgement.
 
-## Orchestration: how the main session delegates
+| # | rule | enforced by |
+|---|---|---|
+| 1 | `framer-motion-3d` is banned (discontinued, breaks React 19) | ESLint `no-restricted-imports` |
+| 2 | **one animation owner per property** — a uniform/camera/property is driven by exactly one system | `qa:state` (an uniform that converges to its target has one writer) |
+| 3 | **one scroll/RAF loop** — Lenis + `gsap.ticker`, no stray `requestAnimationFrame` | ESLint `no-restricted-syntax` |
+| 4 | scroll progress lives in a **ref**, not React state | judgement (review) |
+| 5 | **ease everything** — scroll/pointer pass through `MathUtils.damp` before uniforms/camera | `qa:state` (convergence assertions) |
+| 6 | mobile first-class — `dpr` ≤ 2, tiered detail/amplitude | `qa:state` (dpr) + `qa:frames` (per-path budget) |
+| 7 | accessibility is part of "done" — reduced-motion path, `aria-hidden` canvas, contrast, keyboard order | judgement + `perf-fallback-auditor` |
+| 8 | no browser storage in the canvas layer | ESLint `no-restricted-globals/properties` |
 
-Sub-agents cannot spawn sub-agents, so this main session is the orchestrator. Default build order
-(adapt to the brief):
+Also mechanical: no `<Environment preset>` (third-party CDN → GDPR); self-host the HDRI.
 
-1. `@agent-r3f-scene-architect`: project skeleton, async WebGPU `Canvas`, scene graph, camera,
-   lights, asset pipeline, the single Lenis + GSAP loop, and `ARCHITECTURE.md` defining the
-   component contract (the scroll-progress ref and the shader uniforms).
-2. `@agent-tsl-shader-engineer`: the TSL node materials (scroll + pointer displacement, RGB shift,
-   any compute particles), exposing well-named uniforms per the contract.
-3. `@agent-scroll-motion-engineer`: bind scroll progress and pointer/touch to the uniforms and the
-   camera, build the ScrollTrigger timeline, tune the damping for desktop and mobile.
-4. `@agent-ui-overlay-a11y-engineer`: the DOM overlay with Motion, responsive and touch-friendly,
-   with the reduced-motion path and ARIA.
-5. `@agent-interaction-engineer`: the interactivity layer — pick + copy + wire React Bits components
-   (`lib/react-bits/`) and bespoke GSAP/Motion/Lenis/`@use-gesture` effects (animated headlines,
-   scroll reveals, cursor/hover effects, animated menus, galleries, animated backgrounds), without
-   breaking the single loop or a11y.
-6. `@agent-perf-fallback-auditor`: read-only audit (draw calls, instancing, DPR, fallback,
-   reduced-motion, accessibility); returns a prioritized report that the others apply.
+## Orchestration: one builder, many verifiers
 
-Chain them: e.g. "Use the tsl-shader-engineer to build the displacement material, then the
-scroll-motion-engineer to drive its uniforms from scroll and pointer." Run independent research
-in parallel where it helps, but keep edits serialized to avoid conflicts.
+The agents split into two families, and the split is the whole point.
 
-**Auto-dispatch (every prompt).** A `UserPromptSubmit` hook (`.claude/hooks/agents-autostart.py`)
-reads each request and injects the matching specialist so delegation happens on its own — engaging
-the specialist is the default, not something to ask permission for. It also reminds: independent
-research can run in parallel, but **serialize edits** (one owner per property, one RAF loop); use
-`isolation: worktree` for parallel branches. Same non-negotiables apply (no `framer-motion-3d`, one
-loop, ease everything, mobile + a11y in "done").
+**Builders — never in parallel with each other on the same property space.** Anthropic's own
+finding on multi-agent systems is that domains requiring shared context and many inter-agent
+dependencies are a bad fit, and that coding has fewer truly parallelizable subtasks than research;
+Cognition's is sharper — *actions carry implicit decisions, and conflicting implicit decisions
+produce bad results*. The scene track is exactly that: `r3f-scene-architect`,
+`tsl-shader-engineer` and `scroll-motion-engineer` all read and write the SAME uniform contract.
+Run them as **one sequential track**, or as one session wearing three skills. Never as a fan-out.
+`ui-overlay-a11y-engineer` and `interaction-engineer` work a different property space (the DOM
+layer), so they may run alongside the scene track — still serialized against each other on shared
+files.
+
+**Verifiers — parallel, read-only, fresh context. This is where fan-out pays.** The research on
+self-correction is unambiguous: intrinsic self-correction does not improve (and can degrade)
+results, while the same model catches the same error reliably when it arrives as *external*
+content. A verifier therefore needs a context that never saw the code being written:
+`perf-fallback-auditor` (read-only by construction) and `visual-qa-operator` (may write
+`qa/issues.md`, never `src/`). Their findings go back to the builder — they don't apply them.
+
+Upstream artefact producers (`creative-director`, `scroll-storyboarder`, `copy-chief`,
+`asset-wrangler`, `blueprint-librarian`) touch `brief/`, `content/`, `public/` — not `src/` —
+so they parallelize freely.
+
+Sub-agents cannot spawn sub-agents: this main session is the orchestrator. Use
+`isolation: worktree` when a builder needs a branch of its own.
+
+**Open item (Aug 2026).** The `UserPromptSubmit` hook `.claude/hooks/agents-autostart.py` still
+injects a specialist on *every* prompt. Half of what it repeats is now enforced by ESLint and by
+`qa:state`, and always-on injection is the pattern Anthropic identified as over-constraining when
+they cut 80%+ of Claude Code's system prompt for the Claude 5 models — the failure mode being
+conflicting instructions arriving from prompt, CLAUDE.md and skills at once. It should be narrowed
+to genuine two-signal matches or retired. Edits under `.claude/hooks/` are refused by the
+permission classifier as self-modification, so this is a change Lorenzo applies by hand.
 
 ## The factory: from client request to shipped site
 
@@ -111,10 +116,35 @@ Compose and parameterize blueprints; write custom only for what the registry doe
 promote it. No stage starts without the previous stage's artifact.
 
 Factory commands: `npm run tokens:build` (direction.md → tokens.css + tokens.generated.ts) ·
-`npm run assets:encode` · `npm run qa:verify` (single-shot: real backend + console + screenshot) ·
-`npm run qa:shoot` (per-section × 390/834/1440) · `npm run perf:check` (budget gate).
+`npm run assets:encode` · `npm run qa:verify` (single-shot: real backend + console + screenshot).
 Verification runs on playwright-core + the cached Chrome for Testing — NOT the user's Chrome
 (it cannot reach local servers on this machine) and NOT the preview MCP from a worktree.
+
+### The three gates — and why they are three
+
+They have three different natures of determinism. Merging them yields a gate that fails at random
+and that nobody reads any more.
+
+| gate | command | determinism | contract |
+|---|---|---|---|
+| **state** | `qa:state` | **total** — no GPU, no pixels, no clock | `qa/checkpoints.json` (hand-written invariants) + `qa/state-baseline.json` (recorded direction) |
+| **pixel** | `qa:shoot` | perceptual — needs a real GPU, has an empty-canvas guard | screenshots per section × breakpoint |
+| **frame** | `qa:frames` | statistical — long-frame tail, per render path | `qa/budget.json` |
+
+`npm run verify` = lint + build + `perf:check` + `qa:state`: deterministic, headless, always
+runnable — **this is the definition of done**. `npm run verify:full` adds the two gates that need
+a real GPU, and is the release gate.
+
+Two measured facts worth keeping: `renderer.info.render.calls` **accumulates** across frames on
+the WebGPU backend while `triangles` is reset, and reading either inside `useFrame` (which runs
+*before* the render) yields zero — per-frame draw calls come from the delta between snapshots
+taken outside the loop. And "under 100 draw calls" is a WebGL-era heuristic: on WebGPU draw calls
+are cheap, so calls and triangles are **diagnostics** here, never thresholds — the threshold is
+frame time. On the WebGL2 fallback the old heuristic still bites, which is why the budget is
+per-path.
+
+When the direction changes on purpose, re-run `npm run qa:state:baseline` and commit the diff:
+the baseline diff *is* the review of the change.
 
 ### The recon corpus (lug 2026) — where this architecture comes from
 
@@ -140,7 +170,16 @@ new library or a genre shift.
 
 ## Definition of done
 
-- Runs at the frame budget on a throttled mid-tier mobile profile.
-- WebGPU path works; WebGL2 fallback works; a no-WebGL poster exists.
-- `prefers-reduced-motion` respected; accessibility checklist passed.
-- One loop, one owner per property, no `framer-motion-3d`, no browser storage in the canvas.
+`npm run verify` green — and, before a release, `npm run verify:full`. That command *is* the
+definition; what follows is what it does and does not cover.
+
+Covered mechanically: the eight non-negotiables (see the table above), the scroll→scene contract
+at every checkpoint, the frame budget per render path, the empty-canvas failure.
+
+Still judgement, and still required:
+- WebGL2 fallback exercised and a no-WebGL poster present (the gates measure whichever path the
+  browser picked — they do not force the other one).
+- Accessibility beyond `dpr` and reduced-motion: keyboard order, contrast over a moving
+  background, controls mirrored in accessible DOM.
+- A real device once before shipping: CDP throttles the CPU, **never the GPU**, so a "mid-tier
+  mobile profile" here is a CPU approximation, not a measurement.
