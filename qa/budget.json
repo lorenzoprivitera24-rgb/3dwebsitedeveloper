@@ -1,0 +1,54 @@
+{
+  "$comment": [
+    "Budget per PERCORSO, non unico — ed è la correzione più importante rispetto al vecchio",
+    "'meno di 100 draw call'. Quella soglia è un'euristica dell'era WebGL: in WebGPU il costo di",
+    "emissione di una draw call è molto più basso e le scene reggono stabilmente migliaia di",
+    "chiamate (i render bundle spostano l'asticella di un altro ordine di grandezza). Applicarla",
+    "al percorso WebGPU significa o passare sempre (gate inutile) o ottimizzare a vuoto.",
+    "",
+    "Quindi: il GATE è il tempo per frame; draw call e triangoli sono DIAGNOSTICA — servono a",
+    "spiegare un fallimento, non a causarlo. Sul fallback WebGL2, invece, la vecchia euristica",
+    "morde ancora, e infatti lì la soglia diagnostica resta stretta.",
+    "",
+    "Il tempo per frame si misura in mediana e p95 su N campioni: mai un confronto esatto, mai",
+    "su software renderer (SwiftShader è deterministico ma non è una GPU: i numeri non vogliono",
+    "dire nulla). Il throttling CPU si emula via CDP; la GPU NON si può throttlare: un controllo",
+    "a campione su device reale resta necessario prima di dire 'gira su mobile'."
+  ],
+
+  "samples": 120,
+  "settleFrames": 90,
+  "longFrameMs": 20.0,
+
+  "$comment2": [
+    "Perché la metrica che conta è `longFramePct` e non la mediana: il vsync inchioda la",
+    "mediana a ~16.7 ms su qualunque macchina che regga i 60 fps, quindi non distingue 'ci",
+    "arriva col fiato corto' da 'gli avanza il triplo'. Ciò che l'occhio vede come scatto è la",
+    "CODA: la percentuale di frame oltre longFrameMs. Mediana e p95 restano come guardie",
+    "grossolane per il caso in cui si scenda sotto i 60 fps stabili."
+  ],
+
+  "paths": {
+    "WebGPU": {
+      "frameMs": { "median": 18.0, "p95": 24.0 },
+      "maxLongFramePct": 3.0,
+      "diagnostics": { "calls": 500, "triangles": 1200000 }
+    },
+    "WebGL2": {
+      "frameMs": { "median": 18.0, "p95": 34.0 },
+      "maxLongFramePct": 8.0,
+      "diagnostics": { "calls": 120, "triangles": 700000 }
+    }
+  },
+
+  "viewports": [
+    { "name": "mobile", "width": 390, "height": 844, "cpuThrottle": 4 },
+    { "name": "desktop", "width": 1440, "height": 900, "cpuThrottle": 1 }
+  ],
+
+  "at": [
+    { "section": "hero", "p": 0.3 },
+    { "section": "scrub", "p": 0.5 },
+    { "section": "kinetic", "p": 0.6 }
+  ]
+}

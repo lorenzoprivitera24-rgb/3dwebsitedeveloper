@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { MathUtils } from 'three'
 import { makeGradientFieldMaterial } from './materials/gradientField'
 import { sceneTargets } from './sceneState'
+import { registerQaProbe } from '../qa/registry'
 import { TOKENS } from '../lib/tokens.generated'
 
 interface Props {
@@ -24,6 +25,9 @@ export function GradientBackdrop({ reduced, flowScale = 1 }: Props) {
     uniforms.uFlow.value = reduced ? 0 : TOKENS.gradient.flow * flowScale
   }, [uniforms, reduced, flowScale])
   useEffect(() => () => material.dispose(), [material])
+
+  // Sonda per il gate di stato: uMix deve convergere a sceneTargets.gradientMix.
+  useEffect(() => registerQaProbe('uMix', () => uniforms.uMix.value), [uniforms])
 
   useFrame((_state, delta) => {
     const lambda = reduced ? 1.5 : 3

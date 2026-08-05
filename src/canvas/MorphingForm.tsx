@@ -11,6 +11,7 @@ import {
   vec3,
 } from 'three/tsl'
 import { sceneTargets } from './sceneState'
+import { registerQaProbe } from '../qa/registry'
 import { TOKENS } from '../lib/tokens.generated'
 
 interface Props {
@@ -59,6 +60,17 @@ export function MorphingForm({ reduced, detail, amplitude }: Props) {
   }, [amplitude])
 
   useEffect(() => () => material.dispose(), [material])
+
+  // Sonde per il gate di stato: pubblicano il valore CORRENTE degli uniform, così il gate può
+  // verificare che convergano verso sceneTargets. Il materiale resta di proprietà di questo
+  // componente: si espone il numero, mai l'oggetto.
+  useEffect(() => {
+    const off = [
+      registerQaProbe('uMorph', () => uMorph.value),
+      registerQaProbe('uPointer', () => [uPointer.value.x, uPointer.value.y, uPointer.value.z]),
+    ]
+    return () => off.forEach((f) => f())
+  }, [uMorph, uPointer])
 
   useFrame((_state, delta) => {
     // morph: floaty so the transition reads as a scene change, not a twitch

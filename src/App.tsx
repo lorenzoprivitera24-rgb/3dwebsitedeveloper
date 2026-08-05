@@ -5,6 +5,8 @@ import { Poster } from './canvas/Poster'
 import { useReducedMotion } from './hooks/useReducedMotion'
 import { useQualityTier } from './hooks/useQualityTier'
 import { supportsWebGL } from './lib/webgl'
+import { QaScrollBridge } from './qa/QaScrollBridge'
+import { qaEnabled } from './qa/bridge'
 // Composizione dal registro (regola d'oro, piano in brief/composition-plan.md):
 import { PreloaderProgress } from '../registry/01-preloader-progress/PreloaderProgress'
 import { Hero3dSplit } from '../registry/02-hero-3d-split/Hero3dSplit'
@@ -25,6 +27,9 @@ export default function App() {
 
   return (
     <SmoothScroll>
+      {/* metà "DOM" del ponte QA — deve stare QUI dentro: il <Canvas> è una reconciler root
+          separata e il context di Lenis non lo attraversa. Montata solo con ?qa=1. */}
+      {qaEnabled() && <QaScrollBridge />}
       <PreloaderProgress minShowMs={600} reduced={reduced} />
 
       {/* fixed full-screen 3D layer, decorative for assistive tech — UNA scena persistente */}

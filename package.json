@@ -14,8 +14,14 @@
     "qa:verify": "node scripts/verify-preview.mjs",
     "sync:global": "node scripts/sync-global-kit.mjs",
     "qa:shoot": "node scripts/shoot.mjs",
-    "perf:check": "node scripts/perf-check.mjs"
+    "perf:check": "node scripts/perf-check.mjs",
+    "qa:state": "node scripts/with-server.mjs node scripts/state-gate.mjs",
+    "qa:state:baseline": "node scripts/with-server.mjs node scripts/state-gate.mjs --baseline",
+    "qa:frames": "node scripts/with-server.mjs node scripts/frame-perf.mjs",
+    "verify": "npm run lint && npm run build && npm run perf:check && npm run qa:state",
+    "verify:full": "npm run verify && npm run qa:frames && npm run qa:shoot"
   },
+  "//verify": "`npm run verify` è la definizione di FATTO: deterministico, headless, lanciabile sempre (lint + build + peso + gate di stato). `verify:full` aggiunge i due gate che richiedono una GPU vera — frame time e pixel — ed è il gate di RILASCIO.",
   "//versions": "Verified floor (June 2026), matching the audited build (three 0.184, R3F 9.6). WebGPU is zero-config since three r171/0.171. After install, pull the latest stable. See STACK.md for the full stack and lib/react-bits/ for the interactive component library.",
   "dependencies": {
     "@gsap/react": "^2.1.0",

@@ -7,11 +7,22 @@
 //      node scripts/shoot.mjs http://127.0.0.1:5199/
 // Le sezioni = <main> section[id]. Browser: playwright-core + Chrome for Testing in cache
 // (il Chrome dell'utente NON raggiunge i server locali su questa macchina — fatto verificato).
+//
+// GUARDIA CANVAS VUOTO (ago 2026) — è il modo documentato in cui questo gate mente: headless
+// Chrome può non presentare il canvas WebGPU al compositore, e allora lo screenshot RIESCE ma
+// il canvas è nero. Il report resta verde e nessuno se ne accorge finché non guarda i PNG.
+// Qui si misura: un PNG quasi uniforme comprime a pochissimi byte, quindi sotto una soglia per
+// pixel lo scatto viene marcato come sospetto e il gate fallisce. È un'euristica, dichiarata
+// come tale — ma cattura esattamente quel fallimento. Con --headed si usa la GPU vera.
 import { chromium } from 'playwright-core'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 
-const url = process.argv[2] ?? 'http://127.0.0.1:5199/'
+const url = process.argv.slice(2).find((a) => a.startsWith('http')) ?? 'http://127.0.0.1:5199/'
+const headed = process.argv.includes('--headed')
+// byte di PNG per pixel sotto cui l'immagine è quasi certamente piatta (misurato: uno scatto
+// reale di questa scena sta un ordine di grandezza sopra)
+const FLAT_BYTES_PER_PX = 0.02
 const OUT = 'qa/shots'
 const BREAKPOINTS = [
   { width: 390, height: 844 },   // mobile
@@ -25,7 +36,7 @@ const exe =
 mkdirSync(OUT, { recursive: true })
 const browser = await chromium.launch({
   executablePath: exe,
-  headless: true,
+  headless: !headed,
   args: ['--enable-unsafe-webgpu', '--use-angle=metal'],
 })
 
@@ -53,7 +64,13 @@ try {
       await page.waitForTimeout(900)
       const file = `${OUT}/${id}-${bp.width}.png`
       await page.screenshot({ path: file })
-      report.shots.push(file)
+      const bytesPerPx = statSync(file).size / (bp.width * bp.height)
+      if (bytesPerPx < FLAT_BYTES_PER_PX)
+        errors.push(
+          `[canvas-vuoto] ${file}: ${bytesPerPx.toFixed(4)} B/px < ${FLAT_BYTES_PER_PX} — immagine quasi piatta. ` +
+            `Su WebGPU headless il canvas può non arrivare al compositore: rilancia con --headed.`,
+        )
+      report.shots.push({ file, bytesPerPx: +bytesPerPx.toFixed(4) })
     }
 
     report.breakpoints.push({ ...bp, sections, errors })

@@ -17,3 +17,7 @@ verify-preview.png
 
 # Sistema
 .DS_Store
+
+# Report dei gate (artefatti di run; i CONTRATTI — checkpoints/budget/baseline — si committano)
+qa/state-report.json
+qa/frame-report.json

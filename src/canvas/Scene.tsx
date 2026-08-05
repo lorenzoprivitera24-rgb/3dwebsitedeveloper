@@ -2,6 +2,8 @@ import { Environment } from '@react-three/drei'
 import { CameraDirector } from './CameraDirector'
 import { GradientBackdrop } from './GradientBackdrop'
 import { MorphingForm } from './MorphingForm'
+import { QaSceneBridge } from '../qa/QaSceneBridge'
+import { qaEnabled } from '../qa/bridge'
 
 interface SceneProps {
   reduced: boolean
@@ -25,6 +27,9 @@ export function Scene({ reduced, detail, amplitude, flowScale = 1 }: SceneProps)
       <CameraDirector reduced={reduced} />
       <GradientBackdrop reduced={reduced} flowScale={flowScale} />
       <MorphingForm reduced={reduced} detail={detail} amplitude={amplitude} />
+
+      {/* metà "scena" del ponte QA — montata solo con ?qa=1 (gate di stato) */}
+      {qaEnabled() && <QaSceneBridge />}
     </>
   )
 }
