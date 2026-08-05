@@ -62,38 +62,27 @@ Also mechanical: no `<Environment preset>` (third-party CDN → GDPR); self-host
 
 The agents split into two families, and the split is the whole point.
 
-**Builders — never in parallel with each other on the same property space.** Anthropic's own
-finding on multi-agent systems is that domains requiring shared context and many inter-agent
-dependencies are a bad fit, and that coding has fewer truly parallelizable subtasks than research;
-Cognition's is sharper — *actions carry implicit decisions, and conflicting implicit decisions
-produce bad results*. The scene track is exactly that: `r3f-scene-architect`,
-`tsl-shader-engineer` and `scroll-motion-engineer` all read and write the SAME uniform contract.
-Run them as **one sequential track**, or as one session wearing three skills. Never as a fan-out.
-`ui-overlay-a11y-engineer` and `interaction-engineer` work a different property space (the DOM
-layer), so they may run alongside the scene track — still serialized against each other on shared
-files.
+**Builders — never fanned out over the same property space.** `r3f-scene-architect`,
+`tsl-shader-engineer` and `scroll-motion-engineer` read and write the SAME uniform contract:
+run them as ONE sequential track (or one session wearing three skills). Parallel builders make
+conflicting implicit decisions that nobody can reconcile afterwards.
+`ui-overlay-a11y-engineer` and `interaction-engineer` own the DOM layer — a different property
+space — so they may run alongside the scene track, serialized against each other on shared files.
 
-**Verifiers — parallel, read-only, fresh context. This is where fan-out pays.** The research on
-self-correction is unambiguous: intrinsic self-correction does not improve (and can degrade)
-results, while the same model catches the same error reliably when it arrives as *external*
-content. A verifier therefore needs a context that never saw the code being written:
-`perf-fallback-auditor` (read-only by construction) and `visual-qa-operator` (may write
-`qa/issues.md`, never `src/`). Their findings go back to the builder — they don't apply them.
+**Verifiers — parallel, read-only, fresh context. This is where fan-out pays**, because a model
+catches an error far more reliably when it arrives as external content than in its own trace.
+`perf-fallback-auditor` (read-only) and `visual-qa-operator` (writes `qa/issues.md`, never
+`src/`) report; the builder applies.
 
-Upstream artefact producers (`creative-director`, `scroll-storyboarder`, `copy-chief`,
-`asset-wrangler`, `blueprint-librarian`) touch `brief/`, `content/`, `public/` — not `src/` —
-so they parallelize freely.
+Upstream producers (`creative-director`, `scroll-storyboarder`, `copy-chief`, `asset-wrangler`,
+`blueprint-librarian`) touch `brief/`, `content/`, `public/` — not `src/` — so they parallelize
+freely. Sub-agents cannot spawn sub-agents: this session orchestrates. Use `isolation: worktree`
+when a builder needs its own branch.
 
-Sub-agents cannot spawn sub-agents: this main session is the orchestrator. Use
-`isolation: worktree` when a builder needs a branch of its own.
-
-**Open item (Aug 2026).** The `UserPromptSubmit` hook `.claude/hooks/agents-autostart.py` still
-injects a specialist on *every* prompt. Half of what it repeats is now enforced by ESLint and by
-`qa:state`, and always-on injection is the pattern Anthropic identified as over-constraining when
-they cut 80%+ of Claude Code's system prompt for the Claude 5 models — the failure mode being
-conflicting instructions arriving from prompt, CLAUDE.md and skills at once. It should be narrowed
-to genuine two-signal matches or retired. Edits under `.claude/hooks/` are refused by the
-permission classifier as self-modification, so this is a change Lorenzo applies by hand.
+**Open item (Aug 2026).** `.claude/hooks/agents-autostart.py` still injects a specialist on every
+prompt, half of it now redundant with ESLint and `qa:state`. Narrow it to two-signal matches or
+retire it — Lorenzo applies it by hand (edits under `.claude/hooks/` are refused as
+self-modification).
 
 ## The factory: from client request to shipped site
 
@@ -120,31 +109,20 @@ Factory commands: `npm run tokens:build` (direction.md → tokens.css + tokens.g
 Verification runs on playwright-core + the cached Chrome for Testing — NOT the user's Chrome
 (it cannot reach local servers on this machine) and NOT the preview MCP from a worktree.
 
-### The three gates — and why they are three
-
-They have three different natures of determinism. Merging them yields a gate that fails at random
-and that nobody reads any more.
+### The three gates — three natures of determinism, so three gates
 
 | gate | command | determinism | contract |
 |---|---|---|---|
-| **state** | `qa:state` | **total** — no GPU, no pixels, no clock | `qa/checkpoints.json` (hand-written invariants) + `qa/state-baseline.json` (recorded direction) |
-| **pixel** | `qa:shoot` | perceptual — needs a real GPU, has an empty-canvas guard | screenshots per section × breakpoint |
+| **state** | `qa:state` | **total** — no GPU, no pixels, no clock | `qa/checkpoints.json` + `qa/state-baseline.json` |
+| **pixel** | `qa:shoot` | perceptual — real GPU, empty-canvas guard | shots per section × breakpoint |
 | **frame** | `qa:frames` | statistical — long-frame tail, per render path | `qa/budget.json` |
 
 `npm run verify` = lint + build + `perf:check` + `qa:state`: deterministic, headless, always
-runnable — **this is the definition of done**. `npm run verify:full` adds the two gates that need
-a real GPU, and is the release gate.
+runnable. `verify:full` adds the two that need a real GPU. Direction changed on purpose? Re-run
+`qa:state:baseline` and commit the diff — that diff *is* the review.
 
-Two measured facts worth keeping: `renderer.info.render.calls` **accumulates** across frames on
-the WebGPU backend while `triangles` is reset, and reading either inside `useFrame` (which runs
-*before* the render) yields zero — per-frame draw calls come from the delta between snapshots
-taken outside the loop. And "under 100 draw calls" is a WebGL-era heuristic: on WebGPU draw calls
-are cheap, so calls and triangles are **diagnostics** here, never thresholds — the threshold is
-frame time. On the WebGL2 fallback the old heuristic still bites, which is why the budget is
-per-path.
-
-When the direction changes on purpose, re-run `npm run qa:state:baseline` and commit the diff:
-the baseline diff *is* the review of the change.
+Why the budget is per-path, and why `renderer.info` cannot be read naively: the reasons are in
+`qa/budget.json` and in the header of `src/qa/QaSceneBridge.tsx`, next to the code they govern.
 
 ### The recon corpus (lug 2026) — where this architecture comes from
 
