@@ -1,0 +1,26 @@
+{
+  "eyebrow": "Anatomia",
+  "title": "Cinque strati, una forma sola.",
+  "notes": {
+    "05-cupola": {
+      "label": "Cupola",
+      "desc": "Diffonde la luce d'ambiente e chiude il volume."
+    },
+    "04-scocca": {
+      "label": "Scocca",
+      "desc": "Guscio portante: tiene la rigidezza senza aggiungere massa."
+    },
+    "03-lamina": {
+      "label": "Lamina",
+      "desc": "Interfaccia sottile fra scocca e nucleo."
+    },
+    "02-nucleo": {
+      "label": "Nucleo",
+      "desc": "Dove sta il lavoro: l'unica parte che scalda."
+    },
+    "01-basamento": {
+      "label": "Basamento",
+      "desc": "Appoggio e dissipazione. Non si vede mai, regge tutto."
+    }
+  }
+}

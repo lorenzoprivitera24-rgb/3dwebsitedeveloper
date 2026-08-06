@@ -6,6 +6,8 @@ import App from './App'
 import '../lib/fonts/Fraunces/font.css'
 import '../lib/fonts/SchibstedGrotesk/font.css'
 import '../lib/fonts/FragmentMono/font.css'
+// Condensato pesante per il display gigante del blueprint 14 (token --display-condensed)
+import '../lib/fonts/Anton/font.css'
 import './styles.css'
 // I token generati vincono sui fallback di styles.css (stesso :root, importato dopo).
 // Fonte unica: brief/direction.md → `npm run tokens:build`. Mai colori/durate fuori da lì.

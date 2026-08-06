@@ -111,10 +111,27 @@ Compose and parameterize blueprints; write custom only for what the registry doe
 promote it. No stage starts without the previous stage's artifact.
 
 Factory commands: `npm run tokens:build` (direction.md → tokens.css + tokens.generated.ts) ·
-`npm run assets:encode` · `npm run qa:verify` (single-shot: real backend + console + screenshot) ·
-`npm run qa:shoot` (per-section × 390/834/1440) · `npm run perf:check` (budget gate).
+`npm run assets:encode` (GLB/KTX2) · `npm run cutouts:encode` (**cut-out layers → AVIF/WebP +
+baked contact shadows + typed manifest**; `cutouts:fixture` draws a stand-in product to
+choreograph against before the client's photography arrives) · `npm run qa:verify` (single-shot:
+real backend + console + screenshot) · `npm run qa:shoot` (per-section × 390/834/1440) ·
+`npm run qa:scrub -- <section> <frames> <w> <h>` (**frames spread through a PINNED section's
+run** — `qa:shoot` always captures state A, so on a scrubbed pin it certifies motion nobody
+watched move) · `npm run perf:check` (budget gate).
 Verification runs on playwright-core + the cached Chrome for Testing — NOT the user's Chrome
 (it cannot reach local servers on this machine) and NOT the preview MCP from a worktree.
+
+### The layered-product family (07 · 13 · 14) — the genre that is NOT 3D
+
+A whole class of client references — food, beverage, packaging, hardware — looks like 3D and is
+not. It is **cut-out photography with real alpha**, stacked and choreographed on scroll (usually
+built in Framer). Reading it as a 3D brief costs weeks. The kit now covers it: blueprints
+**13 `product-explode`**, **14 `type-behind-product`**, **07 `editorial-gallery`**, all fed by one
+asset contract (`scripts/encode-cutouts.mjs`, shared-canvas registration) and one grammar, the
+`layered-product-choreography` skill. Recon: `docs/recon-prodotto-a-strati-ago2026.md`.
+
+**Say it in S0, not in S5:** without alpha there is nothing to occlude and nothing to separate.
+If the client sends JPEGs on a solid background, the job is cut-out work, not animation.
 
 ### The recon corpus (lug 2026) — where this architecture comes from
 

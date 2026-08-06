@@ -1,0 +1,24 @@
+{
+  "id": "07-editorial-gallery",
+  "descrizione": "Griglia magazine di card prodotto con nome, dato secco (prezzo) e tag: reveal a cascata all'ingresso + parallasse per card sfalsata per colonna",
+  "trigger": [
+    "griglia prodotti",
+    "listino",
+    "card con prezzo",
+    "galleria editoriale",
+    "collezione",
+    "menu",
+    "product grid"
+  ],
+  "props": {
+    "copy": "GalleryCopy (eyebrow/title/items[])",
+    "product": "CutoutProduct dal manifesto di encode-cutouts",
+    "reduced": "bool",
+    "parallax": "number — ampiezza in % dell'altezza dell'immagine (7)"
+  },
+  "slotCopy": ["eyebrow", "title", "items[].title", "items[].desc", "items[].meta", "items[].tag"],
+  "perfTier": "A",
+  "mobileFallback": "auto-fit a colonna singola; reduced = niente reveal né parallasse, griglia statica",
+  "dipendenze": ["src/lib/cutouts.ts", "gsap/ScrollTrigger", "src/scroll/useSectionProgress"],
+  "nota": "items[].layerId isola UN solo strato del prodotto: serve a vendere i componenti separati senza incidere altri scontornati"
+}

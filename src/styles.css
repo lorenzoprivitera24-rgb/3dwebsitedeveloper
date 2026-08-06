@@ -273,6 +273,422 @@ body {
   display: block;
 }
 
+/* ============ 13 product-explode ============ */
+
+.bp-explode {
+  height: 100vh;
+  position: relative;
+}
+/* Scrim locale dei capitoli «prodotto», stesso rimedio di .bp-hero__copy::before. Arretrare la
+   camera non basta: su portrait la forma «calma» resta comunque grande dietro la pila e le
+   annotazioni piccole ci finiscono sopra — e in `prefers-reduced-motion` la regia non arretra
+   affatto (ramo calmo globale), quindi lì la scena sarebbe sempre in mezzo. Il capitolo del
+   prodotto è una stanza buia, non una finestra sulla scena — ma sfumato ai bordi, se no
+   l'ingresso e l'uscita diventano due stacchi netti. */
+.bp-explode::before,
+.bp-veil::before {
+  content: '';
+  position: absolute;
+  inset: -1px 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--bg) 16%,
+    var(--bg) 84%,
+    transparent 100%
+  );
+}
+.bp-explode__inner {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-content: center;
+  gap: 3vh;
+  padding: 9vh 6vw 7vh;
+}
+.bp-explode__head {
+  max-width: 34rem;
+}
+.bp-explode__title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 380;
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  line-height: 1.02;
+  text-wrap: balance;
+}
+/* lo stage è il BOX CONDIVISO del manifesto: le proporzioni arrivano da --aspect, tutti gli
+   strati stanno inset:0 e sono già registrati fra loro. Nessun offset scritto a mano. */
+.bp-explode__stage {
+  position: relative;
+  aspect-ratio: var(--aspect, 1);
+  height: min(52vh, 34vw);
+  margin: 0 auto;
+  transform-origin: 50% 50%;
+}
+.bp-explode__stage.is-live,
+.bp-explode__stage.is-live .bp-explode__layer {
+  will-change: transform;
+}
+.bp-explode__layer {
+  position: absolute;
+  inset: 0;
+}
+.bp-explode__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* l'ombra si posiziona con left/top/margin, MAI con transform: il transform appartiene a GSAP
+   (scala + opacità nello scrub). Due proprietari sullo stesso transform = sfarfallio. */
+.bp-explode__shadow {
+  position: absolute;
+  left: calc(var(--ink-x) * 100%);
+  top: calc(var(--ink-y) * 100%);
+  width: calc(var(--ink-w) * 100%);
+  margin-left: calc(var(--ink-w) * -50%);
+  margin-top: -2.4%;
+  opacity: 0.48;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+.bp-explode__note {
+  position: absolute;
+  left: 100%;
+  top: calc(var(--ink-center) * 100%);
+  margin-left: 3rem;
+  width: 12.5rem;
+  display: grid;
+  gap: 0.25rem;
+  visibility: hidden; /* la mostra GSAP; senza JS non deve comparire disallineata */
+}
+.bp-explode__leader {
+  position: absolute;
+  right: 100%;
+  top: 0.55em;
+  display: block;
+  width: 2.4rem;
+  height: 1px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 20%, transparent), var(--accent));
+}
+.bp-explode__label {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.bp-explode__desc {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+/* la legenda È il contenuto: nascosta agli occhi su desktop, mai agli screen reader */
+.bp-explode__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 900px) {
+  .bp-explode {
+    height: auto;
+    min-height: 100vh;
+  }
+  .bp-explode__inner {
+    grid-template-rows: auto auto auto;
+    padding: 10vh 6vw;
+  }
+  .bp-explode__stage {
+    height: min(42vh, 66vw);
+  }
+  .bp-explode__note {
+    display: none;
+  }
+  .bp-explode__legend,
+  .bp-explode--static .bp-explode__legend {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 2vh 0 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    display: grid;
+    gap: 0.9rem;
+    counter-reset: strato;
+  }
+}
+/* reduced-motion: pila ferma e assemblata, la legenda diventa il contenuto visibile */
+.bp-explode--static {
+  height: auto;
+  min-height: 100vh;
+}
+/* lo stage si stringe: senza pin la legenda sta SOTTO invece che di fianco, e con lo stage a
+   piena altezza finirebbe tutta sotto la piega — cioè il contenuto sparirebbe proprio nel ramo
+   in cui è l'unico contenuto */
+.bp-explode--static .bp-explode__stage {
+  height: min(36vh, 26vw);
+}
+.bp-explode--static .bp-explode__note {
+  display: none;
+}
+.bp-explode--static .bp-explode__legend {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 3vh auto 0;
+  max-width: 34rem;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  display: grid;
+  gap: 0.9rem;
+}
+.bp-explode__legend-item {
+  display: grid;
+  gap: 0.2rem;
+  padding-left: 1rem;
+  border-left: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* ============ 07 editorial-gallery ============ */
+
+.bp-gallery {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  gap: 4vh;
+  padding: 11vh 6vw;
+}
+.bp-gallery__head {
+  max-width: 34rem;
+}
+.bp-gallery__title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 380;
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.bp-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: clamp(1rem, 2.4vw, 2rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bp-gallery__inner {
+  display: grid;
+  gap: 0.7rem;
+  color: inherit;
+  text-decoration: none;
+}
+.bp-gallery__frame {
+  position: relative;
+  overflow: hidden; /* la parallasse esce dal riquadro: qui si taglia */
+  border-radius: 0.9rem;
+  border: 1px solid rgba(238, 241, 247, 0.08);
+  background: linear-gradient(160deg, var(--bg-2), var(--bg));
+  /* quadrato e non 4/5: con tre card in riga, il riquadro alto spinge nome e prezzo sotto la
+     piega su un portatile da 900 px — e il prezzo è metà del motivo per cui la sezione esiste */
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+}
+/* l'art è più alto del riquadro: è quel margine a permettere la parallasse senza scoprire i bordi */
+.bp-gallery__art {
+  position: relative;
+  aspect-ratio: var(--aspect, 1);
+  width: 74%;
+  transform-origin: 50% 50%;
+  /* `scale:` è una proprietà CSS a sé: si compone col transform di GSAP invece di sovrascriverlo */
+  scale: 1;
+  transition: scale 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bp-gallery__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.bp-gallery__inner:hover .bp-gallery__art,
+.bp-gallery__inner:focus-visible .bp-gallery__art {
+  scale: 1.05;
+}
+.bp-gallery__tag {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.bp-gallery__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.bp-gallery__name {
+  margin: 0;
+  font-family: var(--display-condensed, var(--display));
+  font-weight: 400;
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.bp-gallery__meta {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums; /* i prezzi devono incolonnarsi */
+  color: var(--accent);
+}
+.bp-gallery__desc {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ============ 14 type-behind-product ============ */
+
+.bp-veil {
+  height: 100vh;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden; /* il nastro esce dai fianchi: senza questo la pagina scrolla in orizzontale */
+}
+/* lo stage NON è un contesto di impilamento nuovo: nastro, prodotto e blocco in primo piano
+   condividono lo stesso ordine, ed è quell'ordine — non un filtro — a produrre l'occlusione */
+.bp-veil__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+.bp-veil__band {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  translate: 0 -50%;
+  z-index: 0;
+  pointer-events: none;
+}
+.bp-veil__track {
+  display: flex;
+  gap: 0.28em;
+  justify-content: center;
+  white-space: nowrap;
+  transform-origin: 50% 50%;
+}
+.bp-veil__word {
+  font-family: var(--display-condensed, var(--display));
+  font-weight: 400;
+  font-size: clamp(5rem, 21vw, 19rem);
+  line-height: 0.82;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--fg);
+  opacity: 0.14; /* dietro un oggetto, non sopra la pagina */
+}
+.bp-veil__word:nth-child(2) {
+  color: var(--accent);
+  opacity: 0.5; /* la ripetizione centrale è quella che il prodotto taglia: va vista */
+}
+.bp-veil__product {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: var(--aspect, 1);
+  height: min(58vh, 40vw);
+}
+.bp-veil__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.bp-veil.is-live .bp-veil__band,
+.bp-veil.is-live .bp-veil__product {
+  will-change: transform;
+}
+.bp-veil__front {
+  position: absolute;
+  z-index: 2;
+  left: 6vw;
+  bottom: 9vh;
+  max-width: 26rem;
+}
+.bp-veil__headline {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 380;
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.bp-veil__caption {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+@media (max-width: 900px) {
+  .bp-veil__product {
+    height: min(44vh, 74vw);
+  }
+  .bp-veil__front {
+    left: 6vw;
+    right: 6vw;
+    bottom: 6vh;
+    max-width: none;
+  }
+}
+/* reduced-motion: niente pin né corsa — la parola resta ferma dietro il prodotto, che è comunque
+   l'immagine che la sezione voleva dare. Ma il blocco di testo torna nel FLUSSO: lasciarlo
+   assoluto sopra uno stage che non è più alto un viewport lo fa cadere addosso al prodotto. */
+.bp-veil--static {
+  height: auto;
+  min-height: 100vh;
+  grid-auto-flow: row;
+  align-content: center;
+  gap: 4vh;
+  padding: 12vh 0;
+}
+.bp-veil--static .bp-veil__stage {
+  height: auto;
+}
+.bp-veil--static .bp-veil__product {
+  height: min(40vh, 30vw);
+}
+.bp-veil--static .bp-veil__front {
+  position: static;
+  max-width: 42rem;
+  padding: 0 6vw;
+}
+
 /* ============ outro (custom, non da registro) ============ */
 
 .outro {

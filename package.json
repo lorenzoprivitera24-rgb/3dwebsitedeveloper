@@ -14,7 +14,11 @@
     "qa:verify": "node scripts/verify-preview.mjs",
     "sync:global": "node scripts/sync-global-kit.mjs",
     "qa:shoot": "node scripts/shoot.mjs",
-    "perf:check": "node scripts/perf-check.mjs"
+    "perf:check": "node scripts/perf-check.mjs",
+    "cutouts:fixture": "node scripts/gen-cutout-fixture.mjs",
+    "cutouts:encode": "node scripts/encode-cutouts.mjs",
+    "qa:scrub": "node scripts/shoot-scrub.mjs",
+    "qa:reduced": "node scripts/shoot.mjs --reduced"
   },
   "//versions": "Verified floor (June 2026), matching the audited build (three 0.184, R3F 9.6). WebGPU is zero-config since three r171/0.171. After install, pull the latest stable. See STACK.md for the full stack and lib/react-bits/ for the interactive component library.",
   "dependencies": {

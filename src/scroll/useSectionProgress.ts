@@ -2,7 +2,7 @@ import type { RefObject } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { progressMap, type SectionKey } from './progressMap'
+import { approachMap, progressMap, type SectionKey } from './progressMap'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -33,5 +33,31 @@ export function useSectionProgress(
       }
     },
     { dependencies: [id, opts.start, opts.end] },
+  )
+}
+
+// Il gemello per le sezioni PINNATE: scrive approachMap[id] mentre la sezione sale nel viewport
+// e chiude a 1 nell'istante in cui il pin comincia. Le sezioni pinnate lo affiancano al proprio
+// trigger di pin — useSectionProgress non va bene, il suo range finisce quando la sezione esce.
+export function useApproach(id: SectionKey, ref: RefObject<HTMLElement | null>) {
+  useGSAP(
+    () => {
+      const el = ref.current
+      if (!el) return
+      const st = ScrollTrigger.create({
+        trigger: el,
+        start: 'top bottom',
+        end: 'top top',
+        scrub: true,
+        onUpdate: (self) => {
+          approachMap[id] = self.progress
+        },
+      })
+      return () => {
+        st.kill()
+        approachMap[id] = 0
+      }
+    },
+    { dependencies: [id] },
   )
 }

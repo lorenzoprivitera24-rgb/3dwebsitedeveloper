@@ -11,7 +11,11 @@ import { chromium } from 'playwright-core'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 
-const url = process.argv[2] ?? 'http://127.0.0.1:5199/'
+// --reduced: stessa passata con `prefers-reduced-motion: reduce`. Il path ridotto è nella
+// definizione di «done» del kit ma nessuno lo guardava mai: senza emulazione si verifica solo
+// il ramo animato, e i fallback statici marciscono in silenzio.
+const REDUCED = process.argv.includes('--reduced')
+const url = process.argv.find((a) => a.startsWith('http')) ?? 'http://127.0.0.1:5199/'
 const OUT = 'qa/shots'
 const BREAKPOINTS = [
   { width: 390, height: 844 },   // mobile
@@ -29,10 +33,13 @@ const browser = await chromium.launch({
   args: ['--enable-unsafe-webgpu', '--use-angle=metal'],
 })
 
-const report = { url, startedAt: null, breakpoints: [], errors: [], shots: [] }
+const report = { url, reduced: REDUCED, startedAt: null, breakpoints: [], errors: [], shots: [] }
 try {
   for (const bp of BREAKPOINTS) {
-    const page = await browser.newPage({ viewport: bp })
+    const page = await browser.newPage({
+      viewport: bp,
+      ...(REDUCED ? { reducedMotion: 'reduce' } : {}),
+    })
     const errors = []
     page.on('console', (m) => { if (m.type() === 'error') errors.push(`[console] ${m.text()}`) })
     page.on('pageerror', (e) => errors.push(`[pageerror] ${e.message}`))
@@ -51,7 +58,7 @@ try {
         document.getElementById(sid)?.scrollIntoView({ behavior: 'instant', block: 'start' })
       }, id)
       await page.waitForTimeout(900)
-      const file = `${OUT}/${id}-${bp.width}.png`
+      const file = `${OUT}/${REDUCED ? 'reduced-' : ''}${id}-${bp.width}.png`
       await page.screenshot({ path: file })
       report.shots.push(file)
     }
@@ -64,7 +71,7 @@ try {
   await browser.close()
 }
 
-writeFileSync(`${OUT}/report.json`, JSON.stringify(report, null, 2))
+writeFileSync(`${OUT}/${REDUCED ? 'report-reduced' : 'report'}.json`, JSON.stringify(report, null, 2))
 console.log(`✓ ${report.shots.length} screenshot in ${OUT}/ · errori: ${report.errors.length}`)
 for (const e of report.errors.slice(0, 10)) console.log('  ', e)
 if (report.errors.length > 0) process.exitCode = 1

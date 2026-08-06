@@ -11,12 +11,21 @@ import { Hero3dSplit } from '../registry/02-hero-3d-split/Hero3dSplit'
 import { MeshGradientField } from '../registry/03-mesh-gradient-field/MeshGradientField'
 import { PinnedSceneScrub } from '../registry/05-pinned-scene-scrub/PinnedSceneScrub'
 import { KineticType } from '../registry/06-kinetic-type/KineticType'
+import { ProductExplode } from '../registry/13-product-explode/ProductExplode'
+import { TypeBehindProduct } from '../registry/14-type-behind-product/TypeBehindProduct'
+import { EditorialGallery } from '../registry/07-editorial-gallery/EditorialGallery'
 // Copy: S3, uno slot-file per sezione (content/README.md)
 import heroCopy from '../content/01-hero.json'
 import gradientCopy from '../content/03-gradient.json'
 import scrubCopy from '../content/05-scrub.json'
 import kineticCopy from '../content/06-kinetic.json'
+import explodeCopy from '../content/13-explode.json'
+import veilCopy from '../content/14-veil.json'
+import galleryCopy from '../content/07-gallery.json'
 import outroCopy from '../content/07-outro.json'
+// Asset scontornati: manifesto generato da npm run cutouts:encode (importato, non fetchato —
+// ScrollTrigger misura la sezione al mount)
+import { cutouts } from './lib/cutouts.generated'
 
 export default function App() {
   const reduced = useReducedMotion()
@@ -49,6 +58,13 @@ export default function App() {
         <Hero3dSplit copy={heroCopy} reduced={reduced} />
         <MeshGradientField copy={gradientCopy} reduced={reduced} />
         <PinnedSceneScrub copy={scrubCopy} reduced={reduced} />
+        <ProductExplode
+          copy={explodeCopy}
+          product={cutouts.products.stack}
+          reduced={reduced}
+        />
+        <TypeBehindProduct copy={veilCopy} product={cutouts.products.stack} reduced={reduced} />
+        <EditorialGallery copy={galleryCopy} product={cutouts.products.stack} reduced={reduced} />
         <KineticType copy={kineticCopy} reduced={reduced} />
 
         <section id="outro" className="outro">
