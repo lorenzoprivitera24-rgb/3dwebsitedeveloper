@@ -74,10 +74,16 @@ export function CameraDirector({ reduced }: Props) {
     camZ = MathUtils.lerp(camZ, 3.2, s)
     camZ = MathUtils.lerp(camZ, explodeZ, e)
     camZ = MathUtils.lerp(camZ, kineticZ, k)
-    // durante explode la camera torna anche in asse: una deriva laterale dietro una vista
-    // esplosa fa sembrare che si muova la pila
-    const camX = (0.3 * g + Math.sin(s * Math.PI * 0.9) * 1.2 * (1 - k)) * (1 - e)
-    const camY = (0.4 * h + Math.sin(s * Math.PI) * 0.8 - 0.2 * k) * (1 - e)
+    // Nei capitoli del prodotto la camera torna in asse: una deriva laterale dietro una vista
+    // esplosa fa sembrare che si muova la pila.
+    // `* (1 - k)` NON è ridondante: `e` resta inchiodato a 1 dopo il capitolo (il progress di
+    // ScrollTrigger non torna indietro quando la sezione è passata), quindi senza il testimone al
+    // capitolo successivo la camera resterebbe centrata per tutto il resto della pagina — e il
+    // kinetic perderebbe l'inquadratura che aveva. Stesso idioma di morph e camZ, che si
+    // riprendono la proprietà con la lerp su `k`.
+    const eCam = e * (1 - k)
+    const camX = (0.3 * g + Math.sin(s * Math.PI * 0.9) * 1.2 * (1 - k)) * (1 - eCam)
+    const camY = (0.4 * h + Math.sin(s * Math.PI) * 0.8 - 0.2 * k) * (1 - eCam)
 
     sceneTargets.camX = camX
     sceneTargets.camY = camY
