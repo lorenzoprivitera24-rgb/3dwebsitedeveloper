@@ -33,6 +33,10 @@ if (shots.length === 0) {
 }
 
 if (bless) {
+  // Azzera PRIMA di copiare. Una baseline che accumula scatti di sezioni rimosse è la versione
+  // lenta dello stesso difetto che shoot.mjs evita ripulendo qa/shots: file morti che restano
+  // nel repo e che nessuno saprà più se sono ancora la verità.
+  rmSync(BASELINE, { recursive: true, force: true })
   mkdirSync(BASELINE, { recursive: true })
   for (const f of shots) copyFileSync(join(SHOTS, f), join(BASELINE, f))
   rmSync(DIFFS, { recursive: true, force: true })
