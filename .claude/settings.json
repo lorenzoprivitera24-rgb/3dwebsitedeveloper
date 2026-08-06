@@ -1,4 +1,19 @@
 {
+  "permissions": {
+    "deny": [
+      "Read(./node_modules/**)",
+      "Read(./dist/**)",
+      "Read(./package-lock.json)",
+      "Read(./**/*.tsbuildinfo)",
+      "Read(./lib/illustrations/**/*.svg)",
+      "Read(./lib/fonts/**/*.woff2)",
+      "Read(./lib/fonts/**/*.ttf)",
+      "Read(./**/*.glb)",
+      "Read(./**/*.hdr)",
+      "Read(./**/*.ktx2)",
+      "Read(./**/*.basis)"
+    ]
+  },
   "hooks": {
     "UserPromptSubmit": [
       {

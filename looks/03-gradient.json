@@ -1,0 +1,11 @@
+{
+  "section": "gradient",
+  "noiseScale": 3,
+  "pointerInfluence": 0.4,
+  "detailScale": 2,
+  "detailOffset": 7,
+  "baseSpread": 0.45,
+  "baseBias": 0.22,
+  "veinSpread": 0.35,
+  "veinBias": 0.06
+}

@@ -1,0 +1,32 @@
+{
+  "_come_e_stato_ricavato": "Non indovinato: MISURATO. Una scena 3D animata non è deterministica al pixel (rumore TSL legato a `time`, damping della camera, antialiasing). Il budget è il rumore di fondo del rendering, non una tolleranza pigra. Metodo: stessa build, tre giri di `npm run qa:shoot`, il primo promosso a baseline e gli altri due confrontati. Budget = massimo misurato × ~2,5, con pavimento 0,3%. Un budget troppo stretto produce falsi allarmi, e un gate che grida al lupo smette di essere letto: è peggio di un gate un po' largo.",
+  "_misura_6_ago_2026": {
+    "metodo": "2 campioni run-to-run, stessa build, Chrome for Testing headless",
+    "rumore_massimo_osservato": {
+      "scrub-834": 0.6,
+      "gradient-834": 0.42,
+      "scrub-390": 0.2,
+      "hero-834": 0.18,
+      "gradient-390": 0.18,
+      "hero-390": 0.17,
+      "kinetic-834": 0.08,
+      "altri": "≤ 0.06 (outro e kinetic a 1440/390 sono a 0.00: lì il campo è spento)"
+    },
+    "da_rimisurare_quando": "cambia il renderer, la scena persistente, o i tempi di attesa in shoot.mjs"
+  },
+  "default": 0.5,
+  "perShot": {
+    "scrub-834": 1.5,
+    "gradient-834": 1.1,
+    "hero-834": 0.5,
+    "scrub-390": 0.5,
+    "gradient-390": 0.5,
+    "hero-390": 0.5,
+    "kinetic-834": 0.3,
+    "kinetic-1440": 0.3,
+    "kinetic-390": 0.3,
+    "outro-1440": 0.3,
+    "outro-834": 0.3,
+    "outro-390": 0.3
+  }
+}

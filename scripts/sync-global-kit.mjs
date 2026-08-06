@@ -3,9 +3,10 @@
 // Copies the 6 specialist agents + the web3d-integration-patterns skill (SKILL.md +
 // references/) to ~/.claude, so 3D work OUTSIDE this repo (Laribinto, client sites)
 // uses fresh definitions instead of stale global copies (audit 12 lug 2026).
-// Global-only extras in the skill dir (react-bits/ mirror, STACK.md) are preserved.
-// Usage: npm run sync:global  (run after every change to .claude/agents or the skill)
-import { cpSync, existsSync, mkdirSync, readdirSync } from 'node:fs'
+// The react-bits/ shelf is MIRRORED from lib/ (see below) so the global copy cannot rot;
+// other global-only extras in the skill dir (STACK.md) are preserved.
+// Usage: npm run sync:global  (run after every change to .claude/agents, the skill, or lib/react-bits)
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import os from 'node:os'
@@ -45,7 +46,19 @@ for (const f of readdirSync(join(srcSkill, 'references'))) {
   copied++
 }
 
+// The React Bits shelf lives in lib/react-bits/ and is the ONLY source of truth. The skill dir
+// used to hold a hand-placed copy that silently rotted: on 9 Jul 2026 the repo patched
+// ScrollReveal's cleanup (upstream killed EVERY ScrollTrigger on the page, including the kit's own
+// Lenis driver) and the global copy kept shipping the broken upstream to every out-of-repo build.
+// Mirroring it here means the divergence cannot come back.
+const srcBits = join(repo, 'lib', 'react-bits')
+const dstBits = join(dstSkill, 'react-bits')
+rmSync(dstBits, { recursive: true, force: true })
+cpSync(srcBits, dstBits, { recursive: true })
+const bits = readdirSync(srcBits, { recursive: true }).filter((f) => String(f).endsWith('.tsx')).length
+
 console.log(
   `sync:global — ${copied} file copiati repo → ~/.claude ` +
-  `(${AGENTS.length} agenti + skill). Extra globali (react-bits/, STACK.md) preservati.`,
+  `(${AGENTS.length} agenti + skill) + react-bits rispecchiato da lib/ (${bits} componenti). ` +
+  `Extra globali (STACK.md) preservati.`,
 )

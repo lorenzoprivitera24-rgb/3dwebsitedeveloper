@@ -2,8 +2,10 @@ import { useEffect, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { MathUtils } from 'three'
 import { makeGradientFieldMaterial } from './materials/gradientField'
+import { registerGradientLook } from './materials/lookRegistry'
 import { sceneTargets } from './sceneState'
 import { TOKENS } from '../lib/tokens.generated'
+import look from '../../looks/03-gradient.json'
 
 interface Props {
   reduced: boolean
@@ -16,7 +18,13 @@ interface Props {
 // Questo componente è l'unico scrittore dei propri uniform (damp dai target).
 export function GradientBackdrop({ reduced, flowScale = 1 }: Props) {
   const pointer = useThree((s) => s.pointer)
-  const { material, uniforms } = useMemo(() => makeGradientFieldMaterial(), [])
+  const { material, uniforms, lookUniforms } = useMemo(() => makeGradientFieldMaterial(look), [])
+
+  // Espone le manopole al pannello Leva (dev). In produzione nessuno legge il registro.
+  useEffect(() => {
+    registerGradientLook(lookUniforms)
+    return () => registerGradientLook(null)
+  }, [lookUniforms])
 
   // il flow riparte SEMPRE dal token (mai dal valore corrente: un toggle di reduced lo
   // azzererebbe per sempre); dispose del materiale al dismount
