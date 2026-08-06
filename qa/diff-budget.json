@@ -1,32 +1,32 @@
 {
-  "_come_e_stato_ricavato": "Non indovinato: MISURATO. Una scena 3D animata non è deterministica al pixel (rumore TSL legato a `time`, damping della camera, antialiasing). Il budget è il rumore di fondo del rendering, non una tolleranza pigra. Metodo: stessa build, tre giri di `npm run qa:shoot`, il primo promosso a baseline e gli altri due confrontati. Budget = massimo misurato × ~2,5, con pavimento 0,3%. Un budget troppo stretto produce falsi allarmi, e un gate che grida al lupo smette di essere letto: è peggio di un gate un po' largo.",
+  "_come_e_stato_ricavato": "Non indovinato: MISURATO. Una scena 3D animata non è deterministica al pixel (rumore TSL legato a `time`, damping della camera, antialiasing, e nel footer un marquee in ciclo infinito che non si assesta mai). Il budget è il rumore di fondo del rendering, non una tolleranza pigra. Metodo: stessa build, tre giri di `npm run qa:shoot`, il primo promosso a baseline e gli altri due confrontati. Budget = massimo misurato × ~2,5, con pavimento 0,3%. Un budget troppo stretto produce falsi allarmi, e un gate che grida al lupo smette di essere letto: è peggio di un gate un po' largo.",
   "_misura_6_ago_2026": {
-    "metodo": "2 campioni run-to-run, stessa build, Chrome for Testing headless",
+    "metodo": "2 campioni run-to-run, stessa build, Chrome for Testing headless, 8 sezioni × 3 breakpoint",
     "rumore_massimo_osservato": {
-      "scrub-834": 0.6,
-      "gradient-834": 0.42,
-      "scrub-390": 0.2,
-      "hero-834": 0.18,
-      "gradient-390": 0.18,
-      "hero-390": 0.17,
-      "kinetic-834": 0.08,
-      "altri": "≤ 0.06 (outro e kinetic a 1440/390 sono a 0.00: lì il campo è spento)"
+      "footer-834": 0.64,
+      "footer-390": 0.53,
+      "footer-1440": 0.47,
+      "scrub-1440": 0.28,
+      "scrub-834": 0.2,
+      "gradient-1440": 0.2,
+      "hero-1440": 0.15,
+      "strip-834": 0.13,
+      "scrub-390": 0.11,
+      "altri": "≤ 0.09 (gallery, card e kinetic stanno a 0.00-0.05: lì la scena è velata o spenta)"
     },
-    "da_rimisurare_quando": "cambia il renderer, la scena persistente, o i tempi di attesa in shoot.mjs"
+    "perche_il_footer_e_il_piu_rumoroso": "il marquee è una tween infinita: non esiste un istante in cui sia 'a riposo', quindi due scatti non lo trovano mai nella stessa posizione. È rumore strutturale, non instabilità del rendering.",
+    "da_rimisurare_quando": "cambia il renderer, la scena persistente, l'ordine delle sezioni, o i tempi di attesa in shoot.mjs"
   },
-  "default": 0.5,
+  "default": 0.3,
   "perShot": {
-    "scrub-834": 1.5,
-    "gradient-834": 1.1,
-    "hero-834": 0.5,
-    "scrub-390": 0.5,
-    "gradient-390": 0.5,
-    "hero-390": 0.5,
-    "kinetic-834": 0.3,
-    "kinetic-1440": 0.3,
-    "kinetic-390": 0.3,
-    "outro-1440": 0.3,
-    "outro-834": 0.3,
-    "outro-390": 0.3
+    "footer-834": 1.6,
+    "footer-390": 1.3,
+    "footer-1440": 1.2,
+    "scrub-1440": 0.7,
+    "scrub-834": 0.5,
+    "gradient-1440": 0.5,
+    "hero-1440": 0.4,
+    "strip-834": 0.4,
+    "scrub-390": 0.3
   }
 }

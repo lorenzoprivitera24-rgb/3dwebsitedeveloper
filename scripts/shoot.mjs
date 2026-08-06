@@ -8,7 +8,7 @@
 // Le sezioni = <main> section[id]. Browser: playwright-core + Chrome for Testing in cache
 // (il Chrome dell'utente NON raggiunge i server locali su questa macchina — fatto verificato).
 import { chromium } from 'playwright-core'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 
 const url = process.argv[2] ?? 'http://127.0.0.1:5199/'
@@ -22,6 +22,10 @@ const exe =
   process.env.CHROMIUM_PATH ??
   `${homedir()}/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`
 
+// Ripulisci PRIMA di scattare. Senza questo, una sezione rinominata o rimossa lascia il suo
+// vecchio scatto nella cartella: `qa:diff` continua a confrontarlo con la baseline e a dichiararlo
+// PASS per sempre — un verde che certifica una sezione che non esiste più.
+rmSync(OUT, { recursive: true, force: true })
 mkdirSync(OUT, { recursive: true })
 const browser = await chromium.launch({
   executablePath: exe,
@@ -50,7 +54,7 @@ try {
       await page.evaluate((sid) => {
         document.getElementById(sid)?.scrollIntoView({ behavior: 'instant', block: 'start' })
       }, id)
-      await page.waitForTimeout(900)
+      await page.waitForTimeout(1700) // > della piu' lunga entrata (scramble 1.1s + revealDelay)
       const file = `${OUT}/${id}-${bp.width}.png`
       await page.screenshot({ path: file })
       report.shots.push(file)

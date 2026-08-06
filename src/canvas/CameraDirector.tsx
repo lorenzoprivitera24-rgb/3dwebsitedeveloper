@@ -27,30 +27,74 @@ export function CameraDirector({ reduced }: Props) {
     const h = progressMap.hero
     const g = progressMap.gradient
     const s = progressMap.scrub
+    const gal = progressMap.gallery
+    const str = progressMap.strip
+    const crd = progressMap.card
     // la calmata del kinetic si COMPLETA al ~45% della sezione: il testo entra quasi subito
     // (trigger a top 72%) e deve trovare la scena già quieta — non calmarsi mentre esce
     // (finding QA giro 1: drammaturgia rovesciata + contrasto debole)
     const k = MathUtils.clamp(progressMap.kinetic * 2.2, 0, 1)
+    const f = progressMap.footer
 
-    // morph: 0.15 → 0.35 (hero) → 1.0 (scrub) → 0.15 (kinetic calma la scena)
+    // morph: 0.15 → 0.35 (hero) → 1.0 (scrub) → 0.3 gallery → 0.5 strip → 0.25 card
+    //        → 0.15 kinetic (la scena si calma) → 0.9 footer (si riapre per il congedo)
+    // Le lerp sono in ORDINE DI PAGINA: quando una tratta parte, la precedente è già a 1 e la sua
+    // lerp diventa l'identità. È lo stesso passaggio di testimone delle prime tre tratte, che
+    // restano bit-per-bit quelle approvate al terzo giro di QA.
     let morph = 0.15 + 0.2 * h
     morph = MathUtils.lerp(morph, 1.0, s)
+    morph = MathUtils.lerp(morph, 0.3, gal)
+    morph = MathUtils.lerp(morph, 0.5, str)
+    morph = MathUtils.lerp(morph, 0.25, crd)
     morph = MathUtils.lerp(morph, 0.15, k)
+    morph = MathUtils.lerp(morph, 0.9, f)
     sceneTargets.morph = morph
 
-    // il backdrop entra ed esce dentro la sezione gradient, spento del tutto dal kinetic
-    sceneTargets.gradientMix = Math.sin(Math.PI * MathUtils.clamp(g, 0, 1)) * (1 - k)
+    // il backdrop entra ed esce dentro la sezione gradient, spento del tutto dal kinetic; torna
+    // come velo tenue sotto il footer, che è l'unico altro momento in cui la scena riprende voce
+    sceneTargets.gradientMix =
+      Math.sin(Math.PI * MathUtils.clamp(g, 0, 1)) * (1 - k) + 0.35 * Math.sin(Math.PI * f)
 
-    // camera: avvicinamento (hero) → deriva (gradient) → orbita (scrub) → arretra (kinetic)
+    // camera: avvicinamento (hero) → deriva (gradient) → orbita (scrub) → si ritira dietro i
+    // contenuti (gallery, strip, card) → arretra (kinetic) → rientra per il congedo (footer).
+    // Nei capitoli editoriali il protagonista è il DOM: la scena resta profonda e fuori asse,
+    // e nella striscia orizzontale deriva in senso CONTRARIO allo scorrimento — è quel contrasto
+    // a far leggere il movimento come profondità invece che come trascinamento.
     // Nel capitolo kinetic il TESTO è il protagonista: su viewport stretti (aspect < 1,
     // mobile portrait) la ritirata cresce, o la forma continua a dominare il framing (QA giro 2).
     const aspect = 'aspect' in cam && typeof cam.aspect === 'number' ? cam.aspect : 1
     const kineticZ = 6.5 + (aspect < 1 ? (1 - aspect) * 4 : 0)
     let camZ = 6 - 1.5 * h
     camZ = MathUtils.lerp(camZ, 3.2, s)
+    camZ = MathUtils.lerp(camZ, 9.5, gal)
+    camZ = MathUtils.lerp(camZ, 8.0, str)
+    camZ = MathUtils.lerp(camZ, 9.0, crd)
     camZ = MathUtils.lerp(camZ, kineticZ, k)
-    const camX = 0.3 * g + Math.sin(s * Math.PI * 0.9) * 1.2 * (1 - k)
-    const camY = 0.4 * h + Math.sin(s * Math.PI) * 0.8 - 0.2 * k
+    camZ = MathUtils.lerp(camZ, 8.5, f)
+
+    // La striscia deriva per tutta la sua tratta, ma il peso entra in fretta (× 3): se salisse
+    // linearmente, a metà sezione la controderiva sarebbe ancora quasi nulla e non si leggerebbe.
+    const stripIn = MathUtils.clamp(str * 3, 0, 1)
+    const stripDrift = MathUtils.lerp(1.6, -1.6, str)
+
+    // I capitoli hero/gradient/scrub e l'approdo del kinetic restano quelli approvati al terzo
+    // giro di QA: a k=1 (con h, g, s già a 1) le vecchie formule davano camX 0.3 e camY 0.2, ed
+    // è esattamente il bersaglio delle lerp del kinetic qui sotto. I termini (1-k) e -0.2·k
+    // spariscono dalle basi perché ora il capitolo ha la sua tratta esplicita: lasciarli
+    // avrebbe contato due volte la stessa calmata.
+    let camX = 0.3 * g + Math.sin(s * Math.PI * 0.9) * 1.2
+    camX = MathUtils.lerp(camX, -1.1, gal)
+    camX = MathUtils.lerp(camX, stripDrift, stripIn)
+    camX = MathUtils.lerp(camX, 0.9, crd)
+    camX = MathUtils.lerp(camX, 0.3, k)
+    camX = MathUtils.lerp(camX, 0, f)
+
+    let camY = 0.4 * h + Math.sin(s * Math.PI) * 0.8
+    camY = MathUtils.lerp(camY, 0.6, gal)
+    camY = MathUtils.lerp(camY, -0.4, str)
+    camY = MathUtils.lerp(camY, 0.5, crd)
+    camY = MathUtils.lerp(camY, 0.2, k)
+    camY = MathUtils.lerp(camY, -1.6, f)
 
     sceneTargets.camX = camX
     sceneTargets.camY = camY

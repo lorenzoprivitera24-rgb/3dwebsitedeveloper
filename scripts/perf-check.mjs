@@ -24,19 +24,42 @@ if (!existsSync('dist/assets')) {
 }
 
 // --- JS/CSS della build (gzip reale) ---
-let jsGz = 0, cssGz = 0
+//
+// «JS iniziale» significa ciò che il browser scarica PRIMA del primo paint: lo script d'ingresso
+// più tutto quello che index.html preannuncia con <link rel="modulepreload"> (che sono le sue
+// dipendenze statiche). NON è la somma di tutti i chunk.
+//
+// La distinzione non è pedanteria: sommando tutto, questo gate non poteva vedere il proprio
+// bersaglio. Il code-split sposta peso dal percorso critico al caricamento differito senza
+// cambiare il totale di un byte, quindi il semaforo restava fermo per costruzione — e infatti il
+// vecchio messaggio di warn incolpava «debito noto: code-split», cioè proprio la cosa che la sua
+// metrica era incapace di misurare. Misurato su questa build: 587 KB sommando tutto, 157 KB
+// guardando il percorso critico.
+const html = existsSync('dist/index.html') ? readFileSync('dist/index.html', 'utf8') : ''
+const critical = new Set(
+  [...html.matchAll(/(?:src|href)="\/assets\/([^"]+\.js)"/g)].map((m) => m[1]),
+)
+
+let jsInitialGz = 0
+let jsDeferredGz = 0
+let cssGz = 0
 for (const f of readdirSync('dist/assets')) {
   const p = join('dist/assets', f)
   const ext = extname(f)
-  if (ext === '.js' || ext === '.css') {
-    const gz = gzipSync(readFileSync(p)).length
-    rows.push(`| ${f} | ${kb(statSync(p).size)} KB | ${kb(gz)} KB gzip |`)
-    if (ext === '.js') jsGz += gz
-    else cssGz += gz
-  }
+  if (ext !== '.js' && ext !== '.css') continue
+  const gz = gzipSync(readFileSync(p)).length
+  const when = ext === '.css' ? 'css' : critical.has(f) ? 'INIZIALE' : 'differito'
+  rows.push(`| ${f} | ${kb(statSync(p).size)} KB | ${kb(gz)} KB gzip | ${when} |`)
+  if (ext === '.css') cssGz += gz
+  else if (critical.has(f)) jsInitialGz += gz
+  else jsDeferredGz += gz
 }
-if (jsGz > 800 * 1024) fails.push(`JS iniziale ${kb(jsGz)} KB gzip > hard cap 800 KB`)
-else if (jsGz > 300 * 1024) warns.push(`JS iniziale ${kb(jsGz)} KB gzip > target 300 KB (debito noto: code-split/starter Next — gap analysis)`)
+
+if (critical.size === 0) {
+  warns.push('nessuno script trovato in dist/index.html: il conteggio del JS iniziale non è affidabile')
+}
+if (jsInitialGz > 800 * 1024) fails.push(`JS iniziale ${kb(jsInitialGz)} KB gzip > hard cap 800 KB`)
+else if (jsInitialGz > 300 * 1024) warns.push(`JS iniziale ${kb(jsInitialGz)} KB gzip > target 300 KB`)
 if (cssGz > 60 * 1024) warns.push(`CSS ${kb(cssGz)} KB gzip > 60 KB`)
 
 // --- asset ricorsivi (public/ + dist/) ---
@@ -67,7 +90,9 @@ const md = `# Perf report — gate S7
 Stato: **${status}** · Data: (git log della build)
 
 ## Totali
-- JS iniziale: **${kb(jsGz)} KB gzip** (target 300 · cap 800)
+- JS iniziale (entry + modulepreload): **${kb(jsInitialGz)} KB gzip** (target 300 · cap 800)
+- JS differito (chunk caricati dopo il primo paint): ${kb(jsDeferredGz)} KB gzip
+- JS totale sul disco: ${kb(jsInitialGz + jsDeferredGz)} KB gzip
 - CSS: ${kb(cssGz)} KB gzip · GLB: ${kb(glbTotal)} KB (cap 5120)
 
 ## FAIL
@@ -77,8 +102,8 @@ ${fails.map((f) => '- ' + f).join('\n') || '- nessuno'}
 ${warns.map((w) => '- ' + w).join('\n') || '- nessuno'}
 
 ## File della build
-| file | raw | gzip |
-|---|---|---|
+| file | raw | gzip | quando |
+|---|---|---|---|
 ${rows.join('\n')}
 
 Nota: LCP/CWV reali si misurano sul deploy (Lighthouse), non qui; questo gate copre pesi e

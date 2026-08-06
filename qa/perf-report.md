@@ -1,23 +1,26 @@
 # Perf report — gate S7
 
-Stato: **🟡 VERDE con warn** · Data: (git log della build)
+Stato: **🟢 VERDE** · Data: (git log della build)
 
 ## Totali
-- JS iniziale: **604.8 KB gzip** (target 300 · cap 800)
-- CSS: 2 KB gzip · GLB: 0 KB (cap 5120)
+- JS iniziale (entry + modulepreload): **157.5 KB gzip** (target 300 · cap 800)
+- JS differito (chunk caricati dopo il primo paint): 429.7 KB gzip
+- JS totale sul disco: 587.2 KB gzip
+- CSS: 2.8 KB gzip · GLB: 0 KB (cap 5120)
 
 ## FAIL
 - nessuno
 
 ## Warn
-- JS iniziale 604.8 KB gzip > target 300 KB (debito noto: code-split/starter Next — gap analysis)
+- nessuno
 
 ## File della build
-| file | raw | gzip |
-|---|---|---|
-| index-CXafSeWb.js | 1349.1 KB | 418 KB gzip |
-| index-CaRpyx8a.css | 7.5 KB | 2 KB gzip |
-| three-C8qGOpvO.js | 720.1 KB | 186.9 KB gzip |
+| file | raw | gzip | quando |
+|---|---|---|---|
+| CanvasLayer-o7yB0I-6.js | 210.5 KB | 68.3 KB gzip | differito |
+| index-B3O03Oxb.css | 11 KB | 2.8 KB gzip | css |
+| index-CVle23qC.js | 473.7 KB | 157.5 KB gzip | INIZIALE |
+| three-keaazw1T.js | 1364.2 KB | 361.3 KB gzip | differito |
 
 Nota: LCP/CWV reali si misurano sul deploy (Lighthouse), non qui; questo gate copre pesi e
 regressioni. Il fallback WebGPU→WebGL2 e reduced-motion li verifica il perf-fallback-auditor

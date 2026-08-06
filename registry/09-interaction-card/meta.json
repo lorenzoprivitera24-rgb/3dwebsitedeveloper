@@ -1,0 +1,10 @@
+{
+  "id": "09-interaction-card",
+  "descrizione": "Schede interattive: decodifica del titolo all'ingresso, magnetismo al puntatore fine, ribaltamento su click o tastiera",
+  "trigger": ["schede", "card", "flip", "scramble", "decode", "magnetico", "hover", "servizi"],
+  "props": { "copy": "CardCopy (eyebrow/headline/items[])", "reduced": "bool" },
+  "slotCopy": ["eyebrow", "headline", "items[].tag", "items[].title", "items[].detail"],
+  "perfTier": "A",
+  "mobileFallback": "niente magnetismo su puntatore grossolano; il ribaltamento resta (e' contenuto, non decorazione)",
+  "dipendenze": ["gsap/ScrollTrigger", "gsap/ScrambleTextPlugin", "src/scroll/useSectionProgress"]
+}

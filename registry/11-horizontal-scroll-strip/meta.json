@@ -1,0 +1,11 @@
+{
+  "id": "11-horizontal-scroll-strip",
+  "descrizione": "Striscia orizzontale pinnata: lo scorrimento verticale traduce la traccia in orizzontale, corsa calcolata dalla larghezza reale eccedente",
+  "trigger": ["scroll orizzontale", "striscia", "pinnata", "processo", "timeline", "step", "carosello"],
+  "props": { "copy": "StripCopy (eyebrow/headline/panels[])", "reduced": "bool" },
+  "slotCopy": ["eyebrow", "headline", "panels[].tag", "panels[].title"],
+  "perfTier": "B",
+  "mobileFallback": "reduced = niente pin, scorrimento orizzontale nativo con scroll-snap, raggiungibile da tastiera",
+  "dipendenze": ["gsap/ScrollTrigger (pin)", "src/scroll/progressMap"],
+  "note": "Come il 05 crea il PROPRIO trigger con pin e NON usa useSectionProgress: sarebbero due trigger sullo stesso elemento con geometrie diverse."
+}

@@ -1,0 +1,22 @@
+{
+  "section": "card",
+  "eyebrow": "SCRAMBLE / MAGNETIC / FLIP",
+  "headline": "Interaction with a keyboard behind it",
+  "items": [
+    {
+      "tag": "A",
+      "title": "DECODE",
+      "detail": "ScrambleText on enter, once. It runs on the title, restores the real text on unmount, and never fires under reduced motion."
+    },
+    {
+      "tag": "B",
+      "title": "MAGNETIC",
+      "detail": "quickTo per axis, created once. Fine pointers only — chasing a finger that leaves the screen just makes the grid twitch."
+    },
+    {
+      "tag": "C",
+      "title": "FLIP",
+      "detail": "It is a button, so Enter and Space work for free. aria-expanded announces the state; the hidden face is aria-hidden so it is not read twice."
+    }
+  ]
+}

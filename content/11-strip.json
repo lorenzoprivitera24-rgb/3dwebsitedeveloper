@@ -1,0 +1,15 @@
+{
+  "section": "strip",
+  "eyebrow": "PINNED / HORIZONTAL",
+  "headline": "Sideways, on a vertical wheel",
+  "panels": [
+    { "tag": "S0", "title": "Intake" },
+    { "tag": "S1", "title": "Direction" },
+    { "tag": "S2", "title": "Storyboard" },
+    { "tag": "S3", "title": "Copy" },
+    { "tag": "S4", "title": "Assets" },
+    { "tag": "S5", "title": "Sections" },
+    { "tag": "S6", "title": "Visual QA" },
+    { "tag": "S7", "title": "Perf gate" }
+  ]
+}

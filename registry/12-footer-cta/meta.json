@@ -1,0 +1,10 @@
+{
+  "id": "12-footer-cta",
+  "descrizione": "Congedo: marquee continuo su lista duplicata, CTA magnetico su <a> reale, velo radiale che tiene il contrasto sopra la scena viva",
+  "trigger": ["footer", "chiusura", "congedo", "cta finale", "marquee", "contatti"],
+  "props": { "copy": "FooterCopy (marquee[]/headline/body/ctaLabel/ctaHref/footnote)", "reduced": "bool" },
+  "slotCopy": ["marquee", "headline", "body", "ctaLabel", "ctaHref", "footnote"],
+  "perfTier": "A",
+  "mobileFallback": "niente magnetismo su puntatore grossolano; reduced = marquee fermo e leggibile dagli screen reader",
+  "dipendenze": ["gsap", "gsap/ScrollTrigger", "src/scroll/useSectionProgress"]
+}

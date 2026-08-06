@@ -1,0 +1,10 @@
+{
+  "id": "07-editorial-gallery",
+  "descrizione": "Griglia magazine: rivelazione a scaglioni all'ingresso + parallasse PER COLONNA (non per cella, o la griglia si scioglie)",
+  "trigger": ["galleria", "griglia", "magazine", "editoriale", "parallax", "case study", "portfolio"],
+  "props": { "copy": "GalleryCopy (eyebrow/headline/items[])", "reduced": "bool" },
+  "slotCopy": ["eyebrow", "headline", "items[].tag", "items[].title", "items[].note"],
+  "perfTier": "A",
+  "mobileFallback": "una colonna (grid auto-fit); la parallasse si annulla da sé perché il conteggio colonne e' MISURATO dal DOM",
+  "dipendenze": ["gsap/ScrollTrigger", "src/scroll/useSectionProgress"]
+}

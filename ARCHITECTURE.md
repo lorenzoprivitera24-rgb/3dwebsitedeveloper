@@ -22,29 +22,51 @@ Project: a scroll-driven and pointer/touch-driven 3D hero. A form morphs from tw
 
 ```
 <SmoothScroll>                         scroll/SmoothScroll.tsx   (ReactLenis + gsap.ticker sync)  [architect]
-  <ScrollProgressDriver progress/>     scroll/ScrollProgressDriver.tsx (ScrollTrigger -> ref)     [motion]
-  <div class="canvas-fixed" aria-hidden>
-    <Stage>                            canvas/Stage.tsx          (Canvas WebGPU async + extend)   [architect]
-      <Scene scrollProgress reduced/>  canvas/Scene.tsx          (lights + rig + form)            [architect]
-        <CameraRig scrollProgress/>    canvas/CameraRig.tsx      (camera from scroll)             [motion]
-        <MorphingForm scrollProgress/> canvas/MorphingForm.tsx   (TSL displacement + uniforms)    [shader + motion]
-    </Stage>  (Poster fallback)        canvas/Poster.tsx         (no-WebGL poster)                [architect/ui]
+  <PreloaderProgress expectsCanvas/>   registry/01-…             (reads lib/loadProgress store)   [ui]
+  <div class="canvas-layer" aria-hidden>
+    Suspense → lazy(CanvasLayer)       canvas/CanvasLayer.tsx    (THE lazy boundary — see below)  [architect]
+      <LoadProgressBridge/>            canvas/LoadProgressBridge (drei useProgress → store)       [architect]
+      <GradientLookPanel/>             canvas/GradientLookPanel  (Leva, DEV only)                 [ui]
+      <Stage>                          canvas/Stage.tsx          (Canvas WebGPU async + extend)   [architect]
+        <Scene reduced detail …/>      canvas/Scene.tsx          (lights + director + form)       [architect]
+          <CameraDirector/>            canvas/CameraDirector.tsx (progressMap → sceneTargets)     [motion]
+          <MorphingForm/>              canvas/MorphingForm.tsx   (TSL displacement + uniforms)    [shader + motion]
+          <GradientBackdrop/>          canvas/GradientBackdrop   (damps toward sceneTargets)      [shader + motion]
+    (Poster fallback)                  canvas/Poster.tsx         (no-WebGL poster, no deps)       [architect/ui]
   </div>
-  <main>                               DOM overlay (scrollable)
-    <Overlay scrollProgress reduced/>  ui/Overlay.tsx            (Motion UI + parallax + a11y)    [ui]
-    <section id="scene-track"/>        the tall scroll track that generates progress             [architect]
-  </main>
+  <main>                               DOM: 8 blueprint sections, each writes ONE progress channel
 </SmoothScroll>
 ```
 
+### The lazy boundary (non-negotiable rule 9)
+
+`App` imports the 3D layer with `lazy(() => import('./canvas/CanvasLayer'))`. Everything that
+imports `three`, `@react-three/fiber` or `drei` must live on the canvas side of that boundary.
+
+A DOM component that imports drei — even just `useProgress` — makes `three` reachable from the
+entry's STATIC graph, and Rolldown then emits the three chunk as a `<link rel="modulepreload">`:
+the code-split still shows up in the build log but nothing is actually deferred. Measured on this
+kit: 599 KB gzip on first paint before, 157 KB after.
+
+The DOM reads canvas state through `src/lib/loadProgress.ts`, a store with **no imports**. Keep it
+that way. Poster and `lib/webgl.ts` are dependency-free for the same reason.
+
 ## The component contract
 
-### Scroll progress
-- Carried by a single ref: `React.MutableRefObject<number>`, value in `[0, 1]`.
-- Created in `App.tsx` as `const scrollProgress = useRef(0)`.
-- Written by `ScrollProgressDriver` (a `ScrollTrigger` with `scrub`, `onUpdate`).
-- Read in `useFrame` by `MorphingForm` and `CameraRig`.
-- Rule: never store scroll progress in React state. No per-frame re-renders.
+### Scroll progress — the progress map
+- `src/scroll/progressMap.ts` holds one channel per section, each `0..1`. Ref-like, never React state.
+- Each DOM blueprint writes ONLY its own channel via `useSectionProgress(id, ref)`.
+- Pinned sections (05, 11) create their own `ScrollTrigger` with `pin` and write the channel from
+  its `onUpdate`: two triggers on one element with different geometries would disagree.
+- The single consumer is `CameraDirector`, which turns the map into `sceneTargets`; materials damp
+  their uniforms toward those targets. Two levels, one writer each.
+- **The order of the union type is the order on the page.** The director hands off between
+  consecutive chapters assuming that when section N is > 0, N-1 is already 1. Move a section in the
+  DOM → move it in `progressMap.ts` and in the director too.
+
+### Look parameters (non-negotiable rule 10)
+Aesthetic constants live in `looks/<section>.json` and reach the shader as uniforms, so the Leva
+panel can move them at runtime. No number that is tuned by eye stays in the source.
 
 ### Pointer
 - Read from `useThree((s) => s.pointer)` inside `useFrame`. R3F unifies mouse and touch into

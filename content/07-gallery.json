@@ -1,0 +1,37 @@
+{
+  "section": "gallery",
+  "eyebrow": "GRID / PARALLAX BY COLUMN",
+  "headline": "Editorial, not decorative",
+  "items": [
+    {
+      "tag": "01",
+      "title": "One loop",
+      "note": "Lenis rides gsap.ticker. Nothing else touches requestAnimationFrame."
+    },
+    {
+      "tag": "02",
+      "title": "One owner",
+      "note": "Every uniform, every camera axis, has exactly one system writing it."
+    },
+    {
+      "tag": "03",
+      "title": "Progress, then direction",
+      "note": "Sections write a channel. The director reads the map and stages the scene."
+    },
+    {
+      "tag": "04",
+      "title": "Tuned by hand",
+      "note": "Aesthetic numbers live in looks/, on a knob — never hardcoded in a shader."
+    },
+    {
+      "tag": "05",
+      "title": "Measured, not guessed",
+      "note": "The visual gate's thresholds are the rendering's own noise floor."
+    },
+    {
+      "tag": "06",
+      "title": "Green is not proof",
+      "note": "A build can compile and still break on screen. Verify in a real browser."
+    }
+  ]
+}
