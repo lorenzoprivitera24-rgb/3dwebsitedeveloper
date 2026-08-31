@@ -1,0 +1,31 @@
+{
+  "id": "13-product-explode",
+  "descrizione": "Pila di scontornati che si apre allo scrub in una sezione pinnata: ogni strato si porta dietro annotazione e leader line, le ombre di contatto raccontano il distacco, la pila si richiude prima di uscire",
+  "trigger": [
+    "vista esplosa",
+    "strati del prodotto",
+    "come è fatto",
+    "anatomia del prodotto",
+    "ingredienti",
+    "exploded view",
+    "product breakdown"
+  ],
+  "props": {
+    "copy": "ExplodeCopy (eyebrow/title/notes per layer.id)",
+    "product": "CutoutProduct dal manifesto di encode-cutouts",
+    "reduced": "bool",
+    "pinVh": "number (300 desktop, 200 mobile forzato)",
+    "spread": "number — separazione fra strati adiacenti in % dell'altezza stage (11)",
+    "reassemble": "bool — la pila si richiude prima di uscire (true)"
+  },
+  "slotCopy": ["eyebrow", "title", "notes[layerId].label", "notes[layerId].desc"],
+  "perfTier": "A",
+  "mobileFallback": "pin più corto (200vh), spread 0.7×, annotazioni sostituite dalla legenda visibile",
+  "dipendenze": [
+    "scripts/encode-cutouts.mjs (manifesto + registrazione condivisa)",
+    "src/lib/cutouts.ts",
+    "gsap/ScrollTrigger",
+    "src/scroll/progressMap"
+  ],
+  "asset": "public/assets/cutouts/<prodotto>/ — N strati su tela condivisa, NN crescente dal basso in alto"
+}

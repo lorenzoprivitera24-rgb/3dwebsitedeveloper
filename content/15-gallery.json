@@ -1,0 +1,26 @@
+{
+  "section": "gallery",
+  "eyebrow": "Il listino",
+  "title": "Ogni pezzo si vende da solo.",
+  "items": [
+    {
+      "title": "Cupola",
+      "desc": "Vetro sinterizzato, finitura opaca. Diffonde senza scaldare.",
+      "meta": "€ 148",
+      "tag": "Nuovo",
+      "layerId": "05-cupola"
+    },
+    {
+      "title": "Nucleo",
+      "desc": "L'unico pezzo che lavora. Sostituibile in trenta secondi.",
+      "meta": "€ 320",
+      "layerId": "02-nucleo"
+    },
+    {
+      "title": "Basamento",
+      "desc": "Appoggio e dissipazione. Non si vede mai, regge tutto.",
+      "meta": "€ 96",
+      "layerId": "01-basamento"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "14-type-behind-product",
+  "descrizione": "Display condensato gigante che attraversa DIETRO lo scontornato: il prodotto mangia le lettere mentre passano, con contro-parallasse e inclinazione da velocità di scroll",
+  "trigger": [
+    "testo dietro il prodotto",
+    "nome che scorre",
+    "parola gigante",
+    "occlusione",
+    "marquee dietro l'oggetto",
+    "type behind product"
+  ],
+  "props": {
+    "copy": "VeilCopy (eyebrow/word/headline/caption)",
+    "product": "CutoutProduct dal manifesto di encode-cutouts",
+    "reduced": "bool",
+    "pinVh": "number (170 desktop, 130 mobile forzato)",
+    "travel": "number — corsa della parola in % della sua larghezza (62)",
+    "repeat": "number — ripetizioni nel nastro (3)"
+  },
+  "slotCopy": ["eyebrow", "word", "headline", "caption"],
+  "perfTier": "A",
+  "mobileFallback": "corsa 0.55×, pin 130vh, blocco di testo a piena larghezza sotto",
+  "dipendenze": [
+    "scripts/encode-cutouts.mjs (serve alpha VERA: su fondo pieno l'effetto non esiste)",
+    "src/lib/cutouts.ts",
+    "gsap/ScrollTrigger",
+    "token --display-condensed (grottesco stretto pesante, es. Anton)"
+  ]
+}

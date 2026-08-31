@@ -53,6 +53,9 @@ const css = `${header}
   --display: ${q(tokens.fonts.display)}, Georgia, 'Times New Roman', serif;
   --body: ${q(tokens.fonts.body)}, ui-sans-serif, system-ui, sans-serif;
   --mono: ${q(tokens.fonts.mono ?? 'ui-monospace')}, ui-monospace, 'SF Mono', monospace;
+  /* facoltativo: il grottesco stretto e pesante del genere «prodotto editoriale» (blueprint 14).
+     Assente ⇒ ricade sul display, così i progetti che non lo usano non devono dichiararlo. */
+  --display-condensed: ${tokens.fonts.condensed ? `${q(tokens.fonts.condensed)}, ` : ''}var(--display);
   --size-display: clamp(2.8rem, 1rem + 9vw, 9rem);
   --size-eyebrow: 0.78rem;
   --motion-micro: ${tokens.motion.micro}s;

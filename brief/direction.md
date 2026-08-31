@@ -14,6 +14,7 @@ token bridge (`npm run tokens:build`). I valori coincidono con la palette storic
 - **Display**: Fraunces (300/500/600) — self-host `lib/fonts/Fraunces`
 - **Testo**: Schibsted Grotesk (400/500/700) — self-host `lib/fonts/SchibstedGrotesk`
 - **Mono (eyebrow)**: Fragment Mono — self-host `lib/fonts/FragmentMono`
+- **Condensato (display gigante dietro il prodotto, blueprint 14)**: Anton — self-host `lib/fonts/Anton`
 - **Scala**: display `clamp(2.8rem, 1rem + 9vw, 9rem)`, leading 0.95; eyebrow 0.78rem tracking 0.18em
 
 ## Vocabolario di motion
@@ -39,7 +40,7 @@ token bridge (`npm run tokens:build`). I valori coincidono con la palette storic
   "tokens": {
     "colors": { "bg": "#07090d", "bg2": "#0b0e14", "fg": "#eef1f7", "muted": "#9aa3b2", "accent": "#5b8cff" },
     "gradient": { "a": "#07090d", "b": "#5b8cff", "c": "#8db4ff", "flow": 0.15 },
-    "fonts": { "display": "Fraunces", "body": "Schibsted Grotesk", "mono": "Fragment Mono" },
+    "fonts": { "display": "Fraunces", "body": "Schibsted Grotesk", "mono": "Fragment Mono", "condensed": "Anton" },
     "motion": { "micro": 0.18, "base": 0.6, "sceneVh": 250, "ease": "power2.out" }
   }
 }

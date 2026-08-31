@@ -8,6 +8,9 @@
   --display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --body: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
   --mono: 'Fragment Mono', ui-monospace, 'SF Mono', monospace;
+  /* facoltativo: il grottesco stretto e pesante del genere «prodotto editoriale» (blueprint 14).
+     Assente ⇒ ricade sul display, così i progetti che non lo usano non devono dichiararlo. */
+  --display-condensed: 'Anton', var(--display);
   --size-display: clamp(2.8rem, 1rem + 9vw, 9rem);
   --size-eyebrow: 0.78rem;
   --motion-micro: 0.18s;

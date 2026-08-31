@@ -17,7 +17,8 @@ export const TOKENS = {
   "fonts": {
     "display": "Fraunces",
     "body": "Schibsted Grotesk",
-    "mono": "Fragment Mono"
+    "mono": "Fragment Mono",
+    "condensed": "Anton"
   },
   "motion": {
     "micro": 0.18,

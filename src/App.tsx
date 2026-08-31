@@ -11,6 +11,9 @@ import { PreloaderProgress } from '../registry/01-preloader-progress/PreloaderPr
 import { Hero3dSplit } from '../registry/02-hero-3d-split/Hero3dSplit'
 import { MeshGradientField } from '../registry/03-mesh-gradient-field/MeshGradientField'
 import { PinnedSceneScrub } from '../registry/05-pinned-scene-scrub/PinnedSceneScrub'
+import { ProductExplode } from '../registry/13-product-explode/ProductExplode'
+import { TypeBehindProduct } from '../registry/14-type-behind-product/TypeBehindProduct'
+import { ProductGallery } from '../registry/15-product-gallery/ProductGallery'
 import { EditorialGallery } from '../registry/07-editorial-gallery/EditorialGallery'
 import { HorizontalScrollStrip } from '../registry/11-horizontal-scroll-strip/HorizontalScrollStrip'
 import { InteractionCard } from '../registry/09-interaction-card/InteractionCard'
@@ -20,11 +23,17 @@ import { FooterCta } from '../registry/12-footer-cta/FooterCta'
 import heroCopy from '../content/01-hero.json'
 import gradientCopy from '../content/03-gradient.json'
 import scrubCopy from '../content/05-scrub.json'
+import explodeCopy from '../content/13-explode.json'
+import veilCopy from '../content/14-veil.json'
+import prodGalleryCopy from '../content/15-gallery.json'
 import galleryCopy from '../content/07-gallery.json'
 import stripCopy from '../content/11-strip.json'
 import cardCopy from '../content/09-card.json'
 import kineticCopy from '../content/06-kinetic.json'
 import footerCopy from '../content/12-footer.json'
+// Asset scontornati: manifesto generato da npm run cutouts:encode (importato, non fetchato —
+// ScrollTrigger misura la sezione al mount)
+import { cutouts } from './lib/cutouts.generated'
 
 // Il layer 3D entra da un import DINAMICO: è ciò che tiene three/webgpu, R3F e drei fuori dal
 // grafo statico dell'entry. Con un import statico il chunk `three` finisce in <link modulepreload>
@@ -62,11 +71,17 @@ export default function App() {
       </div>
 
       {/* scrollable DOM content above the canvas: i blueprint scrivono la progress map,
-          il CameraDirector dirige la scena (brief/storyboard.md è la sceneggiatura) */}
+          il CameraDirector dirige la scena (brief/storyboard.md è la sceneggiatura).
+          Ordine di pagina = ordine del testimone in CameraDirector e in progressMap. */}
       <main className="content">
         <Hero3dSplit copy={heroCopy} reduced={reduced} />
         <MeshGradientField copy={gradientCopy} reduced={reduced} />
         <PinnedSceneScrub copy={scrubCopy} reduced={reduced} />
+        {/* capitoli «prodotto a strati»: il protagonista è il DOM, la scena si fa da parte */}
+        <ProductExplode copy={explodeCopy} product={cutouts.products.stack} reduced={reduced} />
+        <TypeBehindProduct copy={veilCopy} product={cutouts.products.stack} reduced={reduced} />
+        <ProductGallery copy={prodGalleryCopy} product={cutouts.products.stack} reduced={reduced} />
+        {/* blocco editoriale: la scena riprende voce capitolo per capitolo */}
         <EditorialGallery copy={galleryCopy} reduced={reduced} />
         <HorizontalScrollStrip copy={stripCopy} reduced={reduced} />
         <InteractionCard copy={cardCopy} reduced={reduced} />

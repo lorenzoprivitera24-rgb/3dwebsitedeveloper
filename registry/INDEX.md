@@ -1,8 +1,8 @@
 # Registro — indice dei blueprint
 
-Stato: **9/12 implementati** (01·02·03·05·06·07·09·11·12 — ago 2026, tutti composti nella demo del
-kit e passati per la QA visiva su pagina reale, vedi `brief/composition-plan.md`).
-Backlog extra dalla ricognizione lug 2026 in coda.
+Stato: **12/15 implementati** (01·02·03·05·06·07·09·11·12 ago 2026, composti e passati per la QA
+visiva + **13·14·15 famiglia «prodotto a strati»**, ago 2026). Mancano: 04 (branch `gen-factory`),
+08, 10. Backlog extra dalla ricognizione lug 2026 in coda.
 
 | # | id | Copre | Stato |
 |---|---|---|---|
@@ -18,6 +18,9 @@ Backlog extra dalla ricognizione lug 2026 in coda.
 | 10 | `display-statement` | type gigante su foto, eyebrow mono | pianificato |
 | 11 | `horizontal-scroll-strip` | galleria orizzontale pinnata | ✅ implementato |
 | 12 | `footer-cta` | marquee + CTA magnetico + velo di contrasto | ✅ implementato |
+| 13 | `product-explode` | vista esplosa scrubbata di scontornati + annotazioni | ✅ implementato |
+| 14 | `type-behind-product` | display condensato che passa DIETRO lo scontornato | ✅ implementato |
+| 15 | `product-gallery` | griglia listino di scontornati + `layerId` per strato | ✅ implementato |
 | — | `pointer-ripple-image` | ripple cursor-reactive (da Framer Shaders) | backlog recon |
 | — | `instanced-crowd-physics` | folla istanziata + fisica worker (da threejs.paris) | backlog recon |
 | — | `organic-svg-buttons` | bottoni SVG deformati dal cursore | backlog recon |
@@ -25,7 +28,7 @@ Backlog extra dalla ricognizione lug 2026 in coda.
 ## Ordine in pagina e regia
 
 L'ordine dei blueprint nella demo **è** l'ordine dei canali in `src/scroll/progressMap.ts` e delle
-tratte nel `CameraDirector`: hero → gradient → scrub → gallery → strip → card → kinetic → footer.
+tratte nel `CameraDirector`: hero → gradient → scrub → explode → veil → prodgallery → gallery → strip → card → kinetic → footer.
 La regia si passa il testimone fra tratte consecutive dando per scontato che, quando una sezione ha
 progresso > 0, la precedente sia già a 1. **Se sposti una sezione nel DOM, spostala anche là.**
 
@@ -41,3 +44,17 @@ progresso > 0, la precedente sia già a 1. **Se sposti una sezione nel DOM, spos
 3. **Un'entrata più lunga dell'attesa di QA rende lo scatto non deterministico.** Lo scramble del 09
    dura 1,1 s: con l'attesa a 900 ms si fotografava il titolo a metà decodifica, e nessun confronto
    sarebbe mai stato stabile. `shoot.mjs` ora attende 1700 ms.
+
+## La famiglia «prodotto a strati» (13 · 14 · 15)
+
+Nasce dalla ricognizione di agosto 2026 su un sito di prodotto Framer
+(`docs/recon-prodotto-a-strati-ago2026.md`): un genere che **non è 3D** e che il registro non
+copriva affatto. Condividono un solo contratto di asset — il manifesto di
+`scripts/encode-cutouts.mjs` — e una grammatica comune, codificata nella skill
+**`layered-product-choreography`**.
+
+Sequenza che funziona: **mostra l'oggetto → aprilo (13) → nominalo (14) → vendilo (07)**.
+
+Precondizione dura per tutti e tre: **fotografia scontornata con alpha vera, su tela condivisa**.
+Con JPEG su fondo pieno il blueprint 14 non ha niente da occludere e il 13 non ha strati da
+separare. Va detto al cliente in S0, non scoperto in S5.
