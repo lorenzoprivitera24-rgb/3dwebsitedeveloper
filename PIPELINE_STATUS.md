@@ -24,14 +24,17 @@ Regole di passaggio: nessuno stadio parte se manca l'artefatto dello stadio prec
 umani si superano solo con OK esplicito; ogni artefatto chiude con la sua checklist spuntata.
 
 **Debito JS iniziale: CHIUSO.** Era 604,8 KB gzip e il gate non poteva vederlo scendere, perché
-sommava tutti i chunk e chiamava «iniziale» il totale. Ora `perf:check` legge da `dist/index.html`
-lo script d'ingresso più i suoi `modulepreload`, cioè il percorso critico vero: **~158 KB gzip
-iniziali** — sotto il target di 300, gate 🟢 (rimisurato dopo il merge train; la famiglia
-«prodotto a strati» aggiunge ~3 KB, tutto differito). Il salto viene dall'inversione della
-dipendenza sul progresso di caricamento: vedi `src/lib/loadProgress.ts` e `docs/README.md`.
+sommava tutti i chunk e chiamava «iniziale» il totale. Ora `perf:check` cammina il **manifest di
+Vite** dagli entry lungo i soli import statici (versione recuperata dal worktree `perf`, budget
+150 target / 300 cap + guardia sul totale >700): **161,5 KB gzip iniziali** sulla demo unificata
+a 12 sezioni (🟡 11,5 sopra il target; 431 differiti, 592,5 totali). Il salto viene
+dall'inversione della dipendenza sul progresso di caricamento: `src/lib/loadProgress.ts`.
 
-**Registro a 12/15 blueprint** (01·02·03·05·06·07·09·11·12·13·14·15); mancano 04 (sul branch
-`gen-factory`), 08, 10.
+**Registro a 13/15 blueprint** (01-07·09·11-15); mancano 08 e 10. Gate al 31 ago 2026:
+`qa:state` 🟢 14/14 checkpoint sulla drammaturgia unificata · `qa:diff` 🟢 36/36 ·
+`qa:reduced` 🟢 0 errori · `qa:verify` 🟢 WebGPU 0 errori console · `qa:frames` da rilanciare
+**headed in foreground** (in background il vsync throttla a 30 Hz e i numeri non significano
+nulla — lo dice il contratto in `qa/budget.json`).
 
 **Debiti aperti**: TypeScript fermo alla 6 finché typescript-eslint non supporta la 7 (motivo in
 `package.json` → `//versions`); `qa/baseline/` va rigenerata a ogni cambio voluto dell'aspetto

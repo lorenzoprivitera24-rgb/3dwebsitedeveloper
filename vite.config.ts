@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    // Serve al gate S7: senza manifest, perf-check non può distinguere il grafo statico
+    // dell'entry dai chunk caricati su richiesta, e finirebbe per sommare tutto (era il bug).
+    manifest: true,
     // Vite 8 bundles production with Rolldown: `rollupOptions` → `rolldownOptions`, and the
     // OBJECT form of `manualChunks` no longer exists (the function form is deprecated).
     // That removal is a gift here, because the object form was silently wrong:

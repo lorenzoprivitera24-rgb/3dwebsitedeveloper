@@ -34,18 +34,67 @@
     "sceneTargets.camY": 0.4,
     "sceneTargets.camZ": 3.2
   },
-  "kinetic-scena-quieta": {
-    "sceneTargets.morph": 0.15,
+  "explode-scena-in-ritirata": {
+    "sceneTargets.morph": 0.08,
     "sceneTargets.gradientMix": 0,
-    "sceneTargets.camX": 0.3,
-    "sceneTargets.camY": 0.2,
-    "sceneTargets.camZ": 6.5
+    "sceneTargets.camX": 0,
+    "sceneTargets.camY": 0,
+    "sceneTargets.camZ": 8.6
   },
-  "outro": {
-    "sceneTargets.morph": 0.15,
+  "veil-scena-ferma": {
+    "sceneTargets.morph": 0.08,
     "sceneTargets.gradientMix": 0,
-    "sceneTargets.camX": 0.3,
-    "sceneTargets.camY": 0.2,
-    "sceneTargets.camZ": 6.5
+    "sceneTargets.camX": 0,
+    "sceneTargets.camY": 0,
+    "sceneTargets.camZ": 8.6
+  },
+  "prodgallery-scena-ferma": {
+    "sceneTargets.morph": 0.08,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 0,
+    "sceneTargets.camY": 0,
+    "sceneTargets.camZ": 8.6
+  },
+  "gallery-ripresa": {
+    "sceneTargets.morph": 0.256,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": -0.8798,
+    "sceneTargets.camY": 0.4799,
+    "sceneTargets.camZ": 9.3198
+  },
+  "strip-controderiva": {
+    "sceneTargets.morph": 0.48,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": -1.2808,
+    "sceneTargets.camY": -0.3002,
+    "sceneTargets.camZ": 8.1496
+  },
+  "card-meta": {
+    "sceneTargets.morph": 0.3749,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": -0.3493,
+    "sceneTargets.camY": 0.0502,
+    "sceneTargets.camZ": 8.5003
+  },
+  "pointer-meta": {
+    "sceneTargets.morph": 0.25,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 0.9,
+    "sceneTargets.camY": 0.5,
+    "sceneTargets.camZ": 9
+  },
+  "kinetic-scena-quieta": {
+    "sceneTargets.morph": 0.18,
+    "sceneTargets.gradientMix": 0.0439,
+    "sceneTargets.camX": 0.288,
+    "sceneTargets.camY": 0.128,
+    "sceneTargets.camZ": 6.58
+  },
+  "footer-congedo": {
+    "sceneTargets.morph": 0.525,
+    "sceneTargets.gradientMix": 0.35,
+    "sceneTargets.camX": 0.15,
+    "sceneTargets.camY": -0.7,
+    "sceneTargets.camZ": 7.5
   }
 }

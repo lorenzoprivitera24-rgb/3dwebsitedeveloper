@@ -42,10 +42,10 @@
     { "path": "camera.x", "op": "converges", "to": "sceneTargets.camX", "tol": 0.05 },
     { "path": "camera.y", "op": "converges", "to": "sceneTargets.camY", "tol": 0.05 },
     {
-      "why": "il morph vive nel dominio dichiarato: fuori range = un canale sta sommando due volte",
+      "why": "il morph vive nel dominio dichiarato: fuori range = un canale sta sommando due volte. Floor 0.05: il blocco prodotto scende DI PROPOSITO a 0.08 (scena in ritirata)",
       "path": "sceneTargets.morph",
       "op": "between",
-      "min": 0.1,
+      "min": 0.05,
       "max": 1.05
     },
     { "path": "sceneTargets.gradientMix", "op": "between", "min": -0.01, "max": 1.01 },
@@ -92,13 +92,95 @@
       "p": 1.0,
       "expect": [
         {
-          "why": "regia: IL momento firma. Se qui il morph non arriva quasi a 1, il picco non viene mai visto (il kinetic lo richiama giu' prima) e la sezione va riaccordata",
+          "why": "regia: IL momento firma. Se qui il morph non arriva quasi a 1, il picco non viene mai visto (il capitolo prodotto lo richiama giu' prima) e la sezione va riaccordata",
           "path": "sceneTargets.morph",
           "op": "gte",
           "value": 0.9
         }
       ]
     },
+    {
+      "name": "explode-scena-in-ritirata",
+      "section": "explode",
+      "p": 0.5,
+      "expect": [
+        {
+          "why": "regia: nel blocco prodotto il DOM e' il protagonista — la forma e' quasi spenta (target 0.08)",
+          "path": "sceneTargets.morph",
+          "op": "lte",
+          "value": 0.15
+        },
+        {
+          "why": "regia: backdrop spento per tutto il blocco prodotto",
+          "path": "sceneTargets.gradientMix",
+          "op": "lte",
+          "value": 0.05
+        },
+        {
+          "why": "regia: camera in asse — una deriva laterale dietro la vista esplosa fa sembrare che si muova la pila",
+          "path": "sceneTargets.camX",
+          "op": "between",
+          "min": -0.1,
+          "max": 0.1
+        },
+        {
+          "why": "regia: camera arretrata (explodeZ >= 8.6): la forma esce davvero dal quadro",
+          "path": "sceneTargets.camZ",
+          "op": "gte",
+          "value": 8.0
+        }
+      ]
+    },
+    {
+      "name": "veil-scena-ferma",
+      "section": "veil",
+      "p": 0.5,
+      "expect": [
+        {
+          "why": "regia: il segnale unico e tiene giu' la scena per TUTTO il blocco — nessun lampeggio fra le sezioni",
+          "path": "sceneTargets.morph",
+          "op": "lte",
+          "value": 0.15
+        }
+      ]
+    },
+    { "name": "prodgallery-scena-ferma", "section": "prodgallery", "p": 0.5, "expect": [
+        {
+          "why": "regia: terza sezione del blocco, stessa quiete",
+          "path": "sceneTargets.morph",
+          "op": "lte",
+          "value": 0.15
+        }
+      ]
+    },
+    {
+      "name": "gallery-ripresa",
+      "section": "gallery",
+      "p": 0.8,
+      "expect": [
+        {
+          "why": "regia: il capitolo editoriale si riprende il testimone dal blocco prodotto (morph verso 0.3)",
+          "path": "sceneTargets.morph",
+          "op": "gte",
+          "value": 0.2
+        }
+      ]
+    },
+    {
+      "name": "strip-controderiva",
+      "section": "strip",
+      "p": 0.9,
+      "expect": [
+        {
+          "why": "regia: la camera deriva CONTRO lo scorrimento (stripDrift a p0.9 = -1.28): e' il contrasto che fa leggere la profondita'",
+          "path": "sceneTargets.camX",
+          "op": "lte",
+          "value": -1.0
+        }
+      ]
+    },
+    { "name": "card-meta", "section": "card", "p": 0.5, "expect": [] },
+    { "name": "pointer-meta", "section": "pointer", "p": 0.5, "expect": [] },
     {
       "name": "kinetic-scena-quieta",
       "section": "kinetic",
@@ -118,6 +200,24 @@
         }
       ]
     },
-    { "name": "outro", "section": "outro", "p": 0.5, "expect": [] }
+    {
+      "name": "footer-congedo",
+      "section": "footer",
+      "p": 0.5,
+      "expect": [
+        {
+          "why": "regia: il congedo riapre la scena (morph verso 0.9) — l'unico momento dopo lo scrub in cui riprende voce",
+          "path": "sceneTargets.morph",
+          "op": "gte",
+          "value": 0.4
+        },
+        {
+          "why": "regia: velo tenue di backdrop sotto il footer (0.35 al colmo)",
+          "path": "sceneTargets.gradientMix",
+          "op": "gte",
+          "value": 0.2
+        }
+      ]
+    }
   ]
 }

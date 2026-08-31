@@ -179,8 +179,10 @@ If the client sends JPEGs on a solid background, the job is cut-out work, not an
 `npm run verify` green — and, before a release, `npm run verify:full`. That command *is* the
 definition; what follows is what it does and does not cover.
 
-Covered mechanically: the eight non-negotiables (see the table above), the scroll→scene contract, the lazy entry boundary (perf:check reads the manifest: nothing importing three may sit in the entry's static graph — measured 599 → 156,5 KB gzip).
-at every checkpoint, the frame budget per render path, the empty-canvas failure.
+Covered mechanically: the ten non-negotiables (see the table above), the scroll→scene contract
+at every checkpoint, the frame budget per render path, the empty-canvas failure, and the lazy
+entry boundary (perf:check walks the Vite manifest from the entries: nothing importing three may
+sit in the entry's static graph — measured 599 → 156,5 KB gzip).
 
 Still judgement, and still required:
 - WebGL2 fallback exercised and a no-WebGL poster present (the gates measure whichever path the
