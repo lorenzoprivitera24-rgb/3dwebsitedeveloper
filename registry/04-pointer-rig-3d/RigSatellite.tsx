@@ -4,6 +4,7 @@ import { Color, MathUtils } from 'three'
 import type { Group, Mesh } from 'three'
 import { MeshStandardNodeMaterial } from 'three/webgpu'
 import { progressMap } from '../../src/scroll/progressMap'
+import { usePointerSignal } from '../../src/lib/pointerRef'
 import { TOKENS } from '../../src/lib/tokens.generated'
 
 // Profondità del rig nella scena persistente: davanti alla forma (origine), ben dentro il
@@ -39,20 +40,12 @@ export function RigSatellite({ reduced }: Props) {
   const groupRef = useRef<Group>(null)
   const ringRef = useRef<Mesh>(null)
 
-  // Puntatore letto a livello window: l'overlay DOM (.content) copre il canvas fixed, quindi
-  // gli eventi pointer non raggiungono l'elemento canvas e state.pointer non si aggiornerebbe.
-  // Scrittura passiva in un ref (mai React state a 60fps); il damping resta nell'useFrame
-  // (un solo RAF: Lenis + gsap.ticker + il loop R3F già esistente).
-  const pointerRef = useRef({ x: 0, y: 0 })
-  useEffect(() => {
-    if (reduced || coarse) return
-    const onMove = (e: PointerEvent) => {
-      pointerRef.current.x = (e.clientX / window.innerWidth) * 2 - 1
-      pointerRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1
-    }
-    window.addEventListener('pointermove', onMove, { passive: true })
-    return () => window.removeEventListener('pointermove', onMove)
-  }, [reduced, coarse])
+  // Puntatore dal segnale CONDIVISO del kit (src/lib/pointerRef): un solo listener window
+  // per tutta la scena, perché l'overlay DOM (.content) copre il canvas fixed e state.pointer
+  // resterebbe fermo a (0,0). Il damping resta nell'useFrame (un solo RAF: Lenis +
+  // gsap.ticker + il loop R3F già esistente). Su touch/reduced il valore viene ignorato
+  // dai rami sotto (l'inseguimento passa allo scroll / alla posa composta).
+  const pointerRef = usePointerSignal()
 
   // Stessa famiglia di materiale della forma; colori SOLO dai token (bg2 + gradient.c).
   const material = useMemo(
@@ -108,10 +101,10 @@ export function RigSatellite({ reduced }: Props) {
       ry = MathUtils.lerp(-0.45, 0.45, t)
     } else {
       // desktop: insegue il puntatore, tilt sottile proporzionale
-      tx = pointerRef.current.x * spanX
-      ty = pointerRef.current.y * spanY
-      rx = -pointerRef.current.y * 0.3
-      ry = pointerRef.current.x * 0.45
+      tx = pointerRef.x * spanX
+      ty = pointerRef.y * spanY
+      rx = -pointerRef.y * 0.3
+      ry = pointerRef.x * 0.45
     }
 
     // i target si dampano QUI, nel proprio useFrame (il rig non tocca MAI la camera)

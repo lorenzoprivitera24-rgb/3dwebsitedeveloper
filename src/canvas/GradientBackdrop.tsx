@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { MathUtils } from 'three'
 import { makeGradientFieldMaterial } from './materials/gradientField'
 import { sceneTargets } from './sceneState'
+import { usePointerSignal } from '../lib/pointerRef'
 import { TOKENS } from '../lib/tokens.generated'
 
 interface Props {
@@ -15,7 +16,8 @@ interface Props {
 // forma, e appare/scompare seguendo sceneTargets.gradientMix (scritto dal CameraDirector).
 // Questo componente è l'unico scrittore dei propri uniform (damp dai target).
 export function GradientBackdrop({ reduced, flowScale = 1 }: Props) {
-  const pointer = useThree((s) => s.pointer)
+  // segnale condiviso a livello window (state.pointer è inerte sotto l'overlay .content)
+  const pointer = usePointerSignal()
   const { material, uniforms } = useMemo(() => makeGradientFieldMaterial(), [])
 
   // il flow riparte SEMPRE dal token (mai dal valore corrente: un toggle di reduced lo

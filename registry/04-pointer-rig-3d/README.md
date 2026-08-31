@@ -39,9 +39,11 @@ registry/04-pointer-rig-3d/
 
 - **Perché non `state.pointer`**: l'overlay DOM (`.content`, z-index 1) copre il canvas fixed,
   quindi gli eventi pointer non raggiungono l'elemento canvas e `state.pointer` resta fermo
-  (verificato con `document.elementFromPoint` sulla demo composta). Il rig legge quindi
-  `pointermove` a livello window, in un ref passivo; il damping resta nel suo `useFrame`
-  (un solo RAF, regola #3 del kit).
+  (verificato con `document.elementFromPoint` sulla demo composta). Il pattern window-listener
+  nato qui è stato **promosso a modulo condiviso del kit**: `src/lib/pointerRef.ts`
+  (`usePointerSignal()`), consumato anche da `MorphingForm` e `GradientBackdrop`; il damping
+  resta nell'`useFrame` di ogni consumer (un solo RAF, regola #3 del kit; un owner per
+  proprietà, regola #2).
 - **React Bits consultato**: gli effetti cursor-follow del catalogo (Magnet, Blob Cursor,
   Ghost Cursor, Target Cursor…) sono DOM-layer; questo blueprint vive sulla scena WebGPU
   persistente → implementazione nativa R3F, pattern damp identico al resto della scena.
