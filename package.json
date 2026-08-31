@@ -16,8 +16,14 @@
     "qa:shoot": "node scripts/shoot.mjs",
     "qa:diff": "node scripts/visual-diff.mjs",
     "qa:bless": "node scripts/visual-diff.mjs --bless",
-    "perf:check": "node scripts/perf-check.mjs"
+    "perf:check": "node scripts/perf-check.mjs",
+    "qa:state": "node scripts/with-server.mjs node scripts/state-gate.mjs",
+    "qa:state:baseline": "node scripts/with-server.mjs node scripts/state-gate.mjs --baseline",
+    "qa:frames": "node scripts/with-server.mjs node scripts/frame-perf.mjs",
+    "verify": "npm run lint && npm run build && npm run perf:check && npm run qa:state",
+    "verify:full": "npm run verify && npm run qa:frames && npm run qa:shoot && npm run qa:diff"
   },
+  "//verify": "`npm run verify` è la definizione di FATTO: deterministico, headless, lanciabile sempre (lint + build + peso + gate di stato). `verify:full` aggiunge i gate che richiedono una GPU vera — frame time e pixel (shoot+diff) — ed è il gate di RILASCIO.",
   "//versions": "Latest stable pinned 6 Aug 2026. Node >=20.19 (Vite 8 engine). TypeScript is held at 6.x ON PURPOSE: 7.0 (Go-native, 8 Jul 2026) is out and ~10x faster, but typescript-eslint@8 declares `typescript <6.1.0` and the repo lints on every edit via a PostToolUse hook — revisit when typescript-eslint ships TS7 support (needs the stable programmatic API landing in TS 7.1).",
   "dependencies": {
     "@gsap/react": "^2.1.2",

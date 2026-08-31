@@ -1,0 +1,51 @@
+{
+  "hero-apertura": {
+    "sceneTargets.morph": 0.2333,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 0,
+    "sceneTargets.camY": 0.1667,
+    "sceneTargets.camZ": 5.375
+  },
+  "hero-uscita": {
+    "sceneTargets.morph": 0.35,
+    "sceneTargets.gradientMix": 0.9182,
+    "sceneTargets.camX": 0.1111,
+    "sceneTargets.camY": 0.4,
+    "sceneTargets.camZ": 4.5
+  },
+  "gradient-colmo": {
+    "sceneTargets.morph": 0.35,
+    "sceneTargets.gradientMix": 1,
+    "sceneTargets.camX": 0.15,
+    "sceneTargets.camY": 0.4,
+    "sceneTargets.camZ": 4.5
+  },
+  "scrub-meta": {
+    "sceneTargets.morph": 0.675,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 1.4852,
+    "sceneTargets.camY": 1.2,
+    "sceneTargets.camZ": 3.85
+  },
+  "scrub-picco": {
+    "sceneTargets.morph": 1,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 0.6708,
+    "sceneTargets.camY": 0.4,
+    "sceneTargets.camZ": 3.2
+  },
+  "kinetic-scena-quieta": {
+    "sceneTargets.morph": 0.15,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 0.3,
+    "sceneTargets.camY": 0.2,
+    "sceneTargets.camZ": 6.5
+  },
+  "outro": {
+    "sceneTargets.morph": 0.15,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 0.3,
+    "sceneTargets.camY": 0.2,
+    "sceneTargets.camZ": 6.5
+  }
+}

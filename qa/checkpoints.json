@@ -1,0 +1,123 @@
+{
+  "$comment": [
+    "Lo storyboard come asserzioni: ogni riga di brief/storyboard.md che descrive uno stato della",
+    "scena diventa un checkpoint verificabile. Due strati, con due nature diverse:",
+    "",
+    "  invariants  — scritti a mano, non negoziabili, valgono a OGNI checkpoint. Sono la",
+    "                traduzione eseguibile delle regole 2 e 5 del CLAUDE.md (un owner per",
+    "                proprieta', ease everything): se un uniform smette di convergere verso il",
+    "                suo target, qualcuno lo sta scrivendo due volte o ha saltato il damp.",
+    "  checkpoints — la drammaturgia: cosa DEVE fare la scena in quel punto della pagina.",
+    "                Le soglie qui sono scritte a mano solo dove sono decisioni di regia; il",
+    "                resto lo cattura la baseline (`--baseline` scrive qa/state-baseline.json),",
+    "                che rileva le regressioni senza che nessuno indovini un numero.",
+    "",
+    "Operatori: converges(to,tol) · approx(value,tol) · between(min,max) · lte · gte · equals"
+  ],
+
+  "settleFrames": 150,
+
+  "invariants": [
+    {
+      "why": "regola 5 — il morph passa da MathUtils.damp verso il target del director",
+      "path": "probes.uMorph",
+      "op": "converges",
+      "to": "sceneTargets.morph",
+      "tol": 0.02
+    },
+    {
+      "why": "regola 5 — il mix del backdrop converge al target",
+      "path": "probes.uMix",
+      "op": "converges",
+      "to": "sceneTargets.gradientMix",
+      "tol": 0.02
+    },
+    {
+      "why": "regola 2 — la camera ha UN solo owner (CameraDirector): se converge, nessun altro la scrive",
+      "path": "camera.z",
+      "op": "converges",
+      "to": "sceneTargets.camZ",
+      "tol": 0.05
+    },
+    { "path": "camera.x", "op": "converges", "to": "sceneTargets.camX", "tol": 0.05 },
+    { "path": "camera.y", "op": "converges", "to": "sceneTargets.camY", "tol": 0.05 },
+    {
+      "why": "il morph vive nel dominio dichiarato: fuori range = un canale sta sommando due volte",
+      "path": "sceneTargets.morph",
+      "op": "between",
+      "min": 0.1,
+      "max": 1.05
+    },
+    { "path": "sceneTargets.gradientMix", "op": "between", "min": -0.01, "max": 1.01 },
+    {
+      "why": "regola 6 — dpr sempre sotto 2, anche su schermi Retina",
+      "path": "dpr",
+      "op": "lte",
+      "value": 2
+    }
+  ],
+
+  "checkpoints": [
+    { "name": "hero-apertura", "section": "hero", "p": 0.0, "expect": [] },
+    { "name": "hero-uscita", "section": "hero", "p": 1.0, "expect": [] },
+    {
+      "name": "gradient-colmo",
+      "section": "gradient",
+      "p": 0.5,
+      "expect": [
+        {
+          "why": "regia: a meta' della sezione il backdrop e' al suo massimo (sin(pi/2))",
+          "path": "sceneTargets.gradientMix",
+          "op": "gte",
+          "value": 0.8
+        }
+      ]
+    },
+    {
+      "name": "scrub-meta",
+      "section": "scrub",
+      "p": 0.5,
+      "expect": [
+        {
+          "why": "regia: a meta' scrub la forma e' gia' oltre meta' apertura (lerp(0.35,1,0.5)=0.675)",
+          "path": "sceneTargets.morph",
+          "op": "gte",
+          "value": 0.6
+        }
+      ]
+    },
+    {
+      "name": "scrub-picco",
+      "section": "scrub",
+      "p": 1.0,
+      "expect": [
+        {
+          "why": "regia: IL momento firma. Se qui il morph non arriva quasi a 1, il picco non viene mai visto (il kinetic lo richiama giu' prima) e la sezione va riaccordata",
+          "path": "sceneTargets.morph",
+          "op": "gte",
+          "value": 0.9
+        }
+      ]
+    },
+    {
+      "name": "kinetic-scena-quieta",
+      "section": "kinetic",
+      "p": 0.6,
+      "expect": [
+        {
+          "why": "regia (finding QA giro 1): il testo e' il protagonista, la scena si e' gia' calmata",
+          "path": "sceneTargets.morph",
+          "op": "lte",
+          "value": 0.35
+        },
+        {
+          "why": "regia: il backdrop e' spento del tutto nel capitolo kinetic",
+          "path": "sceneTargets.gradientMix",
+          "op": "lte",
+          "value": 0.05
+        }
+      ]
+    },
+    { "name": "outro", "section": "outro", "p": 0.5, "expect": [] }
+  ]
+}

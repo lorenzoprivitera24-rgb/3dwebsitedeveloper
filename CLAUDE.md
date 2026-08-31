@@ -29,41 +29,51 @@ canvas without fighting it.
   `lib/fonts/` (30 self-hosted — **never** the CDN), `lib/illustrations/` (~2.960 SVG; see its
   `ATTRIBUTION.md` — unDraw forbids repacking and AI use).
 
-### Non-negotiable rules
+### Non-negotiable rules — and who enforces each one
 
-1. **`framer-motion-3d` is banned.** Discontinued, breaks on React 19. Animate 3D via
-   `useFrame` / React Spring / GSAP. Motion is DOM-only.
-2. **One animation owner per property.** One uniform, camera or object property is driven by exactly
-   one system. Mixing causes jitter.
-3. **One scroll/RAF loop.** Lenis + `gsap.ticker`. No stray `requestAnimationFrame` on
-   scroll-linked things.
-4. **Scroll progress lives in a ref**, not React state. No per-frame re-renders.
-5. **Ease everything** through `MathUtils.damp` before it reaches a uniform or the camera.
-6. **Mobile is first-class.** Cap `dpr` at 2, instance repeats, cut amplitude and subdivisions on
-   small viewports, use the skill's quality tiers.
-7. **Accessibility is part of "done".** `prefers-reduced-motion` path, canvas `aria-hidden`,
-   controls mirrored in accessible DOM, contrast over the moving background, intact keyboard order.
-8. **No browser storage** in the canvas layer.
-9. **Nothing that imports three may sit in the entry's static graph.** The 3D layer enters through
-   `lazy(() => import('./canvas/CanvasLayer'))`; DOM components read canvas state from the
-   dependency-free store in `src/lib/loadProgress.ts`. A single static `@react-three/drei` import
-   from a DOM component silently un-splits the bundle — measured 599 → 156,5 KB gzip on first paint.
-10. **No hand-tuned number stays in the source.** If a value is set by looking at the screen, it
-    belongs in `looks/<section>.json` with a Leva knob. See `looks/README.md`.
+A rule a machine can check does not need to live in your context. Most of these are now enforced;
+what remains in prose is what still needs judgement.
 
-## Orchestration
+| # | rule | enforced by |
+|---|---|---|
+| 1 | `framer-motion-3d` is banned (discontinued, breaks React 19) | ESLint `no-restricted-imports` |
+| 2 | **one animation owner per property** — a uniform/camera/property is driven by exactly one system | `qa:state` (an uniform that converges to its target has one writer) |
+| 3 | **one scroll/RAF loop** — Lenis + `gsap.ticker`, no stray `requestAnimationFrame` | ESLint `no-restricted-syntax` |
+| 4 | scroll progress lives in a **ref**, not React state | judgement (review) |
+| 5 | **ease everything** — scroll/pointer pass through `MathUtils.damp` before uniforms/camera | `qa:state` (convergence assertions) |
+| 6 | mobile first-class — `dpr` ≤ 2, tiered detail/amplitude | `qa:state` (dpr) + `qa:frames` (per-path budget) |
+| 7 | accessibility is part of "done" — reduced-motion path, `aria-hidden` canvas, contrast, keyboard order | judgement + `perf-fallback-auditor` |
+| 8 | no browser storage in the canvas layer | ESLint `no-restricted-globals/properties` |
+| 9 | **nothing importing three in the entry's static graph** — the 3D layer enters via `lazy(() => import('./canvas/CanvasLayer'))`; DOM reads canvas state from `src/lib/loadProgress.ts` (599 → 156,5 KB gzip) | `perf:check` (reads the Vite manifest) |
+| 10 | **no hand-tuned number in the source** — screen-set values live in `looks/<section>.json` with a Leva knob | judgement (review) + `looks/README.md` |
 
-Sub-agents cannot spawn sub-agents, so the main session orchestrates. Default order, adapt to the
-brief: `r3f-scene-architect` (skeleton, renderer, scene graph, the single loop, `ARCHITECTURE.md`)
-→ `tsl-shader-engineer` (node materials, named uniforms) → `scroll-motion-engineer` (bind scroll and
-pointer to uniforms and camera, tune damping) → `ui-overlay-a11y-engineer` (DOM overlay, reduced
-motion, ARIA) → `interaction-engineer` (React Bits + bespoke effects) → `perf-fallback-auditor`
-(read-only audit, returns a prioritised report the others apply). Each agent's own file states its
-scope — don't restate it here.
+Also mechanical: no `<Environment preset>` (third-party CDN → GDPR); self-host the HDRI.
 
-A `UserPromptSubmit` hook (`.claude/hooks/agents-autostart.py`) injects the matching specialist, so
-delegating is the default, not something to ask permission for. **Research in parallel, serialise
-edits**; use `isolation: worktree` for parallel branches.
+## Orchestration: one builder, many verifiers
+
+The agents split into two families, and the split is the whole point.
+
+**Builders — never fanned out over the same property space.** `r3f-scene-architect`,
+`tsl-shader-engineer` and `scroll-motion-engineer` read and write the SAME uniform contract:
+run them as ONE sequential track (or one session wearing three skills). Parallel builders make
+conflicting implicit decisions that nobody can reconcile afterwards.
+`ui-overlay-a11y-engineer` and `interaction-engineer` own the DOM layer — a different property
+space — so they may run alongside the scene track, serialized against each other on shared files.
+
+**Verifiers — parallel, read-only, fresh context. This is where fan-out pays**, because a model
+catches an error far more reliably when it arrives as external content than in its own trace.
+`perf-fallback-auditor` (read-only) and `visual-qa-operator` (writes `qa/issues.md`, never
+`src/`) report; the builder applies.
+
+Upstream producers (`creative-director`, `scroll-storyboarder`, `copy-chief`, `asset-wrangler`,
+`blueprint-librarian`) touch `brief/`, `content/`, `public/` — not `src/` — so they parallelize
+freely. Sub-agents cannot spawn sub-agents: this session orchestrates. Use `isolation: worktree`
+when a builder needs its own branch.
+
+**Open item (Aug 2026).** `.claude/hooks/agents-autostart.py` still injects a specialist on every
+prompt, half of it now redundant with ESLint and `qa:state`. Narrow it to two-signal matches or
+retire it — Lorenzo applies it by hand (edits under `.claude/hooks/` are refused as
+self-modification).
 
 ## The factory: from client request to shipped site
 
@@ -85,15 +95,33 @@ S7 perf-fallback-auditor             → qa/perf-report.md (G) → deploy
 Compose and parameterise blueprints; write custom only for what the registry lacks, then promote it.
 No stage starts without the previous stage's artifact.
 
-Commands: `npm run tokens:build` · `assets:encode` · `qa:verify` (single shot: real backend +
-console + screenshot) · `qa:shoot` (per section × 390/834/1440) · **`qa:diff`** (numeric gate against
-`qa/baseline/`; images only for what fails) · `qa:bless` (promote to baseline) · `perf:check` ·
-`sync:global`. Verification runs on playwright-core + the cached Chrome for Testing — NOT the user's
-Chrome (it cannot reach local servers here) and NOT the preview MCP from a worktree.
+Factory commands: `npm run tokens:build` (direction.md → tokens.css + tokens.generated.ts) ·
+`npm run assets:encode` · `npm run qa:verify` (single-shot: real backend + console + screenshot) ·
+**`qa:diff`** (numeric gate against `qa/baseline/`; images only for what fails) · `qa:bless`
+(promote to baseline, pruning stale shots) · `sync:global`.
+Verification runs on playwright-core + the cached Chrome for Testing — NOT the user's Chrome
+(it cannot reach local servers on this machine) and NOT the preview MCP from a worktree.
 
-A green build is **not** proof: the WebGPU/TSL gotchas pass `tsc`/`vite` and break on screen. And a
-green *gate* is not proof either if it measures the wrong thing — `qa:verify` reports which backend
+### The three gates — three natures of determinism, so three gates
+
+| gate | command | determinism | contract |
+|---|---|---|---|
+| **state** | `qa:state` | **total** — no GPU, no pixels, no clock | `qa/checkpoints.json` + `qa/state-baseline.json` |
+| **pixel** | `qa:shoot` | perceptual — real GPU, empty-canvas guard | shots per section × breakpoint |
+| **frame** | `qa:frames` | statistical — long-frame tail, per render path | `qa/budget.json` |
+
+`npm run verify` = lint + build + `perf:check` + `qa:state`: deterministic, headless, always
+runnable. `verify:full` adds the two that need a real GPU. Direction changed on purpose? Re-run
+`qa:state:baseline` and commit the diff — that diff *is* the review.
+
+Why the budget is per-path, and why `renderer.info` cannot be read naively: the reasons are in
+`qa/budget.json` and in the header of `src/qa/QaSceneBridge.tsx`, next to the code they govern.
+
+A green build is **not** proof (WebGPU/TSL gotchas pass `tsc`/`vite` and break on screen) — and a
+green *gate* is not proof either if it measures the wrong thing: `qa:verify` reports which backend
 actually ran and how the preloader became ready, precisely because both can degrade in silence.
+
+### The recon corpus (lug 2026) — where this architecture comes from
 
 ## Tips
 
@@ -105,8 +133,17 @@ actually ran and how the preloader became ready, precisely because both can degr
 
 ## Definition of done
 
-- Runs at the frame budget on a throttled mid-tier mobile profile.
-- WebGPU path works; WebGL2 fallback works; a no-WebGL poster exists.
-- `prefers-reduced-motion` respected; accessibility checklist passed.
-- One loop, one owner per property, no `framer-motion-3d`, no browser storage in the canvas,
-  nothing importing three in the entry graph, no hand-tuned constants outside `looks/`.
+`npm run verify` green — and, before a release, `npm run verify:full`. That command *is* the
+definition; what follows is what it does and does not cover.
+
+Covered mechanically: the eight non-negotiables (see the table above), the scroll→scene contract, the lazy entry boundary (perf:check reads the manifest: nothing importing three may sit in the entry's static graph — measured 599 → 156,5 KB gzip).
+at every checkpoint, the frame budget per render path, the empty-canvas failure.
+
+Still judgement, and still required:
+- WebGL2 fallback exercised and a no-WebGL poster present (the gates measure whichever path the
+  browser picked — they do not force the other one).
+- Accessibility beyond `dpr` and reduced-motion: keyboard order, contrast over a moving
+  background, controls mirrored in accessible DOM.
+- A real device once before shipping: CDP throttles the CPU, **never the GPU**, so a "mid-tier
+  mobile profile" here is a CPU approximation, not a measurement.
+- No hand-tuned number in the source: screen-set values belong in `looks/<section>.json` with a Leva knob (`looks/README.md`).
