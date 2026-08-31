@@ -3,6 +3,7 @@ import { Stage } from './Stage'
 import { Scene } from './Scene'
 import { LoadProgressBridge } from './LoadProgressBridge'
 import { RigSatellite } from '../../registry/04-pointer-rig-3d/RigSatellite'
+import { AdaptiveQuality } from './AdaptiveQuality'
 
 // Pannello di accordatura: `import.meta.env.DEV` è staticamente false in produzione, quindi
 // Rolldown elimina il ramo e leva non finisce nel bundle (stessa tecnica del DevPerf).
@@ -33,6 +34,8 @@ export default function CanvasLayer({ reduced, detail, amplitude, flowScale, dpr
         <Scene reduced={reduced} detail={detail} amplitude={amplitude} flowScale={flowScale} />
         {/* blueprint 04: satellite pointer-rig — proprio useFrame, mai la camera */}
         <RigSatellite reduced={reduced} />
+        {/* misura come va davvero e muove il dpr dentro il range del tier (spento con ?qa=1) */}
+        <AdaptiveQuality dpr={dpr} />
       </Stage>
     </>
   )

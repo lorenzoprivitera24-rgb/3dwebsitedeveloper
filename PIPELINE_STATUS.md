@@ -32,9 +32,16 @@ dall'inversione della dipendenza sul progresso di caricamento: `src/lib/loadProg
 
 **Registro a 13/15 blueprint** (01-07·09·11-15); mancano 08 e 10. Gate al 31 ago 2026:
 `qa:state` 🟢 14/14 checkpoint sulla drammaturgia unificata · `qa:diff` 🟢 36/36 ·
-`qa:reduced` 🟢 0 errori · `qa:verify` 🟢 WebGPU 0 errori console · `qa:frames` da rilanciare
-**headed in foreground** (in background il vsync throttla a 30 Hz e i numeri non significano
-nulla — lo dice il contratto in `qa/budget.json`).
+`qa:reduced` 🟢 0 errori · `qa:verify` 🟢 WebGPU 0 errori console · `qa:frames` **bloccato
+dall'ambiente su questo Mac**: mediana inchiodata a 33,3 ms su OGNI path e sezione, invariante
+al throttle CPU 4× → tetto vsync/compositor a 30 Hz dello schermo, non carico dell'app (misura
+del 31 ago; macchinario del gate operativo). Serve un giro su display a 60 Hz o device reale.
+
+**Layer adattivo runtime: CHIUSO** (31 ago 2026, ROADMAP «Adaptive layer»):
+`src/canvas/AdaptiveQuality.tsx` — PerformanceMonitor → setDpr dentro il range del tier
+(un solo owner del dpr), AdaptiveEvents nel regress, flipflops=3 → resa al floor, spento con
+`?qa=1` per il determinismo dei gate. + `src/hooks/useRenderBackend.ts` (la cucitura
+backend.isWebGPUBackend per i feature-gate compute/post).
 
 **Debiti aperti**: TypeScript fermo alla 6 finché typescript-eslint non supporta la 7 (motivo in
 `package.json` → `//versions`); `qa/baseline/` va rigenerata a ogni cambio voluto dell'aspetto
