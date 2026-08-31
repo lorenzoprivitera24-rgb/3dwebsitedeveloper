@@ -1,0 +1,10 @@
+{
+  "id": "04-pointer-rig-3d",
+  "descrizione": "Satellite della forma sulla scena persistente che insegue il puntatore con damp e tilt sottile; su touch l'inseguimento passa allo scroll progress della sezione",
+  "trigger": ["segue il cursore", "pointer follow", "oggetto magnetico", "inseguimento", "cursore 3D", "l'oggetto reagisce al mouse"],
+  "props": { "copy": "PointerCopy (eyebrow/headline/body)", "reduced": "bool" },
+  "slotCopy": ["eyebrow", "headline", "body"],
+  "perfTier": "B",
+  "mobileFallback": "touch/coarse pointer: il rig segue lo scroll progress della sezione (traversata dolce, nessun gyro in v1); reduced-motion: rig fermo in posa composta, fade di sezione lento",
+  "dipendenze": ["motion/react", "src/scroll/useSectionProgress (canale 'pointer')", "src/scroll/progressMap", "src/lib/tokens.generated", "scena persistente (montato dentro Stage) — NON scrive camera né sceneTargets"]
+}

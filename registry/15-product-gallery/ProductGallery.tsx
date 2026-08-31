@@ -99,29 +99,29 @@ export function ProductGallery({
   )
 
   return (
-    <section id={id} ref={sectionRef} className="bp-gallery" aria-labelledby={`${id}-title`}>
-      <header className="bp-gallery__head">
+    <section id={id} ref={sectionRef} className="bp-prodgallery" aria-labelledby={`${id}-title`}>
+      <header className="bp-prodgallery__head">
         <p className="bp-eyebrow">{copy.eyebrow}</p>
-        <h2 id={`${id}-title`} className="bp-gallery__title">
+        <h2 id={`${id}-title`} className="bp-prodgallery__title">
           {copy.title}
         </h2>
       </header>
 
-      <ul className="bp-gallery__grid">
+      <ul className="bp-prodgallery__grid">
         {copy.items.map((item, i) => {
           const Inner = item.href ? 'a' : 'div'
           return (
             <li
               key={item.title}
-              className="bp-gallery__card"
+              className="bp-prodgallery__card"
               ref={(node) => {
                 cardRefs.current[i] = node
               }}
             >
-              <Inner className="bp-gallery__inner" {...(item.href ? { href: item.href } : {})}>
-                <div className="bp-gallery__frame">
+              <Inner className="bp-prodgallery__inner" {...(item.href ? { href: item.href } : {})}>
+                <div className="bp-prodgallery__frame">
                   <div
-                    className="bp-gallery__art"
+                    className="bp-prodgallery__art"
                     ref={(node) => {
                       artRefs.current[i] = node
                     }}
@@ -140,7 +140,7 @@ export function ProductGallery({
                           sizes={sizes}
                         />
                         <img
-                          className="bp-gallery__layer"
+                          className="bp-prodgallery__layer"
                           src={largest(layer.sources.webp)}
                           alt=""
                           aria-hidden="true"
@@ -150,13 +150,13 @@ export function ProductGallery({
                       </picture>
                     ))}
                   </div>
-                  {item.tag && <span className="bp-gallery__tag">{item.tag}</span>}
+                  {item.tag && <span className="bp-prodgallery__tag">{item.tag}</span>}
                 </div>
-                <div className="bp-gallery__row">
-                  <h3 className="bp-gallery__name">{item.title}</h3>
-                  {item.meta && <span className="bp-gallery__meta">{item.meta}</span>}
+                <div className="bp-prodgallery__row">
+                  <h3 className="bp-prodgallery__name">{item.title}</h3>
+                  {item.meta && <span className="bp-prodgallery__meta">{item.meta}</span>}
                 </div>
-                {item.desc && <p className="bp-gallery__desc">{item.desc}</p>}
+                {item.desc && <p className="bp-prodgallery__desc">{item.desc}</p>}
               </Inner>
             </li>
           )

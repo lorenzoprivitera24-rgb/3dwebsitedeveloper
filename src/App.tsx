@@ -18,6 +18,7 @@ import { EditorialGallery } from '../registry/07-editorial-gallery/EditorialGall
 import { HorizontalScrollStrip } from '../registry/11-horizontal-scroll-strip/HorizontalScrollStrip'
 import { InteractionCard } from '../registry/09-interaction-card/InteractionCard'
 import { KineticType } from '../registry/06-kinetic-type/KineticType'
+import { PointerRig3d } from '../registry/04-pointer-rig-3d/PointerRig3d'
 import { FooterCta } from '../registry/12-footer-cta/FooterCta'
 // Copy: S3, uno slot-file per sezione (content/README.md)
 import heroCopy from '../content/01-hero.json'
@@ -30,6 +31,7 @@ import galleryCopy from '../content/07-gallery.json'
 import stripCopy from '../content/11-strip.json'
 import cardCopy from '../content/09-card.json'
 import kineticCopy from '../content/06-kinetic.json'
+import pointerCopy from '../content/04-pointer.json'
 import footerCopy from '../content/12-footer.json'
 // Asset scontornati: manifesto generato da npm run cutouts:encode (importato, non fetchato —
 // ScrollTrigger misura la sezione al mount)
@@ -85,6 +87,8 @@ export default function App() {
         <EditorialGallery copy={galleryCopy} reduced={reduced} />
         <HorizontalScrollStrip copy={stripCopy} reduced={reduced} />
         <InteractionCard copy={cardCopy} reduced={reduced} />
+        {/* blueprint 04: la meta' DOM del pointer-rig; il satellite vive in CanvasLayer */}
+        <PointerRig3d copy={pointerCopy} reduced={reduced} />
         <KineticType copy={kineticCopy} reduced={reduced} />
         <FooterCta copy={footerCopy} reduced={reduced} />
       </main>

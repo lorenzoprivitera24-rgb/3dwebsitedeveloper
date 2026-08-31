@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { Color, MathUtils, Vector3 } from 'three'
 import { MeshStandardNodeMaterial } from 'three/webgpu'
 import {
@@ -12,6 +12,7 @@ import {
 } from 'three/tsl'
 import { sceneTargets } from './sceneState'
 import { registerQaProbe } from '../qa/registry'
+import { usePointerSignal } from '../lib/pointerRef'
 import { TOKENS } from '../lib/tokens.generated'
 
 interface Props {
@@ -26,8 +27,9 @@ interface Props {
 //   uPointer (vec3)  : local bulge toward the cursor / touch point (xy in -1..1).
 // The emissive tint comes from the tokens (no color exists outside direction.md).
 export function MorphingForm({ reduced, detail, amplitude }: Props) {
-  // R3F unifies mouse and touch into state.pointer ([-1, 1] on x and y). Works on phones as is.
-  const pointer = useThree((s) => s.pointer)
+  // NON state.pointer: l'overlay .content copre il canvas fixed e gli eventi non arrivano
+  // all'elemento canvas — il segnale condiviso ascolta a livello window (vedi lib/pointerRef).
+  const pointer = usePointerSignal()
 
   const { material, uMorph, uPointer } = useMemo(() => {
     const uMorph = uniform(0)

@@ -10,9 +10,9 @@ La griglia del listino: card con scontornato, nome in condensato, prezzo in mono
 
 | cosa | dove | come |
 |---|---|---|
-| reveal a cascata | `.bp-gallery__card` | `gsap.from` toggle, **entra** e non si scrubba |
-| parallasse | `.bp-gallery__art` | `fromTo` scrubbata, sfalsata per colonna (`i % 2`) |
-| hover | `.bp-gallery__art` | CSS **`scale:`**, non `transform` |
+| reveal a cascata | `.bp-prodgallery__card` | `gsap.from` toggle, **entra** e non si scrubba |
+| parallasse | `.bp-prodgallery__art` | `fromTo` scrubbata, sfalsata per colonna (`i % 2`) |
+| hover | `.bp-prodgallery__art` | CSS **`scale:`**, non `transform` |
 
 L'hover è il pezzo interessante. `scale:` e `translate:` sono proprietà CSS **indipendenti** da
 `transform`: si compongono con quello che GSAP sta scrivendo invece di sovrascriverlo. È così che
@@ -22,7 +22,7 @@ per proprietà» — il proprietario di `transform` resta GSAP, l'hover vive alt
 La parallasse è sfalsata per colonna apposta: con la stessa ampiezza su tutte le card la griglia
 si muove come un blocco unico, e a quel punto tanto vale non muoverla.
 
-`.bp-gallery__frame` ha `overflow: hidden` e l'art è più largo del necessario: è quel margine che
+`.bp-prodgallery__frame` ha `overflow: hidden` e l'art è più largo del necessario: è quel margine che
 permette alla parallasse di correre senza scoprire i bordi del riquadro.
 
 ## `layerId`: vendere i pezzi separati

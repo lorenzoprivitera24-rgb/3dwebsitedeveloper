@@ -9,7 +9,8 @@ Data: 2026-07-10 · Input: storyboard.md + registry/*/meta.json · Owner: bluepr
 | 2 | #gradient | `03-mesh-gradient-field` | copy, reduced | 03-gradient.json | scrive `gradient`; consuma GradientBackdrop (uniform da TOKENS.gradient) |
 | 3 | #scrub | `05-pinned-scene-scrub` | copy, reduced, pinVh(250/180 mobile) | 05-scrub.json | scrive `scrub` (pin) |
 | 4 | #kinetic | `06-kinetic-type` | copy, reduced | 06-kinetic.json | scrive `kinetic` |
-| 5 | #outro | CUSTOM inline (footer editoriale) | — | 07-outro.json | nessuna |
+| 5 | #pointer | `04-pointer-rig-3d` | copy, reduced | 04-pointer.json | scrive `pointer`; RigSatellite dentro Stage (proprio useFrame, NON tocca camera/sceneTargets; camera resta sulla posa del capitolo kinetic) |
+| 6 | #outro | CUSTOM inline (footer editoriale) | — | 07-outro.json | nessuna |
 
 **Ordine di implementazione**: core scena (progressMap → sceneTargets → CameraDirector →
 GradientBackdrop → MorphingForm adattato) → blueprint 01 → 02 → 03 → 05 → 06 → ricomposizione

@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Stage } from './Stage'
 import { Scene } from './Scene'
 import { LoadProgressBridge } from './LoadProgressBridge'
+import { RigSatellite } from '../../registry/04-pointer-rig-3d/RigSatellite'
 
 // Pannello di accordatura: `import.meta.env.DEV` è staticamente false in produzione, quindi
 // Rolldown elimina il ramo e leva non finisce nel bundle (stessa tecnica del DevPerf).
@@ -30,6 +31,8 @@ export default function CanvasLayer({ reduced, detail, amplitude, flowScale, dpr
       )}
       <Stage dpr={dpr}>
         <Scene reduced={reduced} detail={detail} amplitude={amplitude} flowScale={flowScale} />
+        {/* blueprint 04: satellite pointer-rig — proprio useFrame, mai la camera */}
+        <RigSatellite reduced={reduced} />
       </Stage>
     </>
   )

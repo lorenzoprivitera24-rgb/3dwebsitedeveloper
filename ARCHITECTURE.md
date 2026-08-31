@@ -69,8 +69,14 @@ Aesthetic constants live in `looks/<section>.json` and reach the shader as unifo
 panel can move them at runtime. No number that is tuned by eye stays in the source.
 
 ### Pointer
-- Read from `useThree((s) => s.pointer)` inside `useFrame`. R3F unifies mouse and touch into
-  `[-1, 1]` on x and y, center `(0, 0)`. No separate touch code for the canvas-level effect.
+- Read from the shared `usePointerSignal()` (`src/lib/pointerRef.ts`) inside `useFrame` —
+  NDC `[-1, 1]` on x and y, center `(0, 0)`, one passive window-level `pointermove` listener
+  for the whole scene.
+- **Not** `useThree((s) => s.pointer)`: the DOM overlay (`.content`, z-index 1) covers the
+  fixed canvas, so pointer events never reach the canvas element and R3F's `state.pointer`
+  stays at `(0, 0)` (verified with `document.elementFromPoint`). We deliberately do NOT use
+  `eventSource`/`eventPrefix` on the Canvas either — R3F may set `touch-action: none` on the
+  event source, which can break touch scrolling.
 
 ### Reduced motion
 - `useReducedMotion()` returns a boolean, passed to `Scene` and `Overlay`.
@@ -85,7 +91,7 @@ panel can move them at runtime. No number that is tuned by eye stays in the sour
 | Uniform | Type | Range | Meaning | Driven by |
 |---|---|---|---|---|
 | `uScroll` | float | 0..1 | global morph amount (scroll) | motion (damp of scrollProgress) |
-| `uPointer` | vec3 | xy in -1..1 | local bulge toward cursor/touch | motion (damp of state.pointer) |
+| `uPointer` | vec3 | xy in -1..1 | local bulge toward cursor/touch | motion (damp of the shared `pointerSignal`) |
 | `uAmplitude` | float | 0..~0.6 | max displacement, set from quality tier | architect/shader (constant per tier) |
 
 Rule: the shader engineer creates and documents these uniforms; the motion engineer drives them in

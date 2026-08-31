@@ -1,10 +1,11 @@
 import { useEffect, useMemo } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { MathUtils } from 'three'
 import { makeGradientFieldMaterial } from './materials/gradientField'
 import { registerGradientLook } from './materials/lookRegistry'
 import { sceneTargets } from './sceneState'
 import { registerQaProbe } from '../qa/registry'
+import { usePointerSignal } from '../lib/pointerRef'
 import { TOKENS } from '../lib/tokens.generated'
 import look from '../../looks/03-gradient.json'
 
@@ -18,7 +19,8 @@ interface Props {
 // forma, e appare/scompare seguendo sceneTargets.gradientMix (scritto dal CameraDirector).
 // Questo componente è l'unico scrittore dei propri uniform (damp dai target).
 export function GradientBackdrop({ reduced, flowScale = 1 }: Props) {
-  const pointer = useThree((s) => s.pointer)
+  // segnale condiviso a livello window (state.pointer è inerte sotto l'overlay .content)
+  const pointer = usePointerSignal()
   const { material, uniforms, lookUniforms } = useMemo(() => makeGradientFieldMaterial(look), [])
 
   // Espone le manopole al pannello Leva (dev). In produzione nessuno legge il registro.
