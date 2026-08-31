@@ -35,9 +35,12 @@ interface StageProps {
   dpr: [number, number]
   /** Artistic exposure dial for the house tonemapper (AgX). 1 = neutral. */
   toneMappingExposure?: number
+  /** Punto di partenza della camera (poi il suo owner la muove). Default: la demo (0,0,6). */
+  cameraPosition?: [number, number, number]
+  cameraFov?: number
 }
 
-export function Stage({ children, dpr, toneMappingExposure = 1 }: StageProps) {
+export function Stage({ children, dpr, toneMappingExposure = 1, cameraPosition = [0, 0, 6], cameraFov = 45 }: StageProps) {
   return (
     <CanvasErrorBoundary fallback={<Poster />}>
       <Canvas
@@ -63,7 +66,7 @@ export function Stage({ children, dpr, toneMappingExposure = 1 }: StageProps) {
           console.info('[kit] renderer backend:', backend?.isWebGPUBackend ? 'WebGPU' : 'WebGL2')
           return renderer
         }}
-        camera={{ position: [0, 0, 6], fov: 45 }}
+        camera={{ position: cameraPosition, fov: cameraFov }}
         dpr={dpr}
       >
         <Suspense fallback={null}>{children}</Suspense>

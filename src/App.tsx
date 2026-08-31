@@ -42,11 +42,23 @@ import { cutouts } from './lib/cutouts.generated'
 // e il code-split diventa cosmetico (misurato: 599 KB gzip comunque sul primo paint).
 // Il preloader nel frattempo mostra il progresso pubblicato su src/lib/loadProgress.ts.
 const CanvasLayer = lazy(() => import('./canvas/CanvasLayer'))
+// Il laboratorio delle discipline di realismo (?lab=1): stesso confine lazy — il chunk del lab
+// (rapier compreso) esiste solo per chi apre il lab, l'entry non lo preannuncia.
+const RealismLab = lazy(() => import('./lab/RealismLab'))
+const labRequested = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('lab')
 
 export default function App() {
   const reduced = useReducedMotion()
   const { tier, detail, amplitude, dpr } = useQualityTier()
   const webglOk = supportsWebGL()
+
+  if (labRequested && webglOk) {
+    return (
+      <Suspense fallback={<Poster />}>
+        <RealismLab />
+      </Suspense>
+    )
+  }
 
   return (
     <SmoothScroll>

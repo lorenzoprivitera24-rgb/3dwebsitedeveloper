@@ -12,7 +12,7 @@ import { chromium } from 'playwright-core'
 import { homedir } from 'node:os'
 
 const url = process.argv[2] ?? 'http://127.0.0.1:5199/'
-const shot = process.argv[3] ?? 'verify-preview.png'
+const shot = `verify-preview${new URL(url).search ? '-' + new URL(url).search.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') : ''}.png`
 const exe =
   process.env.CHROMIUM_PATH ??
   `${homedir()}/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`
