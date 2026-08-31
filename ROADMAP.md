@@ -25,7 +25,8 @@ Both are scored against **one chosen reference** per project (recorded in `ARCHI
 > 2026): rows 2–5 and the verify/CI half of row 10 are now **Have** (IBL + AgX + KTX2 self-host,
 > post node graph, `encode-assets`, `qa:verify`/`qa:shoot`, perf gate, factory S0–S7, registry
 > 5/12). Live status: `PIPELINE_STATUS.md` + `docs/gap-analysis-2026-07-09.md`. Next big rock:
-> the **Next starter twin** (closes the JS-bundle debt too).
+> ~~the **Next starter twin**~~ — CHIUSO il 31 ago 2026 (`starters/next/`, vedi il suo README;
+> il debito bundle era già chiuso dal confine lazy della SPA).
 
 | # | Area | Status | One-line reality |
 |---|------|--------|------------------|

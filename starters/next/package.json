@@ -1,0 +1,26 @@
+{
+  "name": "web3d-next-starter",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Gemello Next App Router della SPA Vite: poster server-rendered che vince l'LCP, canvas WebGPU dietro dynamic(ssr:false), View Transitions. È lo starter per i siti CLIENTE che devono indicizzare.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "tokens:pull": "node scripts/pull-tokens.mjs"
+  },
+  "dependencies": {
+    "next": "^15.5.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.185.1",
+    "@react-three/fiber": "^9.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.185.1",
+    "typescript": "^5.6.0"
+  }
+}

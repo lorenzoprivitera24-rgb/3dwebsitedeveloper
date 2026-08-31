@@ -1,0 +1,150 @@
+/* Token del kit — copia aggiornabile con `npm run tokens:pull` (fonte: ../../src/styles/tokens.css,
+   generata a sua volta da brief/direction.md). Il ponte token è UNO: si edita la direction, mai qui. */
+:root {
+  --bg: #07090d;
+  --bg-2: #0b0e14;
+  --fg: #eef1f7;
+  --muted: #9aa3b2;
+  --accent: #5b8cff;
+  --display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --body: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'Fragment Mono', ui-monospace, 'SF Mono', monospace;
+  /* facoltativo: il grottesco stretto e pesante del genere «prodotto editoriale» (blueprint 14).
+     Assente ⇒ ricade sul display, così i progetti che non lo usano non devono dichiararlo. */
+  --display-condensed: 'Anton', var(--display);
+  --size-display: clamp(2.8rem, 1rem + 9vw, 9rem);
+  --size-eyebrow: 0.78rem;
+  --motion-micro: 0.18s;
+  --motion-base: 0.6s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Il sipario fra route: View Transition di SOLO CSS — niente WebGL nel cambio pagina. */
+::view-transition-old(root) {
+  animation: vt-out 0.28s ease both;
+}
+::view-transition-new(root) {
+  animation: vt-in 0.34s ease both;
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+.page {
+  position: relative;
+  min-height: 100vh;
+}
+
+.canvas-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 92vh;
+  display: grid;
+  align-content: center;
+  gap: 1.2rem;
+  padding: 12vh 6vw;
+  max-width: 60rem;
+  pointer-events: none; /* la scena sotto riceve il puntatore; i link riattivano da soli */
+}
+.hero a,
+.body-copy {
+  pointer-events: auto;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--size-eyebrow);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.display {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: var(--size-display);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 0;
+  max-width: 38rem;
+  font-size: 1.08rem;
+  color: var(--muted);
+  /* velo di contrasto sul testo sopra la scena viva (lezione dei blueprint editoriali) */
+  text-shadow: 0 1px 12px rgba(7, 9, 13, 0.8);
+}
+
+.cta {
+  justify-self: start;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid rgba(238, 241, 247, 0.25);
+  border-radius: 999px;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: border-color var(--motion-micro) ease;
+}
+.cta:hover,
+.cta:focus-visible {
+  border-color: var(--accent);
+}
+
+.body-copy {
+  position: relative;
+  z-index: 1;
+  padding: 10vh 6vw 16vh;
+  max-width: 44rem;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+}
+.body-copy h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 2rem;
+}
+.body-copy code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  color: var(--accent);
+}

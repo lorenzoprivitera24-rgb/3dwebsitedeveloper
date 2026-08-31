@@ -44,6 +44,12 @@ del 31 ago; macchinario del gate operativo). Serve un giro su display a 60 Hz o 
 `?qa=1` per il determinismo dei gate. + `src/hooks/useRenderBackend.ts` (la cucitura
 backend.isWebGPUBackend per i feature-gate compute/post).
 
+**P1 starter Next: CHIUSO** (31 ago 2026): `starters/next/` — App Router gemello, poster
+server-rendered che vince l'LCP (h1 nell'HTML della prima risposta), canvas WebGPU dietro
+`dynamic(ssr:false)` (three fuori dal server bundle e dal First Load: 120 KB senza scena),
+route `/manifesto` solo-server, View Transitions CSS fra le route, `tokens:pull` come ponte
+unico dai token del kit. Verificato: build statica 6/6, WebGPU nel browser reale, 0 errori.
+
 **Debiti aperti**: TypeScript fermo alla 6 finché typescript-eslint non supporta la 7 (motivo in
 `package.json` → `//versions`); `qa/baseline/` va rigenerata a ogni cambio voluto dell'aspetto
 (`npm run qa:bless`) — e il merge train ha cambiato la pagina: baseline da ribenedire.
