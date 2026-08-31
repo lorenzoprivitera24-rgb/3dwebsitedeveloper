@@ -1,0 +1,33 @@
+{
+  "id": "08-spec-sheet-latex",
+  "descrizione": "Scheda tecnica: tabella dl con formule KaTeX (lazy, self-host) e note a piè di sezione navigabili",
+  "trigger": [
+    "scheda tecnica",
+    "specifiche",
+    "formula",
+    "spec sheet",
+    "dati tecnici",
+    "footnote",
+    "matematica"
+  ],
+  "props": {
+    "copy": "SpecCopy (eyebrow/headline/rows[]/footnotes[])",
+    "reduced": "bool"
+  },
+  "slotCopy": [
+    "eyebrow",
+    "headline",
+    "rows[].label",
+    "rows[].value",
+    "rows[].formula",
+    "footnotes[]"
+  ],
+  "perfTier": "A",
+  "mobileFallback": "tabella a colonna singola; reduced = niente reveal, righe già visibili",
+  "dipendenze": [
+    "katex (import dinamico: js+css+font in chunk lazy, MAI nell'entry)",
+    "gsap/ScrollTrigger",
+    "src/scroll/useSectionProgress"
+  ],
+  "nota": "senza KaTeX (o prima che arrivi) la formula resta leggibile come sorgente LaTeX in <code>: la scheda non dipende dall'arricchimento"
+}

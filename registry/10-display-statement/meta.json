@@ -1,0 +1,29 @@
+{
+  "id": "10-display-statement",
+  "descrizione": "Dichiarazione editoriale: display gigante a righe mascherate sopra una foto che deriva, eyebrow mono",
+  "trigger": [
+    "statement",
+    "manifesto",
+    "dichiarazione",
+    "type gigante",
+    "citazione",
+    "quote",
+    "display su foto"
+  ],
+  "props": {
+    "copy": "StatementCopy (eyebrow/lines[]/credit?/image?)",
+    "reduced": "bool"
+  },
+  "slotCopy": [
+    "eyebrow",
+    "lines[]",
+    "credit"
+  ],
+  "perfTier": "A",
+  "mobileFallback": "clamp() scala il display; reduced = righe visibili, foto ferma",
+  "dipendenze": [
+    "gsap/ScrollTrigger",
+    "src/scroll/useSectionProgress"
+  ],
+  "nota": "il reveal ENTRA (toggle), la foto DERIVA (scrub): una dichiarazione non si scrubba — o è detta o non lo è"
+}

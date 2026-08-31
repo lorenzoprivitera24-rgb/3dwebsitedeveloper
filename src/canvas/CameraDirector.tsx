@@ -29,6 +29,7 @@ export function CameraDirector({ reduced }: Props) {
     const s = progressMap.scrub
     const gal = progressMap.gallery
     const str = progressMap.strip
+    const stm = progressMap.statement
     const crd = progressMap.card
     // la calmata del kinetic si COMPLETA al ~45% della sezione: il testo entra quasi subito
     // (trigger a top 72%) e deve trovare la scena già quieta — non calmarsi mentre esce
@@ -67,6 +68,8 @@ export function CameraDirector({ reduced }: Props) {
     morph = MathUtils.lerp(morph, 0.08, e)
     morph = MathUtils.lerp(morph, 0.3, gal)
     morph = MathUtils.lerp(morph, 0.5, str)
+    // statement: il display gigante comanda, la forma si abbassa senza spegnersi
+    morph = MathUtils.lerp(morph, 0.2, stm)
     morph = MathUtils.lerp(morph, 0.25, crd)
     morph = MathUtils.lerp(morph, 0.15, k)
     morph = MathUtils.lerp(morph, 0.9, f)
@@ -97,6 +100,7 @@ export function CameraDirector({ reduced }: Props) {
     camZ = MathUtils.lerp(camZ, explodeZ, e)
     camZ = MathUtils.lerp(camZ, 9.5, gal)
     camZ = MathUtils.lerp(camZ, 8.0, str)
+    camZ = MathUtils.lerp(camZ, 8.6, stm)
     camZ = MathUtils.lerp(camZ, 9.0, crd)
     camZ = MathUtils.lerp(camZ, kineticZ, k)
     camZ = MathUtils.lerp(camZ, 8.5, f)
@@ -114,6 +118,7 @@ export function CameraDirector({ reduced }: Props) {
     camX = MathUtils.lerp(camX, 0, e)
     camX = MathUtils.lerp(camX, -1.1, gal)
     camX = MathUtils.lerp(camX, stripDrift, stripIn)
+    camX = MathUtils.lerp(camX, 0.4, stm)
     camX = MathUtils.lerp(camX, 0.9, crd)
     camX = MathUtils.lerp(camX, 0.3, k)
     camX = MathUtils.lerp(camX, 0, f)
@@ -122,6 +127,7 @@ export function CameraDirector({ reduced }: Props) {
     camY = MathUtils.lerp(camY, 0, e)
     camY = MathUtils.lerp(camY, 0.6, gal)
     camY = MathUtils.lerp(camY, -0.4, str)
+    camY = MathUtils.lerp(camY, -0.2, stm)
     camY = MathUtils.lerp(camY, 0.5, crd)
     camY = MathUtils.lerp(camY, 0.2, k)
     camY = MathUtils.lerp(camY, -1.6, f)

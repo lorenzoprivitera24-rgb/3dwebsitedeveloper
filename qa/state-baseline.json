@@ -55,6 +55,13 @@
     "sceneTargets.camY": 0,
     "sceneTargets.camZ": 8.6
   },
+  "spec-eredita-la-quiete": {
+    "sceneTargets.morph": 0.08,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 0,
+    "sceneTargets.camY": 0,
+    "sceneTargets.camZ": 8.6
+  },
   "gallery-ripresa": {
     "sceneTargets.morph": 0.256,
     "sceneTargets.gradientMix": 0,
@@ -69,12 +76,19 @@
     "sceneTargets.camY": -0.3002,
     "sceneTargets.camZ": 8.1496
   },
-  "card-meta": {
-    "sceneTargets.morph": 0.3749,
+  "statement-display": {
+    "sceneTargets.morph": 0.3124,
     "sceneTargets.gradientMix": 0,
-    "sceneTargets.camX": -0.3493,
-    "sceneTargets.camY": 0.0502,
-    "sceneTargets.camZ": 8.5003
+    "sceneTargets.camX": -0.2584,
+    "sceneTargets.camY": -0.1951,
+    "sceneTargets.camZ": 8.4297
+  },
+  "card-meta": {
+    "sceneTargets.morph": 0.225,
+    "sceneTargets.gradientMix": 0,
+    "sceneTargets.camX": 0.6501,
+    "sceneTargets.camY": 0.1502,
+    "sceneTargets.camZ": 8.8001
   },
   "pointer-meta": {
     "sceneTargets.morph": 0.25,

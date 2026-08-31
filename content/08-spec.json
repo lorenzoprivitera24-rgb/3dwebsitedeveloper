@@ -1,0 +1,34 @@
+{
+  "eyebrow": "scheda tecnica · 08",
+  "headline": "I numeri sotto la forma",
+  "rows": [
+    {
+      "label": "Geometria",
+      "value": "icosaedro, 128 suddivisioni (tier high)",
+      "footnote": 1
+    },
+    {
+      "label": "Spostamento",
+      "value": "rumore simplex sul raggio",
+      "formula": "p' = p + \\hat{n}\\,A\\,\\mathrm{noise}(p\\,s + t\\,v)"
+    },
+    {
+      "label": "Easing",
+      "value": "damp esponenziale, indipendente dal framerate",
+      "formula": "x_{t+1} = \\mathrm{lerp}\\big(x_t,\\; x^{*},\\; 1 - e^{-\\lambda\\,\\Delta t}\\big)",
+      "footnote": 2
+    },
+    {
+      "label": "Ampiezza",
+      "value": "0,55 unità scena (tier high) · 0,35 (low)"
+    },
+    {
+      "label": "Risoluzione",
+      "value": "dpr ≤ 2, adattivo nel range del tier"
+    }
+  ],
+  "footnotes": [
+    "Le suddivisioni scendono a 96 (medium) e 48 (low): il tier decide al load, il layer adattivo corregge in corsa.",
+    "λ = 3 per la camera, 4 per gli uniform dei materiali: la scena insegue i target, mai il contrario."
+  ]
+}

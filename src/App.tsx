@@ -14,8 +14,10 @@ import { PinnedSceneScrub } from '../registry/05-pinned-scene-scrub/PinnedSceneS
 import { ProductExplode } from '../registry/13-product-explode/ProductExplode'
 import { TypeBehindProduct } from '../registry/14-type-behind-product/TypeBehindProduct'
 import { ProductGallery } from '../registry/15-product-gallery/ProductGallery'
+import { SpecSheetLatex } from '../registry/08-spec-sheet-latex/SpecSheetLatex'
 import { EditorialGallery } from '../registry/07-editorial-gallery/EditorialGallery'
 import { HorizontalScrollStrip } from '../registry/11-horizontal-scroll-strip/HorizontalScrollStrip'
+import { DisplayStatement } from '../registry/10-display-statement/DisplayStatement'
 import { InteractionCard } from '../registry/09-interaction-card/InteractionCard'
 import { KineticType } from '../registry/06-kinetic-type/KineticType'
 import { PointerRig3d } from '../registry/04-pointer-rig-3d/PointerRig3d'
@@ -27,8 +29,10 @@ import scrubCopy from '../content/05-scrub.json'
 import explodeCopy from '../content/13-explode.json'
 import veilCopy from '../content/14-veil.json'
 import prodGalleryCopy from '../content/15-gallery.json'
+import specCopy from '../content/08-spec.json'
 import galleryCopy from '../content/07-gallery.json'
 import stripCopy from '../content/11-strip.json'
+import statementCopy from '../content/10-statement.json'
 import cardCopy from '../content/09-card.json'
 import kineticCopy from '../content/06-kinetic.json'
 import pointerCopy from '../content/04-pointer.json'
@@ -95,9 +99,12 @@ export default function App() {
         <ProductExplode copy={explodeCopy} product={cutouts.products.stack} reduced={reduced} />
         <TypeBehindProduct copy={veilCopy} product={cutouts.products.stack} reduced={reduced} />
         <ProductGallery copy={prodGalleryCopy} product={cutouts.products.stack} reduced={reduced} />
+        {/* la scheda tecnica SIEDE nel blocco quiete del prodotto: eredita il segnale e */}
+        <SpecSheetLatex copy={specCopy} reduced={reduced} />
         {/* blocco editoriale: la scena riprende voce capitolo per capitolo */}
         <EditorialGallery copy={galleryCopy} reduced={reduced} />
         <HorizontalScrollStrip copy={stripCopy} reduced={reduced} />
+        <DisplayStatement copy={statementCopy} reduced={reduced} />
         <InteractionCard copy={cardCopy} reduced={reduced} />
         {/* blueprint 04: la meta' DOM del pointer-rig; il satellite vive in CanvasLayer */}
         <PointerRig3d copy={pointerCopy} reduced={reduced} />

@@ -782,6 +782,161 @@ body {
   line-height: 1.55;
 }
 
+/* ============ 08 spec-sheet-latex ============ */
+
+/* Velo di contrasto come i capitoli editoriali (la scena resta accesa dietro tutto il sito) */
+.bp-spec {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  padding: 14vh 6vw;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+}
+.bp-spec__inner {
+  max-width: 46rem;
+  margin: 0 auto;
+  width: 100%;
+}
+.bp-spec__eyebrow,
+.bp-statement__eyebrow {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.8rem;
+}
+.bp-spec__title {
+  font-family: var(--display);
+  font-weight: 380;
+  font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+  line-height: 1.05;
+  margin: 0 0 5vh;
+  text-wrap: balance;
+}
+.bp-spec__table {
+  margin: 0;
+  border-top: 1px solid rgba(238, 241, 247, 0.14);
+}
+.bp-spec__row {
+  display: grid;
+  /* minmax(0,…): una formula KaTeX è una traccia non-wrap — senza il vincolo allarga la colonna
+     e i titoli smettono di andare a capo (lezione dei blueprint 07-12) */
+  grid-template-columns: minmax(7rem, 14rem) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(238, 241, 247, 0.14);
+}
+.bp-spec__label {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 0.15rem;
+}
+.bp-spec__value {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+.bp-spec__formula {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 1.05rem;
+  overflow-x: auto; /* una formula larga scorre nel suo riquadro, mai la pagina */
+}
+.bp-spec__formula code {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.bp-spec__value sup a {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 0 0.15em;
+}
+.bp-spec__footnotes {
+  margin: 4vh 0 0;
+  padding: 0 0 0 1.2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.bp-spec__footnotes a {
+  color: var(--accent);
+  text-decoration: none;
+}
+@media (max-width: 640px) {
+  .bp-spec__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.3rem;
+  }
+}
+
+/* ============ 10 display-statement ============ */
+
+.bp-statement {
+  position: relative;
+  min-height: 92vh;
+  display: grid;
+  align-content: center;
+  padding: 16vh 6vw;
+  overflow: hidden; /* la foto deriva oltre i bordi: qui si taglia */
+}
+.bp-statement__media {
+  position: absolute;
+  inset: -12% 0; /* più alta del riquadro: è quel margine a permettere la deriva */
+  margin: 0;
+  z-index: -1;
+}
+.bp-statement__media img,
+.bp-statement__placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bp-statement__placeholder {
+  background:
+    radial-gradient(120% 90% at 75% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 55%),
+    linear-gradient(200deg, var(--bg-2) 0%, var(--bg) 70%);
+}
+/* dissolvenza verticale, non blocco: l'ingresso e l'uscita non devono essere stacchi netti */
+.bp-statement::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--bg) 0%, transparent 22%, transparent 78%, var(--bg) 100%);
+}
+.bp-statement__inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  width: 100%;
+}
+.bp-statement__display {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 380;
+  font-size: clamp(2.6rem, 9vw, 7.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.bp-statement__line {
+  display: block;
+  overflow: hidden; /* la maschera del reveal: la riga sale da qui dietro */
+}
+.bp-statement__line-inner {
+  display: block;
+}
+.bp-statement__credit {
+  margin: 3vh 0 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 /* ============ 11 horizontal-scroll-strip ============ */
 
 .bp-strip {

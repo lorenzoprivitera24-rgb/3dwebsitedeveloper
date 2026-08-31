@@ -1,8 +1,8 @@
 # Registro — indice dei blueprint
 
-Stato: **13/15 implementati** (01-07·09·11-15 — mancano 08 e 10). La famiglia «prodotto a
-strati» è 13·14·15 (ago 2026); il backlog della ricerca lug 2026 è rinumerato 16-21.
-Backlog extra dalla ricognizione lug 2026 in coda.
+Stato: **15/15 implementati** — il registro numerato è COMPLETO (31 ago 2026), tutti composti
+nella demo a 14 sezioni e passati per i gate (stato 16/16, pixel 42/42). La famiglia «prodotto a
+strati» è 13·14·15; il backlog della ricerca lug 2026 (16-21) è la prossima frontiera.
 
 | # | id | Copre | Stato |
 |---|---|---|---|
@@ -13,9 +13,9 @@ Backlog extra dalla ricognizione lug 2026 in coda.
 | 05 | `pinned-scene-scrub` | sezione pinnata, scena che si trasforma | ✅ implementato |
 | 06 | `kinetic-type` | SplitText, display gigante | ✅ implementato |
 | 07 | `editorial-gallery` | griglia magazine + parallax per colonna + reveal | ✅ implementato |
-| 08 | `spec-sheet-latex` | KaTeX + footnote | pianificato |
+| 08 | `spec-sheet-latex` | scheda tecnica: dl + formule KaTeX lazy + note ↩ | ✅ implementato |
 | 09 | `interaction-card` | decode/scramble, flip, magnetic | ✅ implementato |
-| 10 | `display-statement` | type gigante su foto, eyebrow mono | pianificato |
+| 10 | `display-statement` | display a righe mascherate su foto che deriva | ✅ implementato |
 | 11 | `horizontal-scroll-strip` | galleria orizzontale pinnata | ✅ implementato |
 | 12 | `footer-cta` | marquee + CTA magnetico + velo di contrasto | ✅ implementato |
 | 13 | `product-explode` | vista esplosa scrubbata di scontornati + annotazioni | ✅ implementato |
@@ -37,7 +37,7 @@ Backlog extra dalla ricognizione lug 2026 in coda.
 ## Ordine in pagina e regia
 
 L'ordine dei blueprint nella demo **è** l'ordine dei canali in `src/scroll/progressMap.ts` e delle
-tratte nel `CameraDirector`: hero → gradient → scrub → explode → veil → prodgallery → gallery → strip → card → pointer → kinetic → footer.
+tratte nel `CameraDirector`: hero → gradient → scrub → explode → veil → prodgallery → spec → gallery → strip → statement → card → pointer → kinetic → footer.
 La regia si passa il testimone fra tratte consecutive dando per scontato che, quando una sezione ha
 progresso > 0, la precedente sia già a 1. **Se sposti una sezione nel DOM, spostala anche là.**
 

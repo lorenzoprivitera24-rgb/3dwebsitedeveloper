@@ -153,6 +153,15 @@
         }
       ]
     },
+    { "name": "spec-eredita-la-quiete", "section": "spec", "p": 0.5, "expect": [
+        {
+          "why": "design: lo spec-sheet siede DENTRO il blocco prodotto senza una tratta propria — se questo fallisce, qualcuno l'ha spostato nel DOM senza dargli una tratta in regia",
+          "path": "sceneTargets.morph",
+          "op": "lte",
+          "value": 0.15
+        }
+      ]
+    },
     {
       "name": "gallery-ripresa",
       "section": "gallery",
@@ -176,6 +185,15 @@
           "path": "sceneTargets.camX",
           "op": "lte",
           "value": -1.0
+        }
+      ]
+    },
+    { "name": "statement-display", "section": "statement", "p": 0.6, "expect": [
+        {
+          "why": "regia: il display comanda — la forma si abbassa (verso 0.2) senza spegnersi del tutto",
+          "path": "sceneTargets.morph",
+          "op": "lte",
+          "value": 0.4
         }
       ]
     },

@@ -12,8 +12,10 @@ export type SectionKey =
   | 'explode'
   | 'veil'
   | 'prodgallery'
+  | 'spec'
   | 'gallery'
   | 'strip'
+  | 'statement'
   | 'card'
   | 'pointer'
   | 'kinetic'
@@ -27,8 +29,10 @@ export const progressMap: Record<SectionKey, number> = {
   explode: 0,
   veil: 0,
   prodgallery: 0,
+  spec: 0,
   gallery: 0,
   strip: 0,
+  statement: 0,
   card: 0,
   pointer: 0,
   kinetic: 0,
@@ -51,8 +55,10 @@ export const approachMap: Record<SectionKey, number> = {
   explode: 0,
   veil: 0,
   prodgallery: 0,
+  spec: 0,
   gallery: 0,
   strip: 0,
+  statement: 0,
   card: 0,
   pointer: 0,
   kinetic: 0,

@@ -4,8 +4,8 @@
 > "done" dello stadio. Le regole e i comandi della fabbrica sono in `CLAUDE.md` § The factory.
 
 - **Progetto**: demo starter interno («Form in Motion»)
-- **Stadio corrente**: **S6/S7 sulla demo interna** — 11 sezioni composte da 12 blueprint (S2
-  storyboard ✓, S3 content ✓, S5 composizione ✓); nessun brief CLIENTE attivo
+- **Stadio corrente**: **S6/S7 sulla demo interna** — 14 sezioni, **registro numerato COMPLETO
+  15/15** (S2 storyboard ✓, S3 content ✓, S5 composizione ✓); nessun brief CLIENTE attivo
 - **Ultimo aggiornamento**: 2026-08-31 (merge train: velocity + gates + product-choreography
   unificati su main — Vite 8, tre gate qa, famiglia prodotto rinumerata 13·14·15)
 
@@ -30,8 +30,9 @@ Vite** dagli entry lungo i soli import statici (versione recuperata dal worktree
 a 12 sezioni (🟡 11,5 sopra il target; 431 differiti, 592,5 totali). Il salto viene
 dall'inversione della dipendenza sul progresso di caricamento: `src/lib/loadProgress.ts`.
 
-**Registro a 13/15 blueprint** (01-07·09·11-15); mancano 08 e 10. Gate al 31 ago 2026:
-`qa:state` 🟢 14/14 checkpoint sulla drammaturgia unificata · `qa:diff` 🟢 36/36 ·
+**Registro COMPLETO 15/15** (08 spec-sheet-latex e 10 display-statement chiusi il 31 ago: KaTeX
+da import dinamico — l'entry non lo paga, +1,4 KB di componenti). Gate al 31 ago 2026:
+`qa:state` 🟢 16/16 checkpoint sulla drammaturgia unificata · `qa:diff` 🟢 42/42 ·
 `qa:reduced` 🟢 0 errori · `qa:verify` 🟢 WebGPU 0 errori console · `qa:frames` **bloccato
 dall'ambiente su questo Mac**: mediana inchiodata a 33,3 ms su OGNI path e sezione, invariante
 al throttle CPU 4× → tetto vsync/compositor a 30 Hz dello schermo, non carico dell'app (misura
