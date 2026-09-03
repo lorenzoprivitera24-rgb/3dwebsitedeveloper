@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 // perf-check.mjs — il gate S7: budget come numeri, non come consigli.
+// GATE-NEGATIVO: il righello vecchio (somma di tutti i .js) non si muoveva sul code-split,
+// che è proprio il fix che il gate chiedeva: totale identito al byte, semaforo fermo su 🟡
+// per mesi. Quello nuovo legge l'ingresso + i modulepreload da dist/index.html e separa
+// iniziale 157,5 KB · differito 429,7 · totale 587,2: 🟡→🟢 senza che il totale cambi (6 ago 2026).
 // Misura la build (dist/) e gli asset (public/) e scrive qa/perf-report.md.
 // Exit: 0 verde (anche con warn) · 1 rosso (hard cap sforato). Richiede `npm run build` prima.
 //
