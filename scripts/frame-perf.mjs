@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+// GATE-NEGATIVO: iniettati 22 ms di lavoro sincrono per frame nello useFrame di
+// GradientBackdrop -> exit 1 con tre metriche distinte nominate, su entrambi i profili:
+// «mediana 22.4 ms > 18 ms», «p95 27.6 ms > 24 ms», «frame lunghi 100% > 3% (>20 ms: sono
+// gli scatti che si vedono)». Pulito: 0% di frame lunghi, mediana 16,7 ms, peggiore 18,7.
+// A differenza del gemello `perf-runtime.mjs` di SILKET, qui le soglie sui TEMPI fanno
+// davvero fallire (qa/budget.json: median 18, p95 24, maxLongFramePct 3 desktop / 8 mobile).
+// (4 set 2026)
 // frame-perf.mjs — il TERZO gate: tempo per frame, per percorso, con statistica.
 //
 // Perché è separato da perf:check — quello misura il PESO (bundle, asset: byte su disco, gate

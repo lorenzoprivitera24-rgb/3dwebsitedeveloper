@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// GATE-NEGATIVO: aggiunto un `console.error` nel boot di src/main.tsx -> «errori: 1», l'errore
+// stampato per esteso ed exit 1; senza, «errori: 0» ed exit 0. Il gate fallisce anche se il
+// backend non viene rilevato (`!backend`): una pagina che carica ma non monta il renderer non
+// passa. Verificato nel giro pulito/rotto/ripristinato del 4 set 2026.
 // verify-preview.mjs — "a green build is not proof": loads the running dev/preview server in a
 // real Chromium, captures console + screenshot, and reports which renderer backend actually ran
 // (Stage.tsx logs `[kit] renderer backend: WebGPU|WebGL2` from backend.isWebGPUBackend).

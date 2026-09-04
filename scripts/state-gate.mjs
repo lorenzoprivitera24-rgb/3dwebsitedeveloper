@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// GATE-NEGATIVO: aggiunto in GradientBackdrop un secondo scrittore della camera
+// (`_state.camera.position.z += 0.02` nel suo useFrame) -> 12 checkpoint rossi, exit 1, ognuno
+// col nome della regola: «camera.z NON converge: 9.0073 vs target 8.6000 (Δ 0.4073 > 0.05)».
+// NB sulla sensibilità, misurata nello stesso giro: a += 0.002/frame il gate resta VERDE —
+// il damp (lambda 3) tiene la deriva a Δ≈0.04, sotto la tolleranza 0.05. Un secondo owner più
+// debole di ~0.0025/frame è invisibile a questo gate: se serve vederlo, stringere la tol. (4 set 2026)
 // state-gate.mjs — il PRIMO dei tre gate del kit, e l'unico deterministico al 100%.
 //
 // I tre gate, e perché sono tre e non uno:
