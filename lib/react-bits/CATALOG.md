@@ -82,6 +82,7 @@ Notes:
 - [Ribbons](https://www.reactbits.dev/animations/ribbons): Flowing responsive ribbons/cursor trail driven by physics and pointer motion. CLI: `Ribbons`.
 - [Shape Blur](https://www.reactbits.dev/animations/shape-blur): Morphing blurred geometric shape. The effect occurs on hover. CLI: `ShapeBlur`.
 - [Splash Cursor](https://www.reactbits.dev/animations/splash-cursor): Liquid splash burst at cursor with curling ripples and waves. CLI: `SplashCursor`.
+- [Strands](https://www.reactbits.dev/animations/strands): Flowing ribbon strands with taper, glow and optional glass refraction/dispersion. CLI: `Strands`.
 - [Star Border](https://www.reactbits.dev/animations/star-border): Animated star / sparkle border orbiting content with twinkle pulses. CLI: `StarBorder`.
 - [Sticker Peel](https://www.reactbits.dev/animations/sticker-peel): Sticker corner lift + peel interaction using 3D transform and shadow depth. CLI: `StickerPeel`.
 - [Target Cursor](https://www.reactbits.dev/animations/target-cursor): A cursor follow animation with 4 corners that lock onto targets. CLI: `TargetCursor`.
@@ -138,6 +139,7 @@ Notes:
 - [Dot Grid](https://www.reactbits.dev/backgrounds/dot-grid): Animated dot grid with cursor interactions. CLI: `DotGrid`.
 - [Evil Eye](https://www.reactbits.dev/backgrounds/evil-eye): Procedural evil eye shader with animated iris, slit pupil, and fiery outer glow. CLI: `EvilEye`.
 - [Faulty Terminal](https://www.reactbits.dev/backgrounds/faulty-terminal): Terminal CRT scanline squares effect with flicker + noise. CLI: `FaultyTerminal`.
+- [Ferrofluid](https://www.reactbits.dev/backgrounds/ferrofluid): Magnetic-fluid blobs with turbulence, rim light and shimmer, reacting to the cursor. CLI: `Ferrofluid`.
 - [Floating Lines](https://www.reactbits.dev/backgrounds/floating-lines): 3D floating lines that react to cursor movement. CLI: `FloatingLines`.
 - [Galaxy](https://www.reactbits.dev/backgrounds/galaxy): Parallax realistic starfield with pointer interactions. CLI: `Galaxy`.
 - [Gradient Blinds](https://www.reactbits.dev/backgrounds/gradient-blinds): Layered gradient blinds with spotlight and noise distortion. CLI: `GradientBlinds`.
@@ -150,6 +152,7 @@ Notes:
 - [Letter Glitch](https://www.reactbits.dev/backgrounds/letter-glitch): Matrix style letter animation. CLI: `LetterGlitch`.
 - [Lightning](https://www.reactbits.dev/backgrounds/lightning): Procedural lightning bolts with branching and glow flicker. CLI: `Lightning`.
 - [Light Pillar](https://www.reactbits.dev/backgrounds/light-pillar): Vertical pillar of light with glow effects. CLI: `LightPillar`.
+- [Lightfall](https://www.reactbits.dev/backgrounds/lightfall): Falling light streaks with twinkle, glow and depth zoom, reacting to the cursor. CLI: `Lightfall`.
 - [Light Rays](https://www.reactbits.dev/backgrounds/light-rays): Volumetric light rays/beams with customizable direction. CLI: `LightRays`.
 - [Line Waves](https://www.reactbits.dev/backgrounds/line-waves): Animated line wave pattern with colorful warped distortion. CLI: `LineWaves`.
 - [Liquid Chrome](https://www.reactbits.dev/backgrounds/liquid-chrome): Liquid metallic chrome shader with flowing reflective surface. CLI: `LiquidChrome`.
@@ -165,6 +168,7 @@ Notes:
 - [Radar](https://www.reactbits.dev/backgrounds/radar): Radar sweep effect with concentric rings, radial spokes, and a rotating beam. CLI: `Radar`.
 - [Ripple Grid](https://www.reactbits.dev/backgrounds/ripple-grid): A grid that continuously animates with a ripple effect. CLI: `RippleGrid`.
 - [Shape Grid](https://www.reactbits.dev/backgrounds/shape-grid): Animated grid with shape variants (square, hexagon, circle, triangle) + direction customization. CLI: `ShapeGrid`.
+- [Side Rays](https://www.reactbits.dev/backgrounds/side-rays): Volumetric rays from a screen corner, with spread, tilt, falloff and saturation. CLI: `SideRays`.
 - [Silk](https://www.reactbits.dev/backgrounds/silk): Smooth waves background with soft lighting. CLI: `Silk`.
 - [Soft Aurora](https://www.reactbits.dev/backgrounds/soft-aurora): Soft aurora borealis shader with 3D Perlin noise and cosine gradient palettes. CLI: `SoftAurora`.
 - [Threads](https://www.reactbits.dev/backgrounds/threads): Animated pattern of lines forming a fabric-like motion. CLI: `Threads`.
