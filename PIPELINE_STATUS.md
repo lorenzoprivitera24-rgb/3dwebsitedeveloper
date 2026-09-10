@@ -6,8 +6,10 @@
 - **Progetto**: demo starter interno («Form in Motion»)
 - **Stadio corrente**: **S6/S7 sulla demo interna** — 14 sezioni, **registro numerato COMPLETO
   15/15** (S2 storyboard ✓, S3 content ✓, S5 composizione ✓); nessun brief CLIENTE attivo
-- **Ultimo aggiornamento**: 2026-08-31 (merge train: velocity + gates + product-choreography
-  unificati su main — Vite 8, tre gate qa, famiglia prodotto rinumerata 13·14·15)
+- **Ultimo aggiornamento**: 2026-09-10 (shelf React Bits riparata + catalogo 134 = 134; scaffale
+  background per i reel DUOMO 26 ancora **non committato**; ROADMAP § 2 riverificato riga per
+  riga — dettaglio in fondo). Prima di questo: 31 ago, merge train (Vite 8, tre gate qa,
+  famiglia prodotto rinumerata 13·14·15)
 
 | Stadio | Owner | Artefatto | Stato | Gate |
 |---|---|---|---|---|
@@ -54,10 +56,33 @@ unico dai token del kit. Verificato: build statica 6/6, WebGPU nel browser reale
 `package.json` → `//versions`); `qa/baseline/` va rigenerata a ogni cambio voluto dell'aspetto
 (`npm run qa:bless`) — e il merge train ha cambiato la pagina: baseline da ribenedire.
 
-**Branch aperti**: `feat/product-choreography` (worktree `.claude/worktrees/product-choreo`,
-6 ago) — famiglia «prodotto a strati» completa e verificata in browser reale. **NON mergiato.**
+**Branch e worktree: nessuno aperto** (verificato il 10 set 2026). Il merge train del 31 ago ha
+chiuso anche `feat/product-choreography` (`7146b7f`) e `gen-factory-lug10` (`02fac07`); i worktree
+sono rimossi e `git worktree list` dà solo `main`. Resta il ramo `setup/auto-dispatch-agenti`
+(20 giu) con **zero commit unici** rispetto a main: è un residuo, non un cantiere.
+**`main` è 3 commit avanti su `origin/main`** — push non ancora fatto.
 
-`gen-factory-lug10` (worktree `.claude/worktrees/gen-factory`, 10 lug) —
-blueprint **04-pointer-rig-3d implementato** + layer «generative factory» (4 agenti nuovi,
-2 skill, intake a 3 porte S0a/b/c, backlog 13-18, master plan). **NON mergiato**: serve review
-+ OK umano esplicito prima del merge.
+## 3-10 set 2026 — dopo il merge train
+
+- **I gate dichiarano di essere stati visti fallire** (`becdfce`, `77d1111`): marcatore
+  `GATE-NEGATIVO:` su `perf-check` e sui tre gate — un gate che nessuno ha mai visto fallire non
+  è un gate.
+- **Shelf React Bits riparata** (`ad38b20`, 9 set): `SideRays.tsx` conteneva **due copie complete
+  del componente concatenate** (470 righe, due `export default`) — unico caso su 135 file, provato
+  con un typecheck dell'intera shelf. Perché era sopravvissuto: `CATALOG.md` elencava 130 voci
+  contro 134 cartelle, e **chi non è a catalogo non viene mai aperto**. Ora 134 = 134,
+  `sync:global` rieseguito (il mirror conteneva ancora il file a 470 righe). Restano 4 componenti
+  con attrito di tipi vero, segnalati e non toccati: `Dither`, `Lanyard`, `PillNav`,
+  `SplitText`/`Shuffle`.
+- **Due scaffalature per i reel DUOMO 26 — NULLA committato** (9 set): `lib/backgrounds/` (indice
+  di 29 sorgenti con licenza e verdetto, `bg:links`/`bg:fetch`), la galleria `lab/bg-gallery/`
+  fuori da `src/` con 47 background catturati a 1080×1920, e la guardia `bg:doctor` (confronta
+  ogni prop numerica col default del componente e boccia oltre 10×; al primo giro ha trovato 4
+  valori fuori scala). Il lab non entra nel bundle; lint + build + `perf:check` verdi. **Sono
+  file non tracciati su `main`.**
+- **ROADMAP § 2 riverificato** (10 set): la tabella «Where we are» era ferma alla fotografia
+  pre-W1 del 20 giu e diceva «Missing» su aree chiuse a luglio e agosto. Riscritta riga per riga
+  aprendo i file, con la distinzione che conta — **prodotto vs realism lab** (`?lab=1`):
+  instancing, PBR triplanar, PostFX, wind e physics esistono e sono verificati, ma **nessuno è
+  montato in una sezione**, quindi nessuno è mai passato dai gate del prodotto. Le righe
+  `Current:` del § 5 restano lo stato d'ingresso, ora dichiarato tale.

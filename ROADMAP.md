@@ -21,25 +21,30 @@ Both are scored against **one chosen reference** per project (recorded in `ARCHI
 
 ## 2. Where we are
 
-> **Snapshot pre-W1 (20 giu 2026), kept as the baseline.** W1–W4 are CLOSED on main (9–10 lug
-> 2026): rows 2–5 and the verify/CI half of row 10 are now **Have** (IBL + AgX + KTX2 self-host,
-> post node graph, `encode-assets`, `qa:verify`/`qa:shoot`, perf gate, factory S0–S7, registry
-> 5/12). Live status: `PIPELINE_STATUS.md` + `docs/gap-analysis-2026-07-09.md`. Next big rock:
-> ~~the **Next starter twin**~~ — CHIUSO il 31 ago 2026 (`starters/next/`, vedi il suo README;
-> il debito bundle era già chiuso dal confine lazy della SPA).
+> **Stato riverificato sul repo il 10 set 2026** (main `ad38b20`), riga per riga, aprendo i file.
+> La tabella che stava qui era la fotografia **pre-W1 del 20 giu 2026**, tenuta come linea di
+> partenza e mai riscritta: continuava a dire «Missing» su cose chiuse a luglio e agosto. Se
+> serve il confronto storico, la vecchia tabella è in `git log`. Lo stato **vivo** di stadio,
+> gate e numeri è in `PIPELINE_STATUS.md`; questa tabella dice solo quanto è coperta ogni area.
+>
+> **Come si legge lo stato.** `Have` = montato nel **prodotto** (la demo a 14 sezioni che
+> spedisce). `Have (lab)` = codice scritto e verificato nel **realism lab** `?lab=1`
+> (`src/lab/RealismLab.tsx`), dietro il confine lazy, **mai composto in una sezione** — la
+> distinzione conta, perché ciò che vive solo nel lab non è mai passato dai gate del prodotto.
+> `Partial` / `Missing` come prima.
 
-| # | Area | Status | One-line reality |
-|---|------|--------|------------------|
-| 1 | Geometry & instancing | **Missing (general) / Have (foliage docs)** | Single icosahedron mesh; zero instancing code; foliage instancing well-documented but uncoded. |
-| 2 | Materials & shading (PBR + TSL) | **Missing** | One untextured `MeshStandardNodeMaterial`; no maps, no triplanar, no transmission, no KTX2 wired. |
-| 3 | Lighting, IBL & shadows | **Missing** | 3 analytic lights, no IBL, no shadows, no tonemapping set — scenes render flat. |
-| 4 | Post-processing & color | **Missing + contradictory** | No post chain; `antialias:true` hardcoded; SKILL.md still recommends the avoided WebGL path. |
-| 5 | Asset pipeline & sourcing | **Missing** | No `public/`, no loaders, no transcoder, no encode script; pipeline exists only as prose. |
-| 6 | Animation, wind, physics & "alive" | **Partial (discipline) / Missing (limbs)** | One-RAF/one-owner law is solid; wind, compute particles, gestures, physics all absent (rapier not even a dep). |
-| 7 | Performance, fallback & mobile | **Partial** | Tier hook + reduced-motion + 3-level fallback exist; static tier, no profiling tooling, no adaptive layer. |
-| 8 | Reference benchmarks & measuring "real" | **Missing** | Only Bruno Simon named; no roster, no realism rubric, no A/B workflow. |
-| 9 | Interactivity & DOM/overlay | **Partial + 1 hazard** | Single-loop wiring correct; React Bits vendored-not-integrated; `ScrollReveal` kills ALL ScrollTriggers on unmount. |
-| 10 | Tooling, verification & agents | **Partial + broken CI** | 6 agents + auto-dispatch + skill playbook are strong; CI runs webpack on a Vite project; no browser-verify gate; agent-memory dir absent. |
+| # | Area | Stato (10 set 2026) | Dov'è — e cosa manca ancora |
+|---|------|---------------------|------------------------------|
+| 1 | Geometry & instancing | **Have (lab)** | `src/canvas/InstancedField.tsx` (istanze + wind TSL), importato solo da `RealismLab`. Il prodotto è ancora a mesh singola; nessun LOD/`<Detailed>`, impostori o chunking. |
+| 2 | Materials & shading (PBR + TSL) | **Have (lab)** | `canvas/materials/pbrTriplanar.ts` + `alphaModes.ts` + `canvas/tsl/triplanar.ts`; KTX2 in `src/lib/ktx2.ts` col transcoder self-host in `public/basis/`. Il prodotto usa `gradientField`/`lookRegistry`, non PBR texturizzato. Mancano transmission/SSS e iridescence/clearcoat. |
+| 3 | Lighting, IBL & shadows | **Have (IBL) / Missing (ombre)** | IBL self-host + AgX + exposure sono nel prodotto (`Scene.tsx:23`, `Stage.tsx:59`). **Nessuna ombra esiste**: `shadowMapSize` in `useQualityTier.ts` è un budget senza una luce che proietti, e non c'è contact/accumulated shadow. |
+| 4 | Post-processing & color | **Have (lab)** | `canvas/PostFX.tsx`, grafo nodale nativo tier-gated, montato solo dal lab. `antialias: true` non è più un hardcode cieco ma una decisione verificata e commentata (`Stage.tsx:50-55`). La contraddizione è risolta nella skill (`web3d-integration-patterns/SKILL.md:46`); resta prosa vecchia in `docs/deep-dive-stack-e-librerie-asset.md:71`. |
+| 5 | Asset pipeline & sourcing | **Have** | `public/basis` `draco` `hdri` `assets`, `scripts/encode-assets.mjs` + `encode-cutouts.mjs`, loader in `src/lib/ktx2.ts`. Manca solo l'uscita di sicurezza fotoreale: hero baked/video e lo spike sui Gaussian splat. |
+| 6 | Animation, wind, physics & "alive" | **Have (lab)** | `canvas/tsl/wind.ts` a più ottave (tier-gated) e `canvas/physics/PhysicsStage.tsx`: **rapier ora è una dipendenza** (`@react-three/rapier ^2.2.0`, `package.json:43`). La legge one-RAF/one-owner regge. `@use-gesture/react` resta installato e mai usato in `src/`. |
+| 7 | Performance, fallback & mobile | **Have — con una misura bloccata** | `AdaptiveQuality.tsx`, `useRenderBackend.ts`, `DevPerf.tsx` (HUD interno: r3f-perf crasha su WebGPU), `Poster.tsx`; `perf:check` cammina il manifest Vite → 161,5 KB iniziali, 🟡 sopra il target 150. `qa:frames` è **bloccato dall'ambiente** (vsync 30 Hz su questo Mac): da rifare su display 60 Hz o device reale. |
+| 8 | Reference benchmarks & measuring "real" | **Partial** | Ci sono la ricognizione (`recon/`, `docs/gap-analysis-2026-07-09.md`) e il confronto pixel numerico (`qa:diff`/`qa:bless` con odiff, soglie misurate run-to-run). Manca **esattamente ciò che la riga chiedeva**: nessun roster di riferimenti, nessun blocco «Realism bar» in `ARCHITECTURE.md`, nessuna checklist percettiva punteggiata. |
+| 9 | Interactivity & DOM/overlay | **Partial (hazard chiuso)** | La patch al vendored `ScrollReveal` uccide solo i propri tween (`lib/react-bits/TextAnimations/ScrollReveal/ScrollReveal.tsx:52`) e `sync:global` rispecchia `lib/react-bits/`, quindi la copia globale non rispedisce più il file marcio; catalogo 134 = 134 cartelle. Lo scroll ha `useSectionProgress.ts`; mancano le primitive d'overlay (`Scrim`, `OverlayLayer`) e `usePointerDamp`. |
+| 10 | Tooling, verification & agents | **Have (verifica) / Partial (agenti)** | CI reale su Vite (`.github/workflows/ci.yml`: lint + build su Node 20/22, **niente webpack**) e sette gate a comando: `qa:state` `qa:diff` `qa:shoot` `qa:scrub` `qa:reduced` `qa:frames` `perf:check`, con `npm run verify` come definizione di fatto. Mancano: smoke Playwright in CI (nessun `tests/`), `.claude/agent-memory/`, `recipes/`. |
 
 ---
 
@@ -157,6 +162,12 @@ Each line: `[area] (effort · impact)`. Effort S/M/L from the briefs.
 ---
 
 ## 5. Per-area deep dive
+
+> **Le righe `Current:` di questa sezione sono lo stato d'ingresso (20 giu 2026), non lo stato
+> corrente.** Sono la diagnosi che ha generato il piano e vanno lette come tali: restano validi
+> `Target`, `Steps`, `Touchpoints` e soprattutto `Verified` — le correzioni tecniche provate a
+> mano, che sono il valore vero di questa sezione. Per «dove siamo» vedi la tabella del § 2 e
+> `PIPELINE_STATUS.md`.
 
 ### 1. Geometry & instancing
 **Current:** single `<icosahedronGeometry>`; foliage instancing well-documented (`realistic-foliage.md`) but zero general instancing code; auditor only counts draw calls/separate meshes.
