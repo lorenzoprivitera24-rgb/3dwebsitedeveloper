@@ -17,7 +17,7 @@
 //
 // Budgets to respect (CLAUDE.md / deep-dive): total GLB per page < 5 MB compressed,
 // hero textures ≤ 2048px, everything mipmapped.
-import { execFileSync, execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { basename, extname, join, resolve } from 'node:path'
 
@@ -42,7 +42,7 @@ const textureSize = Number(opt('--texture-size', '2048'))
 function hasKtxSoftware() {
   for (const bin of ['toktx', 'ktx']) {
     try {
-      execSync(`${bin} --version`, { stdio: 'ignore' })
+      execFileSync(bin, ['--version'], { stdio: 'ignore' })
       return true
     } catch {
       /* not this one */
