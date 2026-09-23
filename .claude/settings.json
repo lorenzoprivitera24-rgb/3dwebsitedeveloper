@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/agents-autostart.py\"",
+            "command": "d=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; [ -f \"$d/.claude/hooks/agents-autostart.py\" ] || d=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$d/.claude/hooks/agents-autostart.py\" ] || exit 0; exec python3 \"$d/.claude/hooks/agents-autostart.py\"",
             "timeout": 10,
             "statusMessage": "3D specialists router: analyzing request…"
           }
