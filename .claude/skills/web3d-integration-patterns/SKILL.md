@@ -1,19 +1,6 @@
 ---
 name: web3d-integration-patterns
-description: >
-  Meta-skill (June 2026) for building modern, scroll-driven and pointer-driven 3D
-  websites where the geometry and the interface morph as the user scrolls or touches
-  the screen. Covers the current stack: Three.js r171+ with the WebGPURenderer and TSL
-  (Three Shading Language), React Three Fiber v9 on React 19, GSAP 3.13+ (now fully free,
-  all plugins) with ScrollTrigger/ScrollSmoother, Lenis smooth scroll, Motion (motion/react)
-  for DOM UI, and @react-spring/three for physics. Use it to choose an architecture, wire the
-  libraries together without conflicts, drive mesh deformation from scroll progress and pointer
-  position, keep the experience accessible (prefers-reduced-motion) and ship a mobile-safe
-  performance budget with automatic WebGL2 fallback. Trigger phrases (IT): "sito 3D",
-  "esperienza 3D allo scroll", "movimentazione della forma", "deformazione mesh al mouse",
-  "shader al tocco", "interfaccia 3D reattiva", "WebGPU", "TSL", "React Three Fiber",
-  "scroll cinematografico". Trigger phrases (EN): "scroll-driven 3D", "pointer-reactive mesh",
-  "WebGPU site", "interactive 3D landing", "shader distortion on scroll".
+description: "Meta-skill (June 2026) for building modern, scroll-driven and pointer-driven 3D websites where the geometry and the interface morph as the user scrolls or touches the screen. Covers the current stack: Three.js r171+ with the WebGPURenderer and TSL (Three Shading Language), React Three Fiber v9 on React 19, GSAP 3.13+ (now fully free, all plugins) with ScrollTrigger driven by Lenis smooth scroll (the only smooth scroller, never ScrollSmoother), Motion (motion/react) for DOM UI, and @react-spring/three for physics. Use it to choose an architecture, wire the libraries together without conflicts, drive mesh deformation from scroll progress and pointer position, keep the experience accessible (prefers-reduced-motion) and ship a mobile-safe performance budget with automatic WebGL2 fallback. Trigger phrases (IT): \"sito 3D\", \"esperienza 3D allo scroll\", \"movimentazione della forma\", \"deformazione mesh al mouse\", \"shader al tocco\", \"interfaccia 3D reattiva\", \"WebGPU\", \"TSL\", \"React Three Fiber\", \"scroll cinematografico\". Trigger phrases (EN): \"scroll-driven 3D\", \"pointer-reactive mesh\", \"WebGPU site\", \"interactive 3D landing\", \"shader distortion on scroll\"."
 ---
 
 # Web 3D Integration Patterns (June 2026 edition)
@@ -32,7 +19,7 @@ Read this first. Several patterns from the old skill are now wrong.
 2. **Shaders are written in TSL, not raw GLSL strings.** TSL (`three/tsl`) is a node-based, renderer-agnostic shading language. The same TSL graph compiles to WGSL (WebGPU) and GLSL (WebGL2). Hand-written GLSL string materials are now the fallback path, not the primary one.
 3. **React Three Fiber is v9 on React 19.** The `gl` prop accepts an **async factory** (returns a Promise) so the `WebGPURenderer` can `await renderer.init()`. `state.gl` is now `state.renderer`. There is a new scheduler for `useFrame`.
 4. **`framer-motion-3d` is dead.** It is discontinued and does not support React 19. Do **not** import `motion` from `framer-motion-3d` and do **not** use `motion.mesh`. Animate 3D objects with `useFrame` (manual `damp`/`lerp`), `@react-spring/three`, or GSAP. Use **Motion (`motion/react`)** only for the DOM UI overlay.
-5. **GSAP is 100% free, all plugins included.** ScrollTrigger, ScrollSmoother, SplitText, MorphSVG, DrawSVG, Observer, Flip, Inertia, Physics2D: all free, including commercial use. Use `@gsap/react` and its `useGSAP()` hook in React (it handles cleanup). No more Club GSAP tokens.
+5. **GSAP is 100% free, all plugins included.** ScrollTrigger, ScrollSmoother, SplitText, MorphSVG, DrawSVG, Observer, Flip, Inertia, Physics2D: all free, including commercial use. Use `@gsap/react` and its `useGSAP()` hook in React (it handles cleanup). No more Club GSAP tokens. Free is a licence fact, not an architecture choice: **ScrollSmoother is not used in this kit**, because it installs its own smooth scroller and Lenis is the only one (point 6).
 6. **Lenis is the smooth-scroll standard** and the synchronization point: one RAF loop drives Lenis, ScrollTrigger, and the R3F render. Do not run two competing scroll/animation loops.
 
 ## The current stack (pin these roles, not exact patch numbers)
@@ -46,7 +33,7 @@ Read this first. Several patterns from the old skill are now wrong.
 | Post FX | **native node graph**: `RenderPipeline` (`three/webgpu`) + `three/addons/tsl/display/*` | Bloom, GTAO, SMAA/TRAA, DoF, LUT/grade on the WebGPU path | `@react-three/postprocessing` (pmndrs) is for **WebGL2-only builds only** — it targets the WebGL pipeline and fights WebGPURenderer. See `references/webgpu-tsl.md` §6 |
 | Physics | `@react-three/rapier` (+ `ecctrl` for character control) | Rigid bodies, colliders as JSX | Only if the brief needs real physics |
 | Scroll engine | `lenis` (darkroom.engineering) | Smooth scroll, single RAF source | First-class React adapter `lenis/react` |
-| Scroll/timeline anim | `gsap` 3.13+ + `@gsap/react` + ScrollTrigger/ScrollSmoother | Scrubbed sequences, pinning, text reveals | The driver for scroll-linked 3D and marketing sections |
+| Scroll/timeline anim | `gsap` 3.13+ + `@gsap/react` + ScrollTrigger | Scrubbed sequences, pinning, text reveals | The driver for scroll-linked 3D and marketing sections; ScrollTrigger is driven by Lenis via `gsap.ticker`. **No ScrollSmoother**: Lenis is the only smooth scroller |
 | 3D motion | `useFrame` / `@react-spring/three` / GSAP | Object animation, gestures, springs | NOT framer-motion-3d |
 | DOM UI motion | `motion` (`motion/react`) | Overlay micro-interactions, layout, exit transitions | DOM only, never the canvas |
 | Pointer/gesture | `@use-gesture/react` | Drag, pinch, hover, wheel gestures | Interactive UI/3D |

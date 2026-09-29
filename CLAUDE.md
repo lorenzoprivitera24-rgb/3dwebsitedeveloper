@@ -19,7 +19,9 @@ canvas without fighting it.
 - **React layer**: React Three Fiber v9 on **React 19**. **TypeScript 6** (see `docs/README.md` for
   why not 7). **Shaders**: **TSL** (`three/tsl`); raw GLSL is a documented exception.
 - **Scroll**: **Lenis** driven by `gsap.ticker` — one RAF source for the whole app.
-  **Timeline**: **GSAP 3.15** with `@gsap/react` `useGSAP` + ScrollTrigger/ScrollSmoother.
+  **Timeline**: **GSAP 3.15** with `@gsap/react` `useGSAP` + ScrollTrigger (driven by Lenis via
+  `gsap.ticker`). **No ScrollSmoother**: it installs its own smooth scroller, and Lenis is the only
+  one. GSAP plugins being free is a licence fact, not permission to add a second scroller.
 - **3D motion**: `useFrame` (with `MathUtils.damp`), `@react-spring/three`, or GSAP.
   **DOM UI motion**: **Motion 13** (`motion/react`), DOM only. **Gestures**: `@use-gesture/react`.
 - **Tuning**: **Leva**, dev-only, bound to the presets in `looks/`.
