@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 // sync-global-kit.mjs: THIS REPO is the canonical source of the shared 3D kit.
+// GATE-NEGATIVO: rimesso il writer vecchio, cpSync(src, destinazione logica) sul catalogo, in una
+// casa finta (HOME=...) coi 6 agenti a symlink verso il kit -> exit 1, sei volte «~/.claude/agents/
+// <x>.md era un symlink (-> .../amplio-claude-kit/agents/<x>.md), ora e' un file normale» e nessun
+// altro errore; lo script vero sulla stessa casa esce 0 (29 set 2026).
+// GATE-NEGATIVO: saltata la scrittura in ~/amplio-claude-kit/agents (il sintomo del 29 set, agenti
+// mai arrivati nel kit) col catalogo a copie staccate, come sul Mac di Lorenzo -> exit 1, sei volte
+// «~/amplio-claude-kit/agents/<x>.md differisce dalla sorgente .claude/agents/<x>.md» e nessun
+// errore sui link; lo script vero sulla stessa casa esce 0 (29 set 2026).
 // Writes the 6 specialist agents + the web3d-integration-patterns skill (SKILL.md, references/,
 // and the react-bits/ shelf mirrored from lib/) into the kit, ~/amplio-claude-kit: the git repo
 // shared with the partner, which ~/.claude sees through the per-entry symlinks made by install.sh
