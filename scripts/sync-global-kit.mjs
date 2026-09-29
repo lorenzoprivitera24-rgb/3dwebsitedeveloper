@@ -290,7 +290,7 @@ console.log(`  catalogo: ${count('link') + relinked.length} link al kit, ${count
 for (const e of relinked) console.log(`    ricollegato ${short(e.cat)} -> ${short(e.kit)}`)
 for (const e of entries) {
   if (e.state === 'copy' && !relinked.includes(e))
-    console.log(`  ATTENZIONE ${short(e.cat)} e' una copia staccata dal kit, non un link: aggiornata, ma ` +
+    console.log(`  ATTENZIONE ${short(e.cat)} e' una copia staccata dal kit, non un link: tenuta uguale al repo, ma ` +
       `skill-banco.py non la puo' togliere e install.sh la salta.` +
       (e.agent ? ' Ricollegala: npm run sync:global -- --ricollega' : ''))
   if (e.state === 'foreign-link')
