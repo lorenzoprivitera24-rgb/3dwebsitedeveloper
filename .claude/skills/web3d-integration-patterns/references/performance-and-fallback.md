@@ -25,6 +25,8 @@ Targets to design against:
 5. **Fewer, cheaper lights.** Prefer an environment map (`Environment` from drei) plus one key light over many dynamic lights. Bake where possible.
 6. **Compress assets.** Draco/Meshopt for geometry, KTX2/Basis for textures. Preload, and dispose what you swap out.
 7. **Throttle post FX.** Bloom and DOF are expensive; measure each pass, drop the heaviest on mobile.
+8. **Compile before the scroll, not during it.** A material compiles its GPU program the first time it is SEEN, so anything born invisible (a section-gated object, a world that enters at its chapter) compiles under the finger. A few ms on a Mac; on an iPhone on the WebGL2 path tens to hundreds of ms per program (SILKET, Sept 2026: 157 programs ≈ 30 s of frozen page, 150 ms to 1.3 s hitches inside the gesture). The kit's `<Riscaldamento />` (`src/canvas/Riscaldamento.tsx`, mounted in `CanvasLayer`) renders a stand-in for every (geometry, material) pair and every top-level child, invisible ones included, into a target TWIN of three's frame buffer, from a budgeted queue: several tasks per frame when the scene is still, one while it moves, never more than one new program per frame, each task with its own `frameId` so it gets its shadow pass. `compileAsync(scene)` is not enough: like the render it skips invisible and off-frustum objects. Verified by counting, not timing: `npm run qa:compilazioni` must report zero programs born while scrolling on WebKit and Chromium. With PostFX the real render goes through the PassNode's MRT target, another context: the warm-up must be pointed there, and the gate will say so.
+9. **Per-part values in uniforms.** A number baked into a TSL graph is a literal in the shader: a material per part with its own measures is a program per part. See `webgpu-tsl.md` §4.4; `qa:compilazioni` reports the families.
 
 ## 3. On-demand rendering pattern
 
@@ -81,6 +83,8 @@ const isWebGPU = renderer.isWebGPURenderer
 
 Also provide a **no-WebGL** path: if WebGL2 itself is unavailable or the canvas fails to create a context, render a static poster image / styled DOM hero so the page is never blank.
 
+**A three r185 defect that only exists on the WebGL2 path.** The fallback backend uploads an index buffer by binding it to `ELEMENT_ARRAY_BUFFER` and then binding `null`; that binding belongs to the VAO bound at that moment, so an object that uploads its indices and is then NOT drawn (its program still compiling with `KHR_parallel_shader_compile`, or an `InstancedMesh` with `count = 0`) strips the indices from the previous object's VAO, and the next draw sharing that VAO fails with `INVALID_OPERATION` (a part of the scene missing for a frame: flicker at the first scroll on iPhone, SILKET 21 Oct 2026, 3 runs out of 3 on the live site). The kit's `Stage` turns on the cure (`src/canvas/indiciWebGL.ts`: `resetVertexState()` before every index upload) and logs `[kit] indici WebGL2: accesa`. `npm run qa:indici` counts draws without indices in WebKit at iPhone size (WebGL2), on the page while scrolling during load and on the `?lab=indici` lab, whose `indici=nudi` run must still fail: the day it stops failing, three fixed the defect and the cure can go.
+
 ## 6. prefers-reduced-motion (required, not optional)
 
 Some users get motion sickness from scroll-jacked 3D. Detect and provide a calm path.
@@ -134,4 +138,6 @@ Return findings as Critical / Warning / Suggestion.
 - [ ] Canvas `aria-hidden`, interactive controls mirrored in accessible DOM
 - [ ] 3D bundle code-split; canvas does not block first paint
 - [ ] Single render/scroll loop (no duplicate RAF)
+- [ ] `qa:compilazioni` green: zero programs born while scrolling (WebKit and Chromium), no family of sources that differ only in their numbers (Critical if programs are born while scrolling: on iPhone each one is a hitch)
+- [ ] `qa:indici` green: zero draws without indices on WebGL2, and the lab's cure-off run still failing
 - [ ] Profiled on a throttled / real mobile device

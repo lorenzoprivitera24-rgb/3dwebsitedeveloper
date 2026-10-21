@@ -137,6 +137,42 @@ material.colorNode = vec3(
 
 Because TSL is renderer-agnostic, the same `material` works whether `renderer.init()` resolved to WebGPU or fell back to WebGL2. You generally do not maintain two shader code paths; you only branch on *features* that WebGL2 lacks (compute shaders).
 
+### 4.4 A JS number in a graph is a literal: per-part values go in uniforms
+
+Two facts of three r185, measured on SILKET (21 Oct 2026) by counting programs, pipelines and builds
+(`renderer._pipelines.programs` / `caches`, `renderer._nodes.nodeBuilderCache`):
+
+1. **A JS number inside a TSL graph becomes a literal in the generated code.** `float(scale)`,
+   `color(hex)`, `clamp(theta, 0, angle)`, `smoothstep(lo, hi, x)`: every different value is a different
+   vertex or fragment shader, that is one more GPU program (plus its shadow variant). A material factory
+   called once per part with that part's measures baked in compiles one program per part. SILKET had 98
+   distinct vertex shaders against 28 fragment ones, the signature of measures baked into `positionNode`.
+   With the measures in `uniform(value)` the code is the same for every part of a shape: WebGL2 157 → 72
+   programs, WebGPU 158 → 75 pipelines, pixels identical within noise (a uniform is a float32 like the
+   literal). On an iPhone on the WebGL2 path each program is tens of ms of GLSL → Metal translation.
+2. **The JS build is cached by node identity.** `NodeMaterial.customProgramCacheKey` is made of the
+   nodes' `getCacheKey`, and `Node.customCacheKey()` returns `this.id`: two materials with identical
+   graphs built separately each pay the whole build (`build`, `generate`, `getDataFromNode`), the bulk of
+   warm-up CPU (SILKET, CDP CPU ×4: 4.4 s of 7.5). Cure: ONE graph per shape, shared by all its
+   materials, with the measures read per object at draw time:
+   `uniform(0).onObjectUpdate(({ object }) => object.material.userData.k)`. Default uniforms live in the
+   `objectGroup`, which has one buffer per drawn object, so values do not mix. Read from the OBJECT's
+   material, not `frame.material`: in the shadow pass the material in turn is the light's, which borrows
+   the `positionNode` (`Renderer.renderObject`). SILKET: builds 133 → 66. A graph that captures its own
+   object (`buffer(obj.instanceMatrix.array)` inside an `Fn` with the builder) cannot be shared.
+
+Rules:
+- A value that differs between materials of the same kind (a scale, a roughness, a part's length, a
+  colour per instance) is a `uniform`, never `float(x)`, `color(x)` or a bare number. Constants that are
+  the same for everyone (a noise frequency, `0.5`) stay literals.
+- Many parts of the same shape: one shared graph plus `onObjectUpdate` (reference code:
+  `src/world/germinazione.ts` in silket-main, `lettura` and `condiviso`).
+- The kit's own factories follow it: `tsl/triplanar.ts`, `materials/pbrTriplanar.ts`, `tsl/wind.ts`,
+  `InstancedField.tsx`.
+- Measure, do not guess: `npm run qa:compilazioni` prints distinct vertex against fragment sources and
+  the **families**, sources identical except for their numbers; a family of 4 or more fails the gate. Its
+  negative control is `?lab=costanti&costanti=cotte` (`src/lab/CostantiLab.tsx`).
+
 ## 5. Compute shaders (WebGPU only)
 
 The compute pipeline runs general-purpose work on the GPU. The headline use is large particle systems and physics where per-frame CPU updates would be the bottleneck.

@@ -4,6 +4,7 @@ import { Scene } from './Scene'
 import { LoadProgressBridge } from './LoadProgressBridge'
 import { RigSatellite } from '../../registry/04-pointer-rig-3d/RigSatellite'
 import { AdaptiveQuality } from './AdaptiveQuality'
+import { Riscaldamento } from './Riscaldamento'
 
 // Pannello di accordatura: `import.meta.env.DEV` è staticamente false in produzione, quindi
 // Rolldown elimina il ramo e leva non finisce nel bundle (stessa tecnica del DevPerf).
@@ -36,6 +37,8 @@ export default function CanvasLayer({ reduced, detail, amplitude, flowScale, dpr
         <RigSatellite reduced={reduced} />
         {/* misura come va davvero e muove il dpr dentro il range del tier (spento con ?qa=1) */}
         <AdaptiveQuality dpr={dpr} />
+        {/* compila anche ciò che nasce invisibile prima che chi scorre ci arrivi (qa:compilazioni) */}
+        <Riscaldamento />
       </Stage>
     </>
   )

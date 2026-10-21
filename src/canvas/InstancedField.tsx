@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three/webgpu'
 import { Color, InstancedBufferAttribute, MathUtils, Matrix4, Quaternion, Vector3 } from 'three'
-import { attribute, color, mix, positionLocal, uv } from 'three/tsl'
+import { attribute, mix, positionLocal, uniform, uv } from 'three/tsl'
 import { windOffset } from './tsl/wind'
 
 interface Props {
@@ -60,8 +60,9 @@ export function InstancedField({
     // type-erasure: i generics TSL r185 non danno operatori ad AttributeNode (cfr. gradientField.ts:58)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const hash = attribute('aHash') as any
-    // gradiente radice→punta lungo la Y locale (uv.y sul cono) + jitter di tinta dall'hash
-    const grad = mix(color(new Color(baseColor)), color(new Color(tipColor)), uv().y)
+    // gradiente radice→punta lungo la Y locale (uv.y sul cono) + jitter di tinta dall'hash.
+    // I colori sono uniform: con color() due campi di colore diverso erano due programmi GPU.
+    const grad = mix(uniform(new Color(baseColor)), uniform(new Color(tipColor)), uv().y)
     m.colorNode = grad.mul(hash.mul(0.3).add(0.85))
     m.roughness = 0.9
     if (!reduced) {

@@ -1,5 +1,5 @@
 import type { Texture } from 'three'
-import { abs, float, normalWorld, positionWorld, texture, vec3 } from 'three/tsl'
+import { abs, normalWorld, positionWorld, texture, uniform, vec3 } from 'three/tsl'
 
 // Triplanar sampling (ROADMAP «PBR + triplanar material primitive»): proietta la texture sui tre
 // piani mondo e fonde con i pesi della normale — la cura n°1 contro il tiling che si vede
@@ -8,10 +8,15 @@ import { abs, float, normalWorld, positionWorld, texture, vec3 } from 'three/tsl
 //
 // Renderer-agnostico: compila in WGSL e GLSL. Nessuna UV richiesta: usa positionWorld, quindi
 // funziona anche su geometria generata/instanziata senza unwrap.
+//
+// Scala e nitidezza entrano come `uniform`, non come `float()`: un numero JS in un grafo TSL è un
+// letterale nel codice generato, e dieci superfici con dieci scale sarebbero dieci programmi GPU
+// (SILKET, 21 ott 2026: 157 → 72 programmi passando le misure in uniform; guida in
+// references/webgpu-tsl.md §4.4, controllo in `qa:compilazioni`, «famiglie»).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function triplanar(map: Texture, scale = 1, sharpness = 8): any {
-  const p = positionWorld.mul(float(scale))
-  const n = abs(normalWorld).pow(float(sharpness))
+  const p = positionWorld.mul(uniform(scale))
+  const n = abs(normalWorld).pow(uniform(sharpness))
   const w = n.div(n.x.add(n.y).add(n.z)) // pesi normalizzati: x+y+z = 1
 
   const xProj = texture(map, p.zy)

@@ -49,7 +49,12 @@ const CanvasLayer = lazy(() => import('./canvas/CanvasLayer'))
 // Il laboratorio delle discipline di realismo (?lab=1): stesso confine lazy — il chunk del lab
 // (rapier compreso) esiste solo per chi apre il lab, l'entry non lo preannuncia.
 const RealismLab = lazy(() => import('./lab/RealismLab'))
+// ?lab=indici: il difetto dei VAO di three r185 riprodotto a comando, per il gate qa:indici;
+// ?lab=costanti: le misure cotte nei grafi TSL, il negativo delle «famiglie» di qa:compilazioni
+const IndiciLab = lazy(() => import('./lab/IndiciLab'))
+const CostantiLab = lazy(() => import('./lab/CostantiLab'))
 const labRequested = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('lab')
+const labScelto = labRequested ? new URLSearchParams(window.location.search).get('lab') : null
 
 export default function App() {
   const reduced = useReducedMotion()
@@ -59,7 +64,7 @@ export default function App() {
   if (labRequested && webglOk) {
     return (
       <Suspense fallback={<Poster />}>
-        <RealismLab />
+        {labScelto === 'indici' ? <IndiciLab /> : labScelto === 'costanti' ? <CostantiLab /> : <RealismLab />}
       </Suspense>
     )
   }
