@@ -93,8 +93,10 @@ function sonda() {
     gpu.createShaderModule = function (d) {
       conta('moduli')
       // three etichetta i moduli con lo stadio: "vertex…", "fragment…", "compute…"
-      const stadio = /^(vertex|fragment|compute)/.exec(d?.label ?? '')?.[1] ?? '?'
-      c.sorgenti.push([stadio, d?.code ?? ''])
+      const etichetta = typeof d?.label === 'string' ? d.label : 'senza-etichetta'
+      const stadio = /^(vertex|fragment|compute)/.exec(etichetta)?.[1] ?? 'altro'
+      // un modulo senza codice non entra nel confronto come stringa vuota: lo si conta a parte
+      c.sorgenti.push([stadio, typeof d?.code === 'string' ? d.code : null])
       return modulo.call(this, d)
     }
     for (const nome of ['createRenderPipeline', 'createRenderPipelineAsync']) {
@@ -118,7 +120,12 @@ const LETTERALE = /(?<![\w.])(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?[fhiu]?(?![\
  */
 export function famiglie(sorgenti) {
   const distinti = new Map() // stadio → Set di sorgenti
+  let senzaCodice = 0
   for (const [stadio, testo] of sorgenti) {
+    if (typeof testo !== 'string') {
+      senzaCodice++
+      continue
+    }
     if (!distinti.has(stadio)) distinti.set(stadio, new Set())
     distinti.get(stadio).add(testo)
   }
@@ -154,7 +161,7 @@ export function famiglie(sorgenti) {
     }
   }
   trovate.sort((a, b) => b.programmi - a.programmi)
-  return { perStadio, trovate }
+  return { perStadio, trovate, senzaCodice, sorgenti: sorgenti.length }
 }
 
 /**
@@ -233,10 +240,17 @@ async function misura(motore, url, { scorri = true } = {}) {
   }
   const decimi = Array.from({ length: 10 }, () => 0)
   for (const [, f] of eventi) decimi[Math.min(9, Math.floor(f * 10))]++
+  // Silenzio = guasto. Una corsa che non vede NESSUNA compilazione (né al caricamento né
+  // scorrendo) non dice «zero nati scorrendo»: dice che la sonda è cieca o che la pagina non ha
+  // scena, e passerebbe proprio quando non ha misurato niente.
+  if (dopo.totale === 0) errori.push('nessuna compilazione vista in tutta la corsa: sonda cieca o pagina senza scena')
+  const fam = famiglie(sorgenti)
+  if (dopo.totale > 0 && fam.sorgenti === 0) errori.push('compilazioni contate ma nessun sorgente letto: il controllo delle famiglie non ha visto niente')
+  if (fam.senzaCodice) errori.push(`${fam.senzaCodice} moduli senza codice leggibile: le famiglie non li vedono`)
   return {
     motore, backend, caldo,
     caricamento: { programmi: prima.programmi, moduli: prima.moduli, pipeline: prima.pipeline, secondi: Math.round((Date.now() - t0) / 1000) },
-    natiScorrendo: nati, perDecimo: decimi, famiglie: famiglie(sorgenti), errori, avvisi,
+    natiScorrendo: nati, perDecimo: decimi, famiglie: fam, errori, avvisi,
   }
 }
 
