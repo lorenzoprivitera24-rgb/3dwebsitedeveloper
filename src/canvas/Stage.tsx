@@ -1,9 +1,16 @@
 import * as THREE from 'three/webgpu'
-import { Canvas, extend, type ThreeToJSXElements } from '@react-three/fiber'
-import { Component, Suspense, type ReactNode } from 'react'
+import { Canvas, extend, useFrame, useThree, type ThreeToJSXElements } from '@react-three/fiber'
+import { Component, Suspense, useEffect, useLayoutEffect, type ReactNode } from 'react'
 import { Poster } from './Poster'
 import { DevPerf } from './DevPerf'
 import { proteggiIndici } from './indiciWebGL'
+import {
+  PARACADUTE_MS,
+  accendiCompilazioneParallela,
+  leggiFotogramma,
+  presentaScena,
+  rivelazione,
+} from './compilazioneParallela'
 
 // Make the WebGPU build's primitives and node materials available as JSX elements.
 declare module '@react-three/fiber' {
@@ -31,6 +38,55 @@ class CanvasErrorBoundary extends Component<
   }
 }
 
+/** La dissolvenza con cui la tela compare (portata da SILKET); niente con prefers-reduced-motion. */
+const DISSOLVENZA_S = 0.35
+
+function mostra(tela: HTMLCanvasElement, motivo: string, anomalo = false) {
+  rivelazione.attesa = false
+  tela.style.opacity = ''
+  const ms = Math.round(performance.now() - rivelazione.dal)
+  // letto da qa:parallela: il tempo alla scena intera, e se ci è arrivata o è scattato il paracadute
+  ;(anomalo ? console.warn : console.info)(`[kit] tela rivelata a ${ms} ms: ${motivo}`)
+}
+
+/**
+ * Mostra la tela al primo fotogramma completo (vedi compilazioneParallela.ts). Non possiede il
+ * render, che resta di R3F (o di PostFX a priorità 1): il suo useFrame gira a priorità -2, negativa,
+ * e quindi non spegne l'auto-render, e giudica il fotogramma PRECEDENTE, già presentato, dal conto
+ * degli oggetti della scena che quel render ha disegnato o saltato. Gira prima di Riscaldamento
+ * (-1), i cui render nel bersaglio gemello restano comunque fuori conto (`fuoriConto`). Il
+ * paracadute è un timer e non il ciclo: regge anche se il ciclo non gira.
+ */
+function Rivelazione() {
+  const gl = useThree((s) => s.gl)
+  const scena = useThree((s) => s.scene)
+  // Un layout effect gira prima del primo fotogramma: R3F non disegna finché il suo Provider non
+  // ha montato, e i figli montano prima del padre.
+  useLayoutEffect(() => {
+    presentaScena(scena)
+    return () => presentaScena(null)
+  }, [scena])
+
+  useEffect(() => {
+    if (!rivelazione.attesa) return
+    const resta = Math.max(0, PARACADUTE_MS - (performance.now() - rivelazione.dal))
+    const t = window.setTimeout(() => {
+      if (!rivelazione.attesa) return
+      const { disegnati, saltati } = leggiFotogramma()
+      mostra(gl.domElement, `paracadute (nell'ultimo conto ${disegnati} disegnati, ${saltati} saltati)`, true)
+    }, resta)
+    return () => window.clearTimeout(t)
+  }, [gl])
+
+  useFrame(() => {
+    if (!rivelazione.attesa) return
+    const { disegnati, saltati } = leggiFotogramma()
+    if (disegnati > 0 && saltati === 0) mostra(gl.domElement, `fotogramma completo (${disegnati} oggetti)`)
+  }, -2)
+
+  return null
+}
+
 interface StageProps {
   children: ReactNode
   dpr: [number, number]
@@ -55,10 +111,24 @@ export function Stage({ children, dpr, toneMappingExposure = 1, cameraPosition =
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const renderer = new THREE.WebGPURenderer({ ...(props as any), antialias: true })
           await renderer.init()
+          // Su WebGL2 con KHR_parallel_shader_compile i programmi della scena si compilano senza
+          // fermare la pagina (compilazioneParallela.ts: su un iPhone con iOS 18 è la differenza
+          // fra una pagina ferma per secondi e una che gira). Un oggetto in volo viene saltato.
+          const compilazione = accendiCompilazioneParallela(renderer)
           // Sul ripiego WebGL2 un oggetto che carica i suoi indici e poi non viene disegnato
           // (programma in volo, zero istanze) toglie gli indici al VAO dell'oggetto disegnato
           // prima: difetto di three r185, cura e misure in indiciWebGL.ts. Su WebGPU non fa niente.
           const indici = proteggiIndici(renderer)
+          // Su ogni motore la tela nasce trasparente e la mostra <Rivelazione> al primo
+          // fotogramma completo: niente scena a pezzi mentre i programmi arrivano.
+          if (compilazione !== 'interni-mancanti') {
+            const tela = renderer.domElement
+            const calmo = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            tela.style.transition = calmo ? 'none' : `opacity ${DISSOLVENZA_S}s ease-out`
+            tela.style.opacity = '0'
+            rivelazione.attesa = true
+            rivelazione.dal = performance.now()
+          }
           // House output transform: AgX tonemapping (neutral filmic highlights; ACESFilmic is
           // the documented alternative) + exposure as the one artistic dial. Set AFTER init().
           renderer.toneMapping = THREE.AgXToneMapping
@@ -75,12 +145,19 @@ export function Stage({ children, dpr, toneMappingExposure = 1, cameraPosition =
           } else {
             console.info('[kit] indici WebGL2:', indici)
           }
+          // Letto da qa:parallela e qa:indici: con quale compilazione ha girato la pagina.
+          if (compilazione === 'interni-mancanti') {
+            console.warn('[kit] compilazione WebGL2: interni-mancanti (three ha cambiato Pipelines: niente compilazione in parallelo né rivelazione, vedi compilazioneParallela.ts)')
+          } else {
+            console.info('[kit] compilazione WebGL2:', compilazione)
+          }
           return renderer
         }}
         camera={{ position: cameraPosition, fov: cameraFov }}
         dpr={dpr}
       >
         <Suspense fallback={null}>{children}</Suspense>
+        <Rivelazione />
         <DevPerf />
       </Canvas>
     </CanvasErrorBoundary>

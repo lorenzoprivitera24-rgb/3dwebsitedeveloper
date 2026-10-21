@@ -146,7 +146,10 @@ Verification runs on playwright-core + the cached Chrome for Testing — NOT the
 runnable. `verify:full` adds the gates that need a real GPU, two of them counts rather than times:
 `qa:compilazioni` (GPU programs born while scrolling must be zero, and no "family" of shaders that
 differ only in a number, i.e. TSL constants baked per part) and `qa:indici` (WebGL2 draws without
-indices, the three r185 VAO defect). Each carries its negative control in a lab page. Direction changed on purpose? Re-run
+indices, the three r185 VAO defect). Each carries its negative control in a lab page. `qa:parallela`
+measures the WebGL2 parallel compile (`canvas/compilazioneParallela.ts`): main-thread waits with and
+without `?sincrono`, and no one-shot render such as the HDRI's PMREM may skip an object (negative:
+`?compilazione=tutta`). Direction changed on purpose? Re-run
 `qa:state:baseline` and commit the diff — that diff *is* the review.
 
 Why the budget is per-path, and why `renderer.info` cannot be read naively: the reasons are in
