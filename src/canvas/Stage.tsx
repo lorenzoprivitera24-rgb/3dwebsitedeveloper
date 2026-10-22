@@ -3,6 +3,7 @@ import { Canvas, extend, type ThreeToJSXElements } from '@react-three/fiber'
 import { Component, Suspense, type ReactNode } from 'react'
 import { Poster } from './Poster'
 import { DevPerf } from './DevPerf'
+import { proteggiIndici } from './indiciWebGL'
 
 // Make the WebGPU build's primitives and node materials available as JSX elements.
 declare module '@react-three/fiber' {
@@ -54,6 +55,10 @@ export function Stage({ children, dpr, toneMappingExposure = 1, cameraPosition =
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const renderer = new THREE.WebGPURenderer({ ...(props as any), antialias: true })
           await renderer.init()
+          // Sul ripiego WebGL2 un oggetto che carica i suoi indici e poi non viene disegnato
+          // (programma in volo, zero istanze) toglie gli indici al VAO dell'oggetto disegnato
+          // prima: difetto di three r185, cura e misure in indiciWebGL.ts. Su WebGPU non fa niente.
+          const indici = proteggiIndici(renderer)
           // House output transform: AgX tonemapping (neutral filmic highlights; ACESFilmic is
           // the documented alternative) + exposure as the one artistic dial. Set AFTER init().
           renderer.toneMapping = THREE.AgXToneMapping
@@ -64,6 +69,12 @@ export function Stage({ children, dpr, toneMappingExposure = 1, cameraPosition =
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const backend = (renderer as any).backend
           console.info('[kit] renderer backend:', backend?.isWebGPUBackend ? 'WebGPU' : 'WebGL2')
+          // Letto da qa:indici: una cura che three ha reso inapplicabile non deve passare in silenzio.
+          if (indici === 'interni-mancanti') {
+            console.warn('[kit] indici WebGL2: interni-mancanti (three ha cambiato WebGLAttributeUtils: riverificare il difetto, vedi indiciWebGL.ts)')
+          } else {
+            console.info('[kit] indici WebGL2:', indici)
+          }
           return renderer
         }}
         camera={{ position: cameraPosition, fov: cameraFov }}

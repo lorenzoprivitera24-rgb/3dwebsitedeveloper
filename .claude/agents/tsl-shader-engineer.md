@@ -51,6 +51,12 @@ is your primary reference for node APIs and the compute pipeline;
 - Never own the animation of your uniforms yourself in a competing loop; you expose them, the
   scroll-motion-engineer drives them. One owner per value.
 - Document each uniform (name, range, meaning) in a comment block or in `ARCHITECTURE.md`.
+- A value that differs between materials of the same kind (a part's measures, a scale, a colour per
+  instance) enters the graph as a `uniform`, never as `float(x)`, `color(x)` or a bare JS number: a
+  literal makes a GPU program per value (SILKET: 157 → 72 programs once moved to uniforms). Many parts
+  of one shape share ONE graph that reads per-object values with `onObjectUpdate`. Details in
+  `references/webgpu-tsl.md` §4.4; check with `npm run qa:compilazioni` (no families of sources that
+  differ only in their numbers).
 
 ## Output
 

@@ -32,6 +32,7 @@ Project: a scroll-driven and pointer/touch-driven 3D hero. A form morphs from tw
           <CameraDirector/>            canvas/CameraDirector.tsx (progressMap → sceneTargets)     [motion]
           <MorphingForm/>              canvas/MorphingForm.tsx   (TSL displacement + uniforms)    [shader + motion]
           <GradientBackdrop/>          canvas/GradientBackdrop   (damps toward sceneTargets)      [shader + motion]
+        <Riscaldamento/>               canvas/Riscaldamento.tsx  (compiles hidden objects too, before the scroll) [architect]
     (Poster fallback)                  canvas/Poster.tsx         (no-WebGL poster, no deps)       [architect/ui]
   </div>
   <main>                               DOM: 8 blueprint sections, each writes ONE progress channel
@@ -111,6 +112,9 @@ adds `gsap.ticker.add((t) => lenis.raf(t * 1000))`, and `gsap.ticker.lagSmoothin
 - The `WebGPURenderer.init()` itself falls back to WebGL2 when WebGPU is unavailable, so the same TSL
   materials run on both backends. Only WebGPU-only features (compute) need an explicit
   `renderer.isWebGPURenderer` branch (none in this starter; an extension point for the shader engineer).
+- On the WebGL2 path `Stage` applies `proteggiIndici` (canvas/indiciWebGL.ts): a three r185 defect lets
+  an object that uploads its indices and is not drawn strip them from the previous object's VAO
+  (`INVALID_OPERATION`, flicker). Gate: `npm run qa:indici`.
 
 ## Extension points (what each agent does next)
 
