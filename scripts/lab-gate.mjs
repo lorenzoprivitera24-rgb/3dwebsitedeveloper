@@ -24,6 +24,22 @@
 // senza collider non ha massa e rapier non lo muove; sabotata la sola forma del terreno, rossi
 // con «il corpo è passato sotto il terreno (quota -17.81, terreno 0)». Col codice vero il corpo si
 // ferma a 0.28, il raggio della palla sopra la faccia del cilindro, e 4/4 verdi.
+// I giunti e il resto di rapier dal palco (il Lanyard del kit, PhysicsMeshCollider,
+// PhysicsInstancedBodies, PhysicsStep, interactionGroups), stesso giorno. La prima sonda della
+// catena filtrava i giunti su joint.type(), che in rapier3d-compat 0.19 dà Generic a tutti: non ne
+// misurava nessuno e l'apertura «0.000» era verde per assenza; l'ha preso il controllo nuovo
+// «la sonda ha misurato 0 giunti su 4», e ora i limiti vengono da declaredJoint. Poi, ognuno
+// sul suo assert: PhysicsJoint che a fisica accesa non rende niente -> «alto» e «medio» rossi con
+// «nel mondo ci sono 0 giunti, il markup del Lanyard ne dichiara 4» e basta (la card cade libera,
+// 2.90); PhysicsJoint che passa a rapier corde lunghe il triplo e l'ancora della card doppia ->
+// «una corda è andata oltre la sua lunghezza del 200.7%» e «l'aggancio sferico della card si è
+// aperto di 0.725»; PhysicsMeshCollider che a fisica accesa rende i figli senza collider -> «il
+// corpo «secondo» non cade (quota 4.400)»; PhysicsStep che non registra niente -> «PhysicsStep
+// non ha visto nessun passo del mondo» e basta; le istanze ferme senza le matrici scritte ->
+// «basso» e «ridotto» rossi con «l'istanza 0 di PhysicsInstancedBodies non è nella posa del markup
+// (quota 0.0000, nel markup 2.6)», una riga per istanza; interactionGroups con << 15 al posto di
+// << 16 -> «diverge da rapier in 1295 combinazioni su 1332, la prima (0, undefined): palco 98303,
+// rapier 131071», exit 1. Col codice vero 4/4 verdi: corde al massimo +11.8%, aggancio 0.0002.
 // lab-gate.mjs: il laboratorio di realismo (?lab=1) visitato SULLA BUILD, un caso per ramo.
 //
 // PERCHÉ ESISTE. Il 22 ott 2026 ?lab=1 cadeva sul poster («react-three-rapier: useRapier must be
@@ -40,24 +56,32 @@
 //   - nessun errore in console né eccezione di pagina, e nessun poster DENTRO la tela (quello di
 //     App è il fallback di caricamento del chunk e c'è sempre per un attimo: non è il crollo);
 //   - tier e fisica sono quelli del caso: un caso che non apre il suo ramo non prova niente;
-//   - con la fisica il primo corpo cade e resta sopra il terreno, senza resta alla quota del
+//   - con la fisica i corpi (uno col collider esplicito, uno con PhysicsMeshCollider) e le istanze
+//     di PhysicsInstancedBodies cadono e restano sopra il terreno, senza restano nella posa del
 //     markup (le due promesse di PhysicsStage, più il collider del terreno);
+//   - con la fisica la catena del Lanyard (PhysicsJoint) ha nel mondo i giunti che il markup
+//     dichiara, si muove e resta legata: nessuna corda oltre la sua lunghezza, l'aggancio della
+//     card chiuso, misurati a ogni passo da PhysicsStep sulle ancore dichiarate; senza, nessun
+//     passo, nessun giunto, la card ferma;
 //   - senza fisica nessuna richiesta dei file di rapier, con la fisica il motore si scarica: la
 //     regola del tier («rapier & friends only from medium up») deve risparmiare il DOWNLOAD
 //     (2,2 MB, 0,8 MB gzip), non solo l'avvio del WASM. I file si riconoscono dal contenuto, non
 //     dal nome: `rapier-*.js` era una facciata di 1 KB, il motore stava nel chunk del laboratorio.
 //
+// Prima del browser, in Node: interactionGroups del palco uguale a quella di rapier su ogni
+// combinazione di gruppi (il palco ne tiene una copia, che divergerebbe in silenzio).
+//
 // La build la serve il gate stesso, con l'API di `vite preview` su una porta scelta dal sistema:
 // non può misurare il server di un'altra sessione (la 5199 dei gate è condivisa fra i worktree).
 //
 // Uso: node scripts/lab-gate.mjs [--headed]   (dopo `npm run build`)
-// Esce 1 se un caso fallisce, se dist/ manca o se il server non parte.
+// Esce 1 se un caso fallisce, se interactionGroups diverge, se dist/ manca o se il server non parte.
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { chromium } from 'playwright-core'
-import { preview } from 'vite'
+import { preview, transformWithOxc } from 'vite'
 
 const headed = process.argv.includes('--headed')
 // 90 fotogrammi: a 60 Hz il corpo è caduto, ha toccato terra e rimbalzato (un guasto all'urto
@@ -67,6 +91,13 @@ const TIMEOUT_MS = 60_000
 // spostamenti più piccoli di così non sono una caduta (con la fisica) e non sono una deriva (senza)
 const DROP_MIN = 0.05
 const STILL_TOL = 1e-4
+// Quanto i giunti del Lanyard possono aprirsi prima che la catena sia «staccata». Il risolutore di
+// rapier è morbido: misurato il 22 ott 2026, le corde (0,5) partono lente, al passo ~20 si tendono
+// sotto la card che cade e vanno oltre la loro lunghezza dell'11,8%, a riposo del 2,6%; l'aggancio
+// sferico resta entro 0,0002. Le soglie stanno a circa il doppio, e un giunto sbagliato le passa
+// di molto (vedi l'header).
+const ROPE_STRETCH_TOL = 0.25
+const HOOK_GAP_TOL = 0.01
 
 const exe =
   process.env.CHROMIUM_PATH ??
@@ -122,6 +153,27 @@ if (![...rapierFiles.keys()].some(hasEngine)) {
 const kb = (n) => (n / 1024).toFixed(0)
 const describe = (f) => `${f} (${rapierFiles.get(f).what.join(' + ')}, ${kb(rapierFiles.get(f).raw)} KB, ${kb(rapierFiles.get(f).gz)} KB gzip)`
 console.log(`rapier nella build: ${[...rapierFiles.keys()].map(describe).join(' · ')}`)
+
+// interactionGroups del palco contro quella di rapier, prima del browser. Il palco ne tiene una
+// copia (importata da rapier per valore porterebbe il motore nel chunk), e una copia di una
+// formula diverge in silenzio. Ogni gruppo da solo, come numero e come array, i due estremi
+// insieme, vuoto, tutti; i filtri assenti più gli stessi insiemi. Il .ts lo traduce Vite (Node 20
+// non toglie i tipi da solo), e il modulo non ha import, quindi gira da un data: URL.
+const groupsTs = 'src/canvas/physics/interactionGroups.ts'
+const { code: groupsJs } = await transformWithOxc(readFileSync(groupsTs, 'utf8'), groupsTs)
+const { interactionGroups: kitGroups } = await import(`data:text/javascript;base64,${Buffer.from(groupsJs).toString('base64')}`)
+const { interactionGroups: rapierGroups } = await import('@react-three/rapier')
+const ALL = [...Array(16).keys()]
+const SETS = [...ALL, ...ALL.map((g) => [g]), [0, 15], [1, 2, 3], [], ALL]
+const groupDiffs = []
+for (const m of SETS)
+  for (const f of [undefined, ...SETS])
+    if (kitGroups(m, f) !== rapierGroups(m, f))
+      groupDiffs.push(`(${JSON.stringify(m)}, ${JSON.stringify(f)}): palco ${kitGroups(m, f)}, rapier ${rapierGroups(m, f)}`)
+const groupCases = SETS.length * (SETS.length + 1)
+if (groupDiffs.length)
+  console.log(`✗ interactionGroups del palco diverge da rapier in ${groupDiffs.length} combinazioni su ${groupCases}, la prima ${groupDiffs[0]}`)
+else console.log(`✓ interactionGroups del palco = quella di rapier su ${groupCases} combinazioni`)
 
 const server = await preview({
   logLevel: 'silent',
@@ -192,14 +244,7 @@ try {
       if (lab.tier !== c.tier) why.push(`tier ${lab.tier}, il caso voleva ${c.tier}: il ramo non è stato aperto`)
       if (lab.physics !== c.physics)
         why.push(`fisica ${lab.physics ? 'accesa' : 'spenta'}, il caso la voleva ${c.physics ? 'accesa' : 'spenta'}`)
-      const drop = lab.startY - lab.y
-      if (!Number.isFinite(drop)) why.push('quota del corpo non leggibile')
-      else if (lab.physics && drop < DROP_MIN)
-        why.push(`fisica accesa ma il corpo non cade (quota ${lab.y.toFixed(3)}, partenza ${lab.startY})`)
-      else if (lab.physics && !(lab.y > lab.floorY))
-        why.push(`fisica accesa ma il corpo è passato sotto il terreno (quota ${lab.y.toFixed(2)}, terreno ${lab.floorY}): nessun collider l'ha fermato`)
-      else if (!lab.physics && Math.abs(drop) > STILL_TOL)
-        why.push(`fisica spenta ma il corpo si è mosso di ${drop.toFixed(4)}`)
+      why.push(...sceneWhy(lab))
     }
     // il download di rapier segue la fisica del CASO: spenta = nessun suo file, accesa = il motore
     // arriva. Il secondo è il controllo positivo: senza, un gate che non riconosce più il chunk
@@ -215,7 +260,7 @@ try {
     const rapierGz = fetched.reduce((s, f) => s + rapierFiles.get(f).gz, 0)
     const download = fetched.length ? `rapier scaricato (${kb(rapierGz)} KB gzip)` : 'rapier non scaricato'
     const facts = lab
-      ? `tier ${lab.tier} · fisica ${lab.physics ? 'accesa' : 'spenta'} · ${backend ?? 'backend?'} · ${lab.frames} fotogrammi · ${Number.isFinite(lab.rendersPerFrame) ? lab.rendersPerFrame.toFixed(1) : 'n/d'} render/fotogramma · corpo ${lab.startY.toFixed(2)} → ${Number.isFinite(lab.y) ? lab.y.toFixed(2) : 'n/d'} · ${download}`
+      ? `tier ${lab.tier} · fisica ${lab.physics ? 'accesa' : 'spenta'} · ${backend ?? 'backend?'} · ${lab.frames} fotogrammi · ${Number.isFinite(lab.rendersPerFrame) ? lab.rendersPerFrame.toFixed(1) : 'n/d'} render/fotogramma · ${sceneFacts(lab)} · ${download}`
       : `${backend ?? 'backend?'} · nessuna sonda · ${download}`
     console.log(`${why.length ? '✗' : '✓'} ${c.name.padEnd(8)} ${size.padEnd(17)} ${facts}`)
     for (const w of why) console.log(`    ${w}`)
@@ -230,4 +275,60 @@ console.log(`\n?lab=1 sulla build: ${results.length - red.length}/${results.leng
 if (red.length) {
   console.log(`rossi: ${red.map((r) => r.c.name).join(', ')}`)
   process.exitCode = 1
+}
+if (groupDiffs.length) {
+  console.log('rosso anche interactionGroups del palco (vedi sopra)')
+  process.exitCode = 1
+}
+
+// Le promesse della scena, sulla sonda. Con la fisica: i corpi e le istanze cadono e restano
+// sopra il terreno; la catena del Lanyard ha nel mondo i giunti che il markup dichiara, si muove e
+// resta legata (nessuna corda oltre la sua lunghezza, l'aggancio della card chiuso), e PhysicsStep
+// vede i passi. Senza: tutto nella posa del markup, nessun passo e nessun giunto. Un dato che manca
+// (la card non trovata, la sonda senza corpi) è rosso, mai un verde per assenza.
+function sceneWhy(lab) {
+  const why = []
+  const fmt = (n, d = 4) => (Number.isFinite(n) ? n.toFixed(d) : 'n/d')
+  const fall = (what, startY, y) => {
+    const drop = startY - y
+    if (!Number.isFinite(drop)) why.push(`quota di ${what} non leggibile`)
+    else if (lab.physics && drop < DROP_MIN) why.push(`fisica accesa ma ${what} non cade (quota ${y.toFixed(3)}, partenza ${startY})`)
+    else if (lab.physics && !(y > lab.floorY))
+      why.push(`fisica accesa ma ${what} sta sotto il terreno (quota ${y.toFixed(2)}, terreno ${lab.floorY}): nessun collider l'ha fermato`)
+    else if (!lab.physics && Math.abs(drop) > STILL_TOL)
+      why.push(`fisica spenta ma ${what} non è nella posa del markup (quota ${y.toFixed(4)}, nel markup ${startY})`)
+  }
+  if (!lab.bodies?.length || !lab.instances?.length || !lab.chain) why.push('la sonda non porta corpi, istanze e catena: è di un altro laboratorio')
+  for (const b of lab.bodies ?? []) fall(`il corpo «${b.name}»`, b.startY, b.y)
+  for (const [i, it] of (lab.instances ?? []).entries()) fall(`l'istanza ${i} di PhysicsInstancedBodies`, it.startY, it.y)
+  const ch = lab.chain
+  if (!ch) return why
+  if (lab.physics) {
+    if (!(ch.steps >= 1)) why.push('fisica accesa ma PhysicsStep non ha visto nessun passo del mondo')
+    if (ch.joints !== ch.expected)
+      why.push(`fisica accesa ma nel mondo ci sono ${ch.joints} giunti, il markup del Lanyard ne dichiara ${ch.expected}`)
+    else if (ch.steps >= 1 && ch.measured !== ch.expected)
+      why.push(`la sonda ha misurato ${ch.measured} giunti su ${ch.expected}: l'apertura sarebbe verde per assenza`)
+    else {
+      if (!(ch.stretch <= ROPE_STRETCH_TOL))
+        why.push(`la catena non resta legata: una corda è andata oltre la sua lunghezza del ${fmt(ch.stretch * 100, 1)}% (tolleranza ${ROPE_STRETCH_TOL * 100}%)`)
+      if (!(ch.gap <= HOOK_GAP_TOL))
+        why.push(`la catena non resta legata: l'aggancio sferico della card si è aperto di ${fmt(ch.gap, 3)} (tolleranza ${HOOK_GAP_TOL})`)
+    }
+    if (!(ch.moved >= DROP_MIN)) why.push(`fisica accesa ma la catena non si muove (card spostata di ${fmt(ch.moved)})`)
+  } else {
+    if (ch.steps !== 0 || ch.joints !== 0) why.push(`fisica spenta ma il mondo c'è: ${ch.steps} passi, ${ch.joints} giunti`)
+    if (!(Math.abs(ch.moved) <= STILL_TOL)) why.push(`fisica spenta ma la card si è mossa di ${fmt(ch.moved)}`)
+  }
+  return why
+}
+
+function sceneFacts(lab) {
+  const fmt = (n, d) => (Number.isFinite(n) ? n.toFixed(d) : 'n/d')
+  const fallen = (list) => (list ?? []).map((b) => `${b.startY.toFixed(2)}→${fmt(b.y, 2)}`).join(' ') || 'n/d'
+  const ch = lab.chain
+  const chain = ch
+    ? `giunti ${ch.joints}/${ch.expected} · ${ch.steps} passi · corde +${fmt(ch.stretch * 100, 1)}% · aggancio ${fmt(ch.gap, 4)} · card ${fmt(ch.moved, 2)}`
+    : 'catena n/d'
+  return `corpi ${fallen(lab.bodies)} · istanze ${fallen(lab.instances)} · ${chain}`
 }

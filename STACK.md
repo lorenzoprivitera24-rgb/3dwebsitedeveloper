@@ -66,14 +66,18 @@ families. Full one-line catalog: [`lib/react-bits/CATALOG.md`](lib/react-bits/CA
 - **Animations (30)** — AnimatedContent, Magnet, ClickSpark, SplashCursor, PixelTrail, Ribbons,
   MetaBalls, ElectricBorder, LaserFlow, GlareHover, ImageTrail, TargetCursor…
 - **Components (36)** — CardSwap, Carousel, Dock, Masonry, ScrollStack, TiltedCard, MagicBento,
-  PillNav, StaggeredMenu, ProfileCard, ModelViewer, Lanyard (rapier), FluidGlass…
+  PillNav, StaggeredMenu, ProfileCard, ModelViewer, Lanyard (rapier: in the kit use its variant
+  on the physics stage, `src/canvas/physics/Lanyard.tsx`), FluidGlass…
 - **Backgrounds (45)** — Aurora, Silk, Threads, Galaxy, Iridescence, Plasma, Beams, LiquidEther,
   Prism, Hyperspeed, Particles, Dither, Waves, DarkVeil, LightRays…
 
 **Workflow (React Bits is copy-first by design):** pick from the catalog → copy that component's
 folder from `lib/react-bits/<Family>/<Name>/` into the target project's `src/` → install its deps
 (varies per component: `gsap`, `motion`, `ogl`, `three`, `@react-three/*`) → tune props. Do **not**
-ship all 134 into a site; copy only what's used. See `interactive-components.md`.
+ship all 134 into a site; copy only what's used. See `interactive-components.md`. The one shelf
+component that imports `@react-three/rapier` (Lanyard) is the exception: copied as it is, it mounts
+its own `<Canvas>` and `<Physics>` and puts the engine in the static graph (`perf:check` fails);
+the kit's variant passes through `PhysicsStage`.
 
 **Tech split:** ~30 are `ogl` shader backgrounds (cheap, full-screen), ~8 are R3F/three (Lanyard,
 Ballpit, ModelViewer, FluidGlass), the rest are GSAP/Motion DOM effects. Match the component's

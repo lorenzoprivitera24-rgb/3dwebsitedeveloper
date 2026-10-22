@@ -19,6 +19,16 @@
 // PhysicsCollider)». E la controprova nello stesso file, `<PhysicsCollider shape="cuboid"
 // args={[0.3, 0.3, 0.3]} />` al posto del collider di rapier: nessun FAIL, CanvasLayer fra i
 // chunk senza motore. La strada lecita non rimette il motore nel grafo statico.
+// Terzo, un hook di giunto (22 ott 2026, coi giunti del palco): `useRopeJoint` importato per valore
+// e chiamato nello stesso RigSatellite -> 🔴 ed exit 1, unico FAIL: «motore rapier nel grafo
+// statico di src/canvas/CanvasLayer.tsx: CanvasLayer-DD4CGF5E.js → react-three-rapier.esm-
+// CyFhCBTV.js (818.4 KB gzip a ogni tier). Un import di VALORE da @react-three/rapier:
+// registry/04-pointer-rig-3d/RigSatellite.tsx importa useRopeJoint (→ <PhysicsJoint
+// type="rope">). Passa da src/canvas/physics/PhysicsStage.tsx, che lo scarica solo a fisica
+// accesa, o importa solo tipi». Il file e il nome li trova rapierValueImports nei sorgenti; il
+// verdetto resta del manifest. Controprova nello stesso file con `<PhysicsJoint type="rope" ...>`
+// e i ref tipizzati con un import di tipo: exit 0, CanvasLayer fra i chunk senza motore, JS
+// iniziale fermo a 162,9 KB gzip. Tolto, RigSatellite identico al commit.
 // Misura la build (dist/) e gli asset (public/) e scrive qa/perf-report.md.
 // Exit: 0 verde (anche con warn) · 1 rosso (hard cap sforato, o motore rapier fuori posto).
 // Richiede `npm run build` prima.
@@ -151,6 +161,73 @@ const isRapierModule = (src) => {
 }
 const label = (c) => (c.src ?? c.file).replace(/^.*node_modules[\\/]/, '')
 const base = (file) => file.replace(/^.*\//, '')
+
+// Chi importa rapier per VALORE nei sorgenti, e la strada del palco per ogni nome. Il verdetto
+// resta del manifest (dice quale chunk si porta dietro il motore, non quale file né quale nome):
+// questo serve solo al messaggio, e legge i testi, quindi vede anche un import commentato. Contano
+// gli import e gli export statici da '@react-three/rapier'; `import type` e i nomi con `type`
+// davanti sono liberi, e l'import() di PhysicsStage qui non compare.
+const KIT = {
+  Physics: 'PhysicsStage',
+  RigidBody: 'PhysicsBody',
+  AnyCollider: '<PhysicsCollider shape>',
+  MeshCollider: 'PhysicsMeshCollider',
+  InstancedRigidBodies: 'PhysicsInstancedBodies',
+  useImpulseJoint: '<PhysicsJoint type>',
+  useRapier: 'usePhysics()',
+  useBeforePhysicsStep: '<PhysicsStep before>',
+  useAfterPhysicsStep: '<PhysicsStep after>',
+  useFilterContactPair: '<PhysicsStep filterContactPair>',
+  useFilterIntersectionPair: '<PhysicsStep filterIntersectionPair>',
+  interactionGroups: 'interactionGroups di PhysicsStage',
+  CoefficientCombineRule: 'usePhysics()?.rapier.CoefficientCombineRule',
+  vec3: 'Vector3 di three',
+  quat: 'Quaternion di three',
+  euler: 'Euler di three',
+}
+const lowerFirst = (s) => s[0].toLowerCase() + s.slice(1)
+function kitFor(name) {
+  if (KIT[name]) return KIT[name]
+  const collider = name.match(/^(\w+)Collider$/)
+  if (collider) return `<PhysicsCollider shape="${lowerFirst(collider[1])}">`
+  const joint = name.match(/^use(\w+)Joint$/)
+  if (joint) return `<PhysicsJoint type="${lowerFirst(joint[1])}">`
+  return 'PhysicsStage'
+}
+function rapierValueImports() {
+  const files = []
+  const collect = (dir) => {
+    if (!existsSync(dir)) return
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name)
+      if (e.isDirectory()) collect(p)
+      else if (/\.(m?[jt]sx?)$/.test(e.name)) files.push(p)
+    }
+  }
+  collect('src')
+  collect('registry')
+  const found = []
+  for (const file of files) {
+    const text = readFileSync(file, 'utf8')
+    const names = []
+    for (const m of text.matchAll(/\b(?:import|export)\s+(type\s+)?([^'";]*?)\s+from\s+['"]@react-three\/rapier['"]/g)) {
+      if (m[1]) continue
+      const clause = m[2]
+      const braces = clause.match(/\{([^}]*)\}/)
+      for (const part of braces ? braces[1].split(',') : []) {
+        const name = part.trim()
+        if (name && !name.startsWith('type ')) names.push(name.split(/\s+as\s+/)[0])
+      }
+      // fuori dalle graffe: `* as R` o `*` (tutto il modulo), o un nome solo (il default)
+      const outside = (braces ? clause.replace(braces[0], '') : clause).replace(/,/g, ' ').trim()
+      if (/^\*(\s+as\s+[\w$]+)?$/.test(outside)) names.push('* (tutto il modulo)')
+      else if (/^[A-Za-z_$][\w$]*$/.test(outside)) names.push('default')
+    }
+    if (/\bimport\s+['"]@react-three\/rapier['"]/.test(text)) names.push('(solo effetti)')
+    if (names.length) found.push(`${file} importa ${names.map((n) => `${n} (→ ${kitFor(n)})`).join(', ')}`)
+  }
+  return found
+}
 // la catena di file dal chunk al primo file col motore, seguendo SOLO `imports`; null se non c'è
 function chainToEngine(from) {
   const parent = new Map([[from.file, null]])
@@ -182,16 +259,22 @@ if (!engineGz.size) {
   let reached = false
   const own = []
   const clean = []
+  let culprits
   for (const chunk of Object.values(manifest)) {
     if (!chunk.isEntry && !chunk.isDynamicEntry) continue
     const chain = chainToEngine(chunk)
     if (chain) reached = true
     if (!chunk.isEntry && isRapierModule(chunk.src)) own.push(label(chunk))
     else if (!chain) clean.push(label(chunk))
-    else
+    else {
+      culprits ??= rapierValueImports()
+      const who = culprits.length
+        ? culprits.join('; ')
+        : 'nessuno nei sorgenti del progetto (src/, registry/), quindi lo porta una dipendenza'
       fails.push(
-        `motore rapier nel grafo statico di ${label(chunk)}: ${chain.map(base).join(' → ')} (${kb(engineGz.get(chain.at(-1)))} KB gzip a ogni tier). Un import di VALORE da @react-three/rapier: passa da PhysicsStage (PhysicsBody, PhysicsCollider), o importa solo tipi`,
+        `motore rapier nel grafo statico di ${label(chunk)}: ${chain.map(base).join(' → ')} (${kb(engineGz.get(chain.at(-1)))} KB gzip a ogni tier). Un import di VALORE da @react-three/rapier: ${who}. Passa da src/canvas/physics/PhysicsStage.tsx, che lo scarica solo a fisica accesa, o importa solo tipi`,
       )
+    }
   }
   // controllo positivo: se nessuna chiusura arriva al motore, il cammino non vede questa build
   // (manifest di un'altra build, o un chunk raggiunto solo da import() senza dynamic entry)
