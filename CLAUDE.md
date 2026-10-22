@@ -149,7 +149,10 @@ differ only in a number, i.e. TSL constants baked per part) and `qa:indici` (Web
 indices, the three r185 VAO defect). Each carries its negative control in a lab page. `qa:parallela`
 measures the WebGL2 parallel compile (`canvas/compilazioneParallela.ts`): main-thread waits with and
 without `?sincrono`, and no one-shot render such as the HDRI's PMREM may skip an object (negative:
-`?compilazione=tutta`). Direction changed on purpose? Re-run
+`?compilazione=tutta`). `qa:ibl` counts black-IBL visits: three r185 never redoes the PMREM of an
+HDRI that got disposed (drei's `<Environment>` unmount, StrictMode in dev), cured in
+`canvas/pmremRigenerato.ts` (negative: `?lab=ibl&ordine=rimonta&pmrem=nudo`).
+Direction changed on purpose? Re-run
 `qa:state:baseline` and commit the diff — that diff *is* the review.
 
 Why the budget is per-path, and why `renderer.info` cannot be read naively: the reasons are in

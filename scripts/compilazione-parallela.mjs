@@ -41,8 +41,9 @@
 // `outputColorTransform`, `PMREM_equirect` e `PMREM_ggx`; con la cura, niente. Se il negativo
 // smette di sbagliare, il canale è cieco e il gate esce 1.
 // Perché niente pixel: su una sfera a specchio sotto l'HDRI (una prova del 21 ott 2026) l'ambiente
-// esce nero a caso anche sul codice PRIMA della cura (2 visite su 4, WebKit a taglia iPhone): un
-// difetto che preesiste e va cercato per conto suo, e un gate sui pixel sarebbe un gate a caso.
+// usciva nero a caso anche sul codice PRIMA della cura (2 visite su 4, WebKit a taglia iPhone). Era un
+// altro difetto, trovato il 22 ott 2026: l'HDRI smaltito dallo StrictMode a PMREM già nato, che three
+// non rifà più (src/canvas/pmremRigenerato.ts). I pixel dell'IBL li guarda ora `npm run qa:ibl`.
 //
 // Uso:
 //   npm run qa:parallela                       # dev server del kit, 4 giri per modo e per serie

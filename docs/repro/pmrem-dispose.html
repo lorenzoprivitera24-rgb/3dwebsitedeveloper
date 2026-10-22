@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PMREM dopo dispose</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #000;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Riproduzione minima, senza React né drei, del difetto curato da src/canvas/pmremRigenerato.ts
+      (22 ott 2026). Servita dal dev server del kit: /docs/repro/pmrem-dispose.html
+
+      Una sfera a specchio sotto un HDRI, niente luci, fondo grigio (il testimone della tela).
+      Un render (il PMREM nasce), poi `hdri.dispose()`, poi si continua a disegnare la stessa scena.
+        - renderer a nodi (WebGPURenderer, three r185.1 e r186.1, WebGPU o `?webgl`): la sfera resta
+          NERA per sempre. three smaltisce il PMREM con la sua sorgente, ma il PMREMNode tiene il
+          riferimento e non lo rifà, perché `pmremVersion` non è cambiata;
+        - `?classico` (WebGLRenderer): la sfera torna accesa, WebGLEnvironments.getPMREM lo rifà;
+        - `?cura`: dopo la dispose `hdri.needsPMREMUpdate = true`, e il renderer a nodi lo rifà.
+      Esito in console e nel titolo: `[repro] …`.
+    -->
+    <script type="module">
+      import * as WEBGPU from 'three/webgpu'
+      import * as CLASSICO from 'three'
+      import { HDRLoader } from 'three/addons/loaders/HDRLoader.js'
+
+      const p = new URLSearchParams(location.search)
+      const classico = p.has('classico')
+      const THREE = classico ? CLASSICO : WEBGPU
+      const dici = (t) => {
+        console.info(`[repro] ${t}`)
+        document.title = t
+      }
+
+      const renderer = classico
+        ? new CLASSICO.WebGLRenderer()
+        : new WEBGPU.WebGPURenderer({ forceWebGL: p.has('webgl') })
+      renderer.setSize(innerWidth, innerHeight)
+      document.body.appendChild(renderer.domElement)
+      if (!classico) await renderer.init()
+      const motore = classico ? 'WebGLRenderer' : renderer.backend.isWebGPUBackend ? 'WebGPU' : 'WebGL2 (nodi)'
+
+      const scene = new THREE.Scene()
+      scene.background = new THREE.Color(0x808080)
+      const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100)
+      camera.position.z = 5
+      const Materiale = classico ? CLASSICO.MeshStandardMaterial : WEBGPU.MeshStandardNodeMaterial
+      scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.6, 96, 64), new Materiale({ metalness: 1, roughness: 0.15 })))
+
+      const hdri = await new HDRLoader().loadAsync('/hdri/studio_small_08_1k.hdr')
+      hdri.mapping = THREE.EquirectangularReflectionMapping
+      scene.environment = hdri
+
+      renderer.render(scene, camera) // 1. il PMREM nasce qui
+      hdri.dispose() //                  2. three smaltisce il PMREM con la sua sorgente
+      if (p.has('cura')) hdri.needsPMREMUpdate = true
+      let fotogrammi = 0
+      renderer.setAnimationLoop(() => {
+        renderer.render(scene, camera) // 3. la stessa scena, lo stesso HDRI
+        if (++fotogrammi === 30) dici(`${motore}${p.has('cura') ? ' con la cura' : ''}: 30 fotogrammi dopo la dispose`)
+      })
+    </script>
+  </body>
+</html>

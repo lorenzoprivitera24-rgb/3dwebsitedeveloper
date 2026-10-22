@@ -4,6 +4,7 @@ import { Component, Suspense, useEffect, useLayoutEffect, type ReactNode } from 
 import { Poster } from './Poster'
 import { DevPerf } from './DevPerf'
 import { proteggiIndici } from './indiciWebGL'
+import { rigeneraPmrem } from './pmremRigenerato'
 import {
   PARACADUTE_MS,
   accendiCompilazioneParallela,
@@ -119,6 +120,10 @@ export function Stage({ children, dpr, toneMappingExposure = 1, cameraPosition =
           // (programma in volo, zero istanze) toglie gli indici al VAO dell'oggetto disegnato
           // prima: difetto di three r185, cura e misure in indiciWebGL.ts. Su WebGPU non fa niente.
           const indici = proteggiIndici(renderer)
+          // Su ogni motore un HDRI smaltito (drei lo fa allo smontaggio di <Environment>, e lo
+          // StrictMode del dev subito dopo il montaggio) lascerebbe l'IBL nero per sempre: difetto
+          // di three r185, cura e misure in pmremRigenerato.ts. Prima del primo render.
+          const pmrem = rigeneraPmrem()
           // Su ogni motore la tela nasce trasparente e la mostra <Rivelazione> al primo
           // fotogramma completo: niente scena a pezzi mentre i programmi arrivano.
           if (compilazione !== 'interni-mancanti') {
@@ -144,6 +149,12 @@ export function Stage({ children, dpr, toneMappingExposure = 1, cameraPosition =
             console.warn('[kit] indici WebGL2: interni-mancanti (three ha cambiato WebGLAttributeUtils: riverificare il difetto, vedi indiciWebGL.ts)')
           } else {
             console.info('[kit] indici WebGL2:', indici)
+          }
+          // Letto da qa:ibl: una cura che three ha reso inapplicabile non deve passare in silenzio.
+          if (pmrem === 'interni-mancanti') {
+            console.warn('[kit] pmrem: interni-mancanti (three ha cambiato PMREMGenerator: riverificare il difetto, vedi pmremRigenerato.ts)')
+          } else {
+            console.info('[kit] pmrem:', pmrem)
           }
           // Letto da qa:parallela e qa:indici: con quale compilazione ha girato la pagina.
           if (compilazione === 'interni-mancanti') {
