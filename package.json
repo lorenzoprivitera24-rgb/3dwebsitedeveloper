@@ -51,7 +51,7 @@
     "react-dom": "^19.2.8",
     "three": "^0.185.1"
   },
-  "//optional": "Add per brief: @react-three/rapier + ecctrl (physics — Lanyard/Ballpit), @react-three/postprocessing (WebGL only; on WebGPU use three's node PostProcessing/RenderPipeline), @react-spring/three (spring 3D motion). KTX2: self-host the Basis transcoder from three/examples/jsm/libs/basis into public/basis/. React Bits components pull their own deps per component (gsap/motion/ogl/three) — install per use.",
+  "//optional": "Add per brief: ecctrl (characters; @react-three/rapier is a dependency since 31 Aug 2026 and is used only through src/canvas/physics/PhysicsStage.tsx, the React Bits Lanyard included: its kit variant is src/canvas/physics/Lanyard.tsx), @react-three/postprocessing (WebGL only; on WebGPU use three's node PostProcessing/RenderPipeline), @react-spring/three (spring 3D motion). KTX2: self-host the Basis transcoder from three/examples/jsm/libs/basis into public/basis/. React Bits components pull their own deps per component (gsap/motion/ogl/three): install per use.",
   "devDependencies": {
     "@dicebear/collection": "^9.4.2",
     "@dicebear/core": "^9.4.2",

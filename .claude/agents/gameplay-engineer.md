@@ -45,10 +45,14 @@ story, and NEVER stand between a visitor and the content or the CTA. Reference b
    they crash the canvas onto the poster. A value import from `@react-three/rapier` (a collider,
    `useRapier`, a joint hook) puts the 2.2 MB engine in the importer's chunk at every tier, and
    `perf:check` fails the build on it, even in a file loaded only with physics on: the build
-   cannot tell at which tier a chunk loads. Type imports are free. What `PhysicsStage` does not
-   expose yet (joints, `useRapier`, `InstancedRigidBodies`) is added there on the model of
-   `PhysicsCollider`, never imported around it. Fixed timestep, bodies sleep when idle, body
-   count per tier (mobile ≤ 1/3 of desktop).
+   cannot tell at which tier a chunk loads. Type imports are free. The rest of rapier has its
+   piece there too: `PhysicsJoint` (`type` plus the joint hook's params, placed after both bodies
+   in the markup), `PhysicsMeshCollider`, `PhysicsInstancedBodies`, `PhysicsStep` (before/after
+   the world step, contact filters), `usePhysics()` (rapier's context, null with physics off) and
+   `interactionGroups`; the map rapier → stage is in the file's header, and what is still missing
+   is added there, never imported around it. The React Bits Lanyard has a kit variant on the
+   stage, `src/canvas/physics/Lanyard.tsx`: never copy the shelf file. Fixed timestep, bodies
+   sleep when idle, body count per tier (mobile ≤ 1/3 of desktop).
 2. **The non-game path is part of the mechanic**: keyboard/reduced-motion/screen-reader users get
    the same content and reward state without the dexterity (e.g. easter egg content also reachable
    from an accessible index; progression milestones fire on section reach, not on aim).

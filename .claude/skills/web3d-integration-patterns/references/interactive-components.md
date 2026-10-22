@@ -18,7 +18,9 @@ React Bits already ships well — copy and tune.
   `PixelTrail`, `ImageTrail`, `Ribbons`, `MetaBalls`, `ElectricBorder`, `LaserFlow`, `StarBorder`.
 - **Components** — UI building blocks: `CardSwap`, `Carousel`, `Dock`, `Masonry`, `ScrollStack`,
   `TiltedCard`, `MagicBento`, `SpotlightCard`, `PillNav`, `StaggeredMenu`, `BubbleMenu`, `CardNav`,
-  `ProfileCard`, `Stepper`, `ModelViewer` (GLB viewer), `Lanyard` (rapier physics).
+  `ProfileCard`, `Stepper`, `ModelViewer` (GLB viewer), `Lanyard` (rapier physics: in the kit use
+  its variant on the physics stage, `src/canvas/physics/Lanyard.tsx`; the shelf file imports rapier
+  by value and mounts its own `<Physics>`, and `perf:check` fails the build on it).
 - **Backgrounds** — full-screen backdrops: `Aurora`, `Silk`, `Threads`, `Galaxy`, `Iridescence`,
   `Plasma`, `Beams`, `LiquidEther`, `Prism`, `Hyperspeed`, `Particles`, `Waves`, `Dither`,
   `DarkVeil`, `LightRays`, `Lightning`, `GridMotion`, `Ballpit` (R3F physics).
