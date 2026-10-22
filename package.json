@@ -22,6 +22,7 @@
     "qa:reduced": "node scripts/shoot.mjs --reduced",
     "perf:check": "node scripts/perf-check.mjs",
     "qa:lab": "node scripts/lab-gate.mjs",
+    "qa:lab:webkit": "node scripts/lab-gate.mjs --motori=webkit",
     "qa:state": "node scripts/with-server.mjs node scripts/state-gate.mjs",
     "qa:state:baseline": "node scripts/with-server.mjs node scripts/state-gate.mjs --baseline",
     "qa:frames": "node scripts/with-server.mjs node scripts/frame-perf.mjs",
@@ -30,9 +31,9 @@
     "qa:parallela": "node scripts/with-server.mjs node scripts/compilazione-parallela.mjs",
     "qa:ibl": "node scripts/with-server.mjs node scripts/ibl.mjs",
     "verify": "npm run lint && npm run build && npm run perf:check && npm run qa:lab && npm run qa:state",
-    "verify:full": "npm run verify && npm run qa:frames && npm run qa:shoot && npm run qa:diff && npm run qa:compilazioni && npm run qa:indici && npm run qa:parallela && npm run qa:ibl"
+    "verify:full": "npm run verify && npm run qa:frames && npm run qa:shoot && npm run qa:diff && npm run qa:compilazioni && npm run qa:indici && npm run qa:parallela && npm run qa:ibl && npm run qa:lab:webkit"
   },
-  "//verify": "`npm run verify` è la definizione di FATTO: deterministico, headless, lanciabile sempre (lint + build + peso + laboratorio ?lab=1 sulla build, un caso per ramo di tier e reduced-motion + gate di stato). `verify:full` aggiunge i gate che richiedono una GPU vera: frame time e pixel (shoot+diff), più due conteggi (programmi GPU nati scorrendo, disegni senza indici su WebGL2), la compilazione in parallelo su WebGL2 (la pagina non aspetta i programmi, il PMREM resta sincrono) e l'IBL che non resta nero quando il suo HDRI viene smaltito (qa:ibl), ed è il gate di RILASCIO.",
+  "//verify": "`npm run verify` è la definizione di FATTO: deterministico, headless, lanciabile sempre (lint + build + peso + laboratorio ?lab=1 sulla build, un caso per ramo di tier e reduced-motion + gate di stato). `verify:full` aggiunge i gate che richiedono una GPU vera: frame time e pixel (shoot+diff), più due conteggi (programmi GPU nati scorrendo, disegni senza indici su WebGL2), la compilazione in parallelo su WebGL2 (la pagina non aspetta i programmi, il PMREM resta sincrono), l'IBL che non resta nero quando il suo HDRI viene smaltito (qa:ibl) e il laboratorio ?lab=1 su WebKit, il ripiego WebGL2 a taglia iPhone e a 1440 con la tela che deve arrivare allo schermo (qa:lab:webkit), ed è il gate di RILASCIO.",
   "//versions": "Latest stable pinned 6 Aug 2026. Node >=20.19 (Vite 8 engine). TypeScript is held at 6.x ON PURPOSE: 7.0 (Go-native, 8 Jul 2026) is out and ~10x faster, but typescript-eslint@8 declares `typescript <6.1.0` and the repo lints on every edit via a PostToolUse hook — revisit when typescript-eslint ships TS7 support (needs the stable programmatic API landing in TS 7.1).",
   "dependencies": {
     "@gsap/react": "^2.1.2",

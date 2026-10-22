@@ -151,7 +151,9 @@ measures the WebGL2 parallel compile (`canvas/compilazioneParallela.ts`): main-t
 without `?sincrono`, and no one-shot render such as the HDRI's PMREM may skip an object (negative:
 `?compilazione=tutta`). `qa:ibl` counts black-IBL visits: three r185 never redoes the PMREM of an
 HDRI that got disposed (drei's `<Environment>` unmount, StrictMode in dev), cured in
-`canvas/pmremRigenerato.ts` (negative: `?lab=ibl&ordine=rimonta&pmrem=nudo`).
+`canvas/pmremRigenerato.ts` (negative: `?lab=ibl&ordine=rimonta&pmrem=nudo`). `qa:lab:webkit`
+runs the `?lab=1` bench on WebKit (the iPhones' WebGL2 fallback, iPhone 15 and 1440): the same crop
+with and without the canvas must differ, because a canvas can render every frame and show nothing.
 Direction changed on purpose? Re-run
 `qa:state:baseline` and commit the diff — that diff *is* the review.
 
