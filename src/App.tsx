@@ -46,8 +46,9 @@ import { cutouts } from './lib/cutouts.generated'
 // e il code-split diventa cosmetico (misurato: 599 KB gzip comunque sul primo paint).
 // Il preloader nel frattempo mostra il progresso pubblicato su src/lib/loadProgress.ts.
 const CanvasLayer = lazy(() => import('./canvas/CanvasLayer'))
-// Il laboratorio delle discipline di realismo (?lab=1): stesso confine lazy — il chunk del lab
-// (rapier compreso) esiste solo per chi apre il lab, l'entry non lo preannuncia.
+// Il laboratorio delle discipline di realismo (?lab=1): stesso confine lazy. Il chunk del lab
+// esiste solo per chi apre il lab, l'entry non lo preannuncia; rapier ha un chunk suo, che
+// PhysicsStage chiede solo a fisica accesa.
 const RealismLab = lazy(() => import('./lab/RealismLab'))
 const labRequested = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('lab')
 

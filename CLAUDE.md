@@ -185,7 +185,8 @@ Covered mechanically: the ten non-negotiables (see the table above), the scroll�
 at every checkpoint, the frame budget per render path, the empty-canvas failure, the lazy
 entry boundary (perf:check walks the Vite manifest from the entries: nothing importing three may
 sit in the entry's static graph — measured 599 → 156,5 KB gzip), and the `?lab=1` bench on the
-build in every tier and reduced-motion branch (`qa:lab`: physics off used to crash it unseen).
+build in every tier and reduced-motion branch (`qa:lab`: physics off used to crash it unseen,
+and to download rapier anyway).
 
 Still judgement, and still required:
 - WebGL2 fallback exercised and a no-WebGL poster present (the gates measure whichever path the
