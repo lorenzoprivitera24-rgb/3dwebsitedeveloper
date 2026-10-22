@@ -4,7 +4,7 @@ import { Component, Suspense, useEffect, useLayoutEffect, type ReactNode } from 
 import { Poster } from './Poster'
 import { DevPerf } from './DevPerf'
 import { proteggiIndici } from './indiciWebGL'
-import { rigeneraPmrem } from './pmremRigenerato'
+import { rigeneraPmrem, rinfrescaAmbiente, seguiScena } from './pmremRigenerato'
 import {
   PARACADUTE_MS,
   accendiCompilazioneParallela,
@@ -48,6 +48,18 @@ function mostra(tela: HTMLCanvasElement, motivo: string, anomalo = false) {
   const ms = Math.round(performance.now() - rivelazione.dal)
   // letto da qa:parallela: il tempo alla scena intera, e se ci è arrivata o è scattato il paracadute
   ;(anomalo ? console.warn : console.info)(`[kit] tela rivelata a ${ms} ms: ${motivo}`)
+}
+
+/**
+ * La seconda metà della cura del PMREM (pmremRigenerato.ts): dal three r186 un HDRI smaltito e
+ * rigenerato non arriva agli oggetti fermi senza un refresh completo dei binding, che qui si forza al
+ * fotogramma dopo la dispose. useFrame a -3: prima di Rivelazione e del render, senza possederlo.
+ */
+function RinfrescoAmbiente() {
+  const scena = useThree((s) => s.scene)
+  useLayoutEffect(() => seguiScena(scena), [scena])
+  useFrame(() => rinfrescaAmbiente(), -3)
+  return null
 }
 
 /**
@@ -169,6 +181,7 @@ export function Stage({ children, dpr, toneMappingExposure = 1, cameraPosition =
       >
         <Suspense fallback={null}>{children}</Suspense>
         <Rivelazione />
+        <RinfrescoAmbiente />
         <DevPerf />
       </Canvas>
     </CanvasErrorBoundary>

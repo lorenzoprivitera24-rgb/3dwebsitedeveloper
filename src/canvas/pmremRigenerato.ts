@@ -34,6 +34,18 @@
 // WebGLEnvironments: senza, dopo una rigenerazione il PMREMNode ripasserebbe dalla cache a ogni
 // fotogramma. Costa un PMREM rifatto per ogni dispose seguita da un nuovo uso, cioè ciò che serve.
 //
+// Da three r186 non basta (misurato il 22 ott 2026 su 0.186.1, banco col kit servito con quella
+// versione): da #34162 un oggetto che non cambia fa solo il refresh SHARED dei binding, e
+// `NodeMaterialObserver` per l'ambiente di scena confronta soltanto `environmentIntensity` e
+// `environmentRotation`, non la dispose della texture. Il PMREM rinasce ma gli oggetti fermi tengono il
+// bind group di quello distrutto: WebGL2 nero (in WebKit tutta la tela, con «bindTexture: attempt to use
+// a deleted object»), WebGPU «Destroyed texture [PMREM.cubeUv] used in a submit» a ogni fotogramma. Per
+// questo la cura ha una seconda metà: al fotogramma dopo una dispose `rinfrescaAmbiente` (chiamata da
+// Stage) sposta di `SPINTA` l'`environmentIntensity` delle scene presentate, e quel cambio forza il
+// refresh completo. Il verso si alterna, quindi l'intensità non si allontana mai più di `SPINTA` dal
+// valore voluto: invisibile. Su r185 costa un refresh in più per dispose. Nota di memoria
+// three-r186-ambiente-di-scena-smaltito-binding-fermi; correzione a monte proposta, non pubblicata.
+//
 // Il gate è `npm run qa:ibl`: `?pmrem=nudo` spegne la cura, e il laboratorio
 // `?lab=ibl&ordine=rimonta` (l'ambiente smontato e rimontato dopo il primo PMREM) DEVE uscire nero.
 // Il giorno che non esce più nero, three ha corretto il difetto e questa cura si toglie.
@@ -58,13 +70,43 @@ interface GeneratoreInterno {
 /** Le texture d'origine che hanno già il loro ascoltatore: uno per texture, per sempre. */
 const seguite = new WeakSet<Texture>()
 
+/** Ciò che serve di una scena: l'intensità dell'ambiente, che `NodeMaterialObserver` confronta. */
+interface ScenaConAmbiente {
+  environmentIntensity: number
+}
+
+/** Le scene presentate (le registra Stage) e se una dispose aspetta il suo refresh completo. */
+const scene = new Set<ScenaConAmbiente>()
+let daRinfrescare = false
+let verso = 1
+/** Abbastanza per cambiare il confronto di three, troppo poco per vedersi. */
+const SPINTA = 1e-6
+
 function segui(sorgente: Texture, nato: RenderTarget) {
   nato.texture.pmremVersion = sorgente.pmremVersion
   if (seguite.has(sorgente)) return
   seguite.add(sorgente)
   sorgente.addEventListener('dispose', () => {
     sorgente.needsPMREMUpdate = true
+    // la spinta si dà al fotogramma, non qui: nello StrictMode drei rimette l'intensità subito dopo
+    daRinfrescare = true
   })
+}
+
+/** Registra la scena presentata; restituisce la funzione che la toglie (per un effetto di React). */
+export function seguiScena(scena: ScenaConAmbiente): () => void {
+  scene.add(scena)
+  return () => {
+    scene.delete(scena)
+  }
+}
+
+/** Da chiamare a ogni fotogramma prima del render: dopo una dispose forza il refresh completo. */
+export function rinfrescaAmbiente(): void {
+  if (!daRinfrescare) return
+  daRinfrescare = false
+  for (const scena of scene) scena.environmentIntensity += verso * SPINTA
+  verso = -verso
 }
 
 /**
