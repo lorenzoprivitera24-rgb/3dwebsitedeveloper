@@ -142,4 +142,5 @@ Return findings as Critical / Warning / Suggestion.
 - [ ] `qa:compilazioni` green: zero programs born while scrolling (WebKit and Chromium), no family of sources that differ only in their numbers (Critical if programs are born while scrolling: on iPhone each one is a hitch)
 - [ ] `qa:indici` green: zero draws without indices on WebGL2, and the lab's cure-off run still failing
 - [ ] `qa:parallela` green: on WebGL2 a cold load does not freeze the page (longest frame at least 4× shorter than `?sincrono`), no one-shot render skips an object, and the `?compilazione=tutta` negative still skips the PMREM
+- [ ] `qa:ibl` green: a remounted HDRI lights the scene again (WebKit and Chromium), zero black-IBL visits on WebKit, and the cure-off negative (`?lab=ibl&ordine=rimonta&pmrem=nudo`) still black
 - [ ] Profiled on a throttled / real mobile device
