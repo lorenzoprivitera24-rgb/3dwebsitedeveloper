@@ -17,9 +17,9 @@ Stato: **🟡 VERDE con warn** · Data: (git log della build)
 - JS totale 1538.6 KB gzip > 700 KB (il peso è rimandato, non tolto)
 
 ## Motore rapier, solo dietro un import() di rapier stesso
-- motore: react-three-rapier.esm-CWS-O6_i.js (818.5 KB gzip), riconosciuto dalla firma del WASM
+- motore: react-three-rapier.esm-C5A2uq3p.js (818.5 KB gzip), riconosciuto dalla firma del WASM
 - chunk di rapier stesso, esenti: @react-three/rapier/dist/react-three-rapier.esm.js, @dimforge/rapier3d-compat/rapier.mjs
-- senza motore nel grafo statico: katex/dist/katex.mjs, index.html, src/canvas/CanvasLayer.tsx, src/lab/RealismLab.tsx
+- senza motore nel grafo statico: katex/dist/katex.mjs, index.html, src/canvas/CanvasLayer.tsx, src/lab/CompilazioneLab.tsx, src/lab/CostantiLab.tsx, src/lab/IblLab.tsx, src/lab/IndiciLab.tsx, src/lab/RealismLab.tsx
 
 ## File della build
 | file | percorso | raw | gzip |
