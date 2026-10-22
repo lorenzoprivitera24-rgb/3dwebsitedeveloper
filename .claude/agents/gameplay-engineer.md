@@ -37,9 +37,18 @@ story, and NEVER stand between a visitor and the content or the CTA. Reference b
 
 ## Rules
 
-1. **Physics enters only when a brief asks for play**: add `@react-three/rapier` (+ `ecctrl` for
-   characters) per project — it is deliberately not a base dependency. Fixed timestep, bodies
-   sleep when idle, body count per tier (mobile ≤ 1/3 of desktop).
+1. **Physics enters only when a brief asks for play, and only through `PhysicsStage`**:
+   `@react-three/rapier` has been a base dependency since 31 Aug 2026 (`ecctrl` for characters is
+   still added per brief), and every use goes through `src/canvas/physics/PhysicsStage.tsx`,
+   which downloads it with `import()` only when physics is on. Bodies are `PhysicsBody`, colliders
+   `PhysicsCollider` (`shape` plus rapier's own props), never rapier's components: off the stage
+   they crash the canvas onto the poster. A value import from `@react-three/rapier` (a collider,
+   `useRapier`, a joint hook) puts the 2.2 MB engine in the importer's chunk at every tier, and
+   `perf:check` fails the build on it, even in a file loaded only with physics on: the build
+   cannot tell at which tier a chunk loads. Type imports are free. What `PhysicsStage` does not
+   expose yet (joints, `useRapier`, `InstancedRigidBodies`) is added there on the model of
+   `PhysicsCollider`, never imported around it. Fixed timestep, bodies sleep when idle, body
+   count per tier (mobile ≤ 1/3 of desktop).
 2. **The non-game path is part of the mechanic**: keyboard/reduced-motion/screen-reader users get
    the same content and reward state without the dexterity (e.g. easter egg content also reachable
    from an accessible index; progression milestones fire on section reach, not on aim).

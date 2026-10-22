@@ -79,8 +79,8 @@ when a builder needs its own branch.
    (`node scripts/extract-brand.mjs`); cookbook in the `brand-to-3d` skill.
 8. `@agent-world-builder`: background depth and living ecosystems — depth planes, fog/atmosphere,
    ambient particles/boids (TSL compute), tier-gated density. The world never steals focus.
-9. `@agent-gameplay-engineer`: gamification — playable physics (rapier, added per brief), easter
-   eggs, cursor-as-instrument, scroll progression. Every mechanic ships a non-game a11y path.
+9. `@agent-gameplay-engineer`: gamification (playable physics through `PhysicsStage`, easter eggs,
+   cursor-as-instrument, scroll progression). Every mechanic ships a non-game a11y path.
 10. `@agent-device-parity-director`: parity of impact mobile/desktop at DESIGN time (S2/S5):
     `brief/parity-plan.md` (wow-moment map, input mapping hover→touch/gyro, per-breakpoint
     budgets). Complements — does not replace — the S7 auditor.
