@@ -14,7 +14,11 @@
 // RealismLab-DpWPu4mF.js) «motore rapier nel grafo statico di src/lab/RealismLab.tsx». Ed è il
 // perché dell'esenzione decisa dal modulo d'ingresso: decisa dal contenuto del chunk, su quella
 // build RealismLab risultava «chunk di rapier stesso, esente» e il FAIL cadeva sulla facciata,
-// cioè sul colpevole sbagliato.
+// cioè sul colpevole sbagliato. Rifatto lo stesso giorno con PhysicsCollider nel kit: stesso
+// unico FAIL ed exit 1, col messaggio che ora indica «passa da PhysicsStage (PhysicsBody,
+// PhysicsCollider)». E la controprova nello stesso file, `<PhysicsCollider shape="cuboid"
+// args={[0.3, 0.3, 0.3]} />` al posto del collider di rapier: nessun FAIL, CanvasLayer fra i
+// chunk senza motore. La strada lecita non rimette il motore nel grafo statico.
 // Misura la build (dist/) e gli asset (public/) e scrive qa/perf-report.md.
 // Exit: 0 verde (anche con warn) · 1 rosso (hard cap sforato, o motore rapier fuori posto).
 // Richiede `npm run build` prima.
@@ -186,7 +190,7 @@ if (!engineGz.size) {
     else if (!chain) clean.push(label(chunk))
     else
       fails.push(
-        `motore rapier nel grafo statico di ${label(chunk)}: ${chain.map(base).join(' → ')} (${kb(engineGz.get(chain.at(-1)))} KB gzip a ogni tier). Un import di VALORE da @react-three/rapier: passa da PhysicsStage, o importa solo tipi`,
+        `motore rapier nel grafo statico di ${label(chunk)}: ${chain.map(base).join(' → ')} (${kb(engineGz.get(chain.at(-1)))} KB gzip a ogni tier). Un import di VALORE da @react-three/rapier: passa da PhysicsStage (PhysicsBody, PhysicsCollider), o importa solo tipi`,
       )
   }
   // controllo positivo: se nessuna chiusura arriva al motore, il cammino non vede questa build

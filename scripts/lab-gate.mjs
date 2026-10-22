@@ -18,6 +18,12 @@
 // solo da «alto» e «medio». E il controllo positivo: con un riconoscimento delle richieste rotto
 // apposta, «basso» e «ridotto» tornavano verdi sul codice di prima (il motore si scaricava lo
 // stesso) e solo «alto» e «medio» cadevano, con «fisica accesa ma nessuna richiesta del motore».
+// Quinto, i collider espliciti di PhysicsCollider (il terreno da solo nel mondo, una palla
+// attaccata al primo corpo): con PhysicsCollider che a fisica accesa non rendeva il collider di
+// nessuna forma, «alto» e «medio» rossi con «il corpo non cade (quota 3.200)», perché un corpo
+// senza collider non ha massa e rapier non lo muove; sabotata la sola forma del terreno, rossi
+// con «il corpo è passato sotto il terreno (quota -17.81, terreno 0)». Col codice vero il corpo si
+// ferma a 0.28, il raggio della palla sopra la faccia del cilindro, e 4/4 verdi.
 // lab-gate.mjs: il laboratorio di realismo (?lab=1) visitato SULLA BUILD, un caso per ramo.
 //
 // PERCHÉ ESISTE. Il 22 ott 2026 ?lab=1 cadeva sul poster («react-three-rapier: useRapier must be

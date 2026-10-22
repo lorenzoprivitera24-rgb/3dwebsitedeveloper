@@ -6,7 +6,7 @@ import { Environment } from '@react-three/drei'
 import { Stage } from '../canvas/Stage'
 import { PostFX } from '../canvas/PostFX'
 import { InstancedField } from '../canvas/InstancedField'
-import { PhysicsBody, PhysicsStage } from '../canvas/physics/PhysicsStage'
+import { PhysicsBody, PhysicsCollider, PhysicsStage } from '../canvas/physics/PhysicsStage'
 import { makePbrTriplanarMaterial } from '../canvas/materials/pbrTriplanar'
 import { asAlphaHashed } from '../canvas/materials/alphaModes'
 import { useQualityTier, type QualityTier } from '../hooks/useQualityTier'
@@ -22,11 +22,16 @@ function LabLookAt() {
   return null
 }
 
-// Da dove parte il primo corpo che cade: la posa del markup, letta anche dalla sonda.
+// Da dove parte il primo corpo che cade: la posa del markup, letta anche dalla sonda. Il raggio è
+// quello della sua mesh e del suo collider esplicito.
 const DROP_FROM: [number, number, number] = [1.6, 3.2, 0.8]
-// Il terreno: il disco che si vede sta a y = 0 (il suo collider un centimetro sotto), e con la
-// fisica i corpi devono restarci sopra.
+const DROP_RADIUS = 0.28
+// Il terreno: il disco che si vede sta a y = 0, e con la fisica i corpi devono restarci sopra.
+// Il suo collider è un cilindro dello stesso raggio con la faccia di sopra a quella quota, spesso
+// abbastanza da non farsi attraversare in un passo da un corpo che arriva veloce.
 const FLOOR_Y = 0
+const FLOOR_RADIUS = 12
+const FLOOR_HALF_DEPTH = 0.5
 
 interface LabProbeState {
   tier: QualityTier
@@ -157,8 +162,8 @@ export default function RealismLab() {
         <directionalLight position={[4, 6, 3]} intensity={1.4} />
 
         {/* terreno: triplanar a doppia scala — nessuna UV, nessun tiling visibile */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} material={groundMaterial}>
-          <circleGeometry args={[12, 48]} />
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FLOOR_Y, 0]} material={groundMaterial}>
+          <circleGeometry args={[FLOOR_RADIUS, 48]} />
         </mesh>
 
         {/* il campo instanziato: budget dal tier, vento a ottave dal tier */}
@@ -176,12 +181,16 @@ export default function RealismLab() {
         </mesh>
 
         {/* fisica: due corpi che cadono sul collider del terreno (rapier unico owner) */}
-        {/* PhysicsBody e non RigidBody: col tier low o con reduced-motion la fisica non monta,
-            e un RigidBody senza <Physics> sopra fa cadere tutta la tela sul poster */}
+        {/* PhysicsBody e PhysicsCollider, mai i componenti di rapier: col tier low o con
+            reduced-motion la fisica non monta, e un RigidBody senza <Physics> sopra fa cadere
+            tutta la tela sul poster; importati per valore, scaricherebbero il motore a ogni tier */}
         <PhysicsStage enabled={physics}>
-          <PhysicsBody colliders="ball" position={DROP_FROM} restitution={0.55}>
+          {/* il primo corpo ha un collider esplicito (colliders={false}: niente collider
+              automatico dalla mesh), il secondo quello automatico */}
+          <PhysicsBody colliders={false} position={DROP_FROM} restitution={0.55}>
+            <PhysicsCollider shape="ball" args={[DROP_RADIUS]} />
             <mesh ref={fallingBody}>
-              <icosahedronGeometry args={[0.28, 2]} />
+              <icosahedronGeometry args={[DROP_RADIUS, 2]} />
               <meshStandardNodeMaterial color="#b3542e" roughness={0.6} />
             </mesh>
           </PhysicsBody>
@@ -191,15 +200,15 @@ export default function RealismLab() {
               <meshStandardNodeMaterial color="#3e5c76" roughness={0.5} />
             </mesh>
           </PhysicsBody>
-          {/* includeInvisible: rapier genera i collider automatici solo dai mesh VISIBILI, e
-              questo è nascosto. Senza, il terreno non aveva collider e i corpi cadevano nel
-              vuoto (quota -8 dopo 90 fotogrammi, il gate qa:lab ora lo misura) */}
-          <PhysicsBody type="fixed" colliders="hull" includeInvisible>
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} visible={false}>
-              <circleGeometry args={[12, 24]} />
-              <meshStandardNodeMaterial />
-            </mesh>
-          </PhysicsBody>
+          {/* il terreno è un collider esplicito da solo, fermo nel mondo. Era un PhysicsBody
+              fixed attorno a un mesh nascosto con includeInvisible, perché rapier fa i collider
+              automatici solo dai mesh visibili: senza, i corpi cadevano nel vuoto (quota -8 dopo
+              90 fotogrammi, il gate qa:lab ora lo misura) */}
+          <PhysicsCollider
+            shape="cylinder"
+            args={[FLOOR_HALF_DEPTH, FLOOR_RADIUS]}
+            position={[0, FLOOR_Y - FLOOR_HALF_DEPTH, 0]}
+          />
         </PhysicsStage>
 
         <PostFX level={postLevel} />
