@@ -4,8 +4,20 @@
 // che è proprio il fix che il gate chiedeva: totale identito al byte, semaforo fermo su 🟡
 // per mesi. Quello nuovo legge l'ingresso + i modulepreload da dist/index.html e separa
 // iniziale 157,5 KB · differito 429,7 · totale 587,2: 🟡→🟢 senza che il totale cambi (6 ago 2026).
+// Secondo negativo, la guardia sul motore rapier (22 ott 2026): con `import { CuboidCollider }
+// from '@react-three/rapier'` usato per valore in registry/04-pointer-rig-3d/RigSatellite.tsx
+// (statico da CanvasLayer) 🔴 ed exit 1, unico FAIL: «motore rapier nel grafo statico di
+// src/canvas/CanvasLayer.tsx: CanvasLayer-D5hkV5PS.js → react-three-rapier.esm-CMLDGo9v.js
+// (818.8 KB gzip a ogni tier)». Rolldown ne fa un chunk comune: nessun dynamic entry di rapier,
+// la facciata sparisce. Tolto l'import, nessun FAIL (🟡 per i due warn di sempre) ed esenti solo
+// il wrapper e la facciata. Sulla PhysicsStage di prima (import statico, motore DENTRO
+// RealismLab-DpWPu4mF.js) «motore rapier nel grafo statico di src/lab/RealismLab.tsx». Ed è il
+// perché dell'esenzione decisa dal modulo d'ingresso: decisa dal contenuto del chunk, su quella
+// build RealismLab risultava «chunk di rapier stesso, esente» e il FAIL cadeva sulla facciata,
+// cioè sul colpevole sbagliato.
 // Misura la build (dist/) e gli asset (public/) e scrive qa/perf-report.md.
-// Exit: 0 verde (anche con warn) · 1 rosso (hard cap sforato). Richiede `npm run build` prima.
+// Exit: 0 verde (anche con warn) · 1 rosso (hard cap sforato, o motore rapier fuori posto).
+// Richiede `npm run build` prima.
 //
 // COSA CONTA COME «JS INIZIALE» (corretto ago 2026). Prima questo script sommava *tutti* i .js
 // di dist/assets e chiamava il totale «JS iniziale». Sbagliato in un modo che contava: dopo un
@@ -25,6 +37,7 @@
 //   GLB totali   FAIL > 5 MB
 //   HDRI         warn > 2 MB l'uno (1k basta per la sola IBL)
 //   Font woff2   warn > 100 KB l'uno (subsetting!)
+//   Motore rapier FAIL se sta nel grafo statico di un entry o di un chunk lazy che non è rapier
 import { readdirSync, readFileSync, statSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, extname } from 'node:path'
 import { gzipSync } from 'node:zlib'
@@ -96,6 +109,99 @@ if (initialJsGz + lazyJsGz > 700 * 1024)
   )
 if (cssGz > 60 * 1024) warns.push(`CSS ${kb(cssGz)} KB gzip > 60 KB`)
 
+// --- il motore rapier solo dietro un import() di rapier stesso (22 ott 2026) ---
+// Il motore (@dimforge/rapier3d-compat, il WASM in base64: 2,2 MB, 0,8 MB gzip) si scarica solo
+// a fisica accesa perché PhysicsStage chiede @react-three/rapier con import(). Un import di
+// VALORE da @react-three/rapier in un altro file (un collider in un blueprint montato da
+// CanvasLayer) lo rimette nel grafo statico di quel chunk, e lo scarica chiunque, a ogni tier.
+// I numeri qui sopra non lo vedono: il JS iniziale non cambia (CanvasLayer è già dietro il
+// confine dinamico) e il totale è oltre il warn proprio per il chunk di rapier; qa:lab visita
+// solo ?lab=1. Regola: il file col motore non sta nella chiusura `imports` (solo statici, come
+// per il JS iniziale) di nessun entry, né di nessun dynamic entry che non sia rapier stesso.
+//
+// Il motore si riconosce dal CONTENUTO, mai dal nome: è il .js con la firma del WASM in base64
+// («\0asm» più la versione 1). Il bundler mette i moduli dove li porta il grafo: `rapier-*.js` è
+// una facciata di 1 KB che importa staticamente il chunk vero, e fino al 22 ott il motore stava
+// in RealismLab-*.js. Anche «rapier stesso» si decide dal contenuto, ma del MODULO d'ingresso del
+// dynamic entry (`src` nel manifest), non del suo chunk: un chunk che ha inghiottito il motore
+// contiene la firma, e CanvasLayer risulterebbe esente proprio quando sbaglia. Il modulo del chunk
+// vero è il wrapper (porta il suo messaggio d'errore), quello della facciata è il motore stesso.
+// Solo moduli di terze parti: un file del progetto può citare la firma in un commento (lo fa
+// PhysicsStage), e un import() del progetto non diventa rapier per questo.
+const ENGINE_MARK = 'AGFzbQEAAAA'
+const RAPIER_MARKS = [ENGINE_MARK, 'useRapier must be used within']
+const engineGz = new Map() // file col motore, come lo scrive il manifest → peso gzip
+for (const f of readdirSync('dist/assets')) {
+  if (!f.endsWith('.js')) continue
+  const buf = readFileSync(join('dist/assets', f))
+  if (buf.toString('latin1').includes(ENGINE_MARK)) engineGz.set(`assets/${f}`, gzipSync(buf).length)
+}
+const isRapierModule = (src) => {
+  if (!src?.split(/[\\/]/).includes('node_modules')) return false
+  try {
+    const text = readFileSync(src, 'latin1') // `src` è relativo alla root di Vite, cioè a qui
+    return RAPIER_MARKS.some((m) => text.includes(m))
+  } catch {
+    return false // illeggibile = non esente: il dubbio non apre la guardia
+  }
+}
+const label = (c) => (c.src ?? c.file).replace(/^.*node_modules[\\/]/, '')
+const base = (file) => file.replace(/^.*\//, '')
+// la catena di file dal chunk al primo file col motore, seguendo SOLO `imports`; null se non c'è
+function chainToEngine(from) {
+  const parent = new Map([[from.file, null]])
+  const queue = [from]
+  while (queue.length) {
+    const chunk = queue.shift()
+    if (engineGz.has(chunk.file)) {
+      const chain = []
+      for (let f = chunk.file; f; f = parent.get(f)) chain.unshift(f)
+      return chain
+    }
+    for (const key of chunk.imports ?? []) {
+      const dep = manifest[key]
+      if (dep && !parent.has(dep.file)) {
+        parent.set(dep.file, chunk.file)
+        queue.push(dep)
+      }
+    }
+  }
+  return null
+}
+const rapierLines = []
+if (!engineGz.size) {
+  // senza il motore in mano la guardia sarebbe verde per costruzione
+  fails.push(
+    `motore rapier non trovato: nessun .js di dist/assets contiene la firma del WASM (${ENGINE_MARK}), la guardia non saprebbe quale file vietare`,
+  )
+} else {
+  let reached = false
+  const own = []
+  const clean = []
+  for (const chunk of Object.values(manifest)) {
+    if (!chunk.isEntry && !chunk.isDynamicEntry) continue
+    const chain = chainToEngine(chunk)
+    if (chain) reached = true
+    if (!chunk.isEntry && isRapierModule(chunk.src)) own.push(label(chunk))
+    else if (!chain) clean.push(label(chunk))
+    else
+      fails.push(
+        `motore rapier nel grafo statico di ${label(chunk)}: ${chain.map(base).join(' → ')} (${kb(engineGz.get(chain.at(-1)))} KB gzip a ogni tier). Un import di VALORE da @react-three/rapier: passa da PhysicsStage, o importa solo tipi`,
+      )
+  }
+  // controllo positivo: se nessuna chiusura arriva al motore, il cammino non vede questa build
+  // (manifest di un'altra build, o un chunk raggiunto solo da import() senza dynamic entry)
+  if (!reached)
+    fails.push(
+      `motore rapier fuori dal cammino della guardia: nessun entry né dynamic entry arriva a ${[...engineGz.keys()].map(base).join(', ')} con i soli import statici, quindi non saprebbe dire chi lo scarica`,
+    )
+  rapierLines.push(
+    `- motore: ${[...engineGz].map(([f, gz]) => `${base(f)} (${kb(gz)} KB gzip)`).join(', ')}, riconosciuto dalla firma del WASM`,
+    `- chunk di rapier stesso, esenti: ${own.join(', ') || 'nessuno'}`,
+    `- senza motore nel grafo statico: ${clean.join(', ') || 'nessuno'}`,
+  )
+}
+
 // --- asset ricorsivi (public/) ---
 function walk(dir, out = []) {
   if (!existsSync(dir)) return out
@@ -136,6 +242,9 @@ ${fails.map((f) => '- ' + f).join('\n') || '- nessuno'}
 ## Warn
 ${warns.map((w) => '- ' + w).join('\n') || '- nessuno'}
 
+## Motore rapier, solo dietro un import() di rapier stesso
+${rapierLines.join('\n') || '- non trovato (vedi FAIL)'}
+
 ## File della build
 | file | percorso | raw | gzip |
 |---|---|---|---|
@@ -147,6 +256,7 @@ con qa:verify/qa:shoot.
 `
 mkdirSync('qa', { recursive: true })
 writeFileSync('qa/perf-report.md', md)
-console.log(md.split('\n').slice(0, 14).join('\n'))
+// tutto fino alla tabella dei file: ogni FAIL e ogni warn, non solo il primo
+console.log(md.split('\n## File della build')[0])
 console.log(`→ qa/perf-report.md`)
 if (fails.length) process.exit(1)

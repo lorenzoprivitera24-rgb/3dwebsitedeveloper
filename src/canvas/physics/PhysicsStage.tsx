@@ -20,7 +20,8 @@ type Rapier = typeof import('@react-three/rapier')
 // vuole la stessa promessa a ogni render.
 // Vale per ogni file: un import di VALORE da @react-three/rapier (un collider, useRapier)
 // rimette il motore nel chunk di chi lo importa, a qualunque tier. I tipi sono liberi; il resto
-// passa da qui, o sta in un file che si carica solo a fisica accesa.
+// passa da qui. perf:check lo boccia sul manifest, anche in un file del progetto caricato solo a
+// fisica accesa: dalla build non si legge a che tier si carica un chunk.
 let rapier: Promise<Rapier> | undefined
 const loadRapier = () => (rapier ??= import('@react-three/rapier'))
 
