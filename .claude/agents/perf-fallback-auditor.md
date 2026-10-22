@@ -42,6 +42,13 @@ your rubric, end to end. Audit against the budget table and the two checklists t
      contrast over the moving background; keyboard tab order intact with Lenis.
    - **Reduced motion**: `prefers-reduced-motion` path implemented (amplitude calm, camera calm,
      content reachable).
+   - **Compilation**: `<Riscaldamento />` mounted inside the Stage; no material factory that bakes
+     per-part numbers into a TSL graph (`float(x)` where a `uniform` belongs). The measurement is
+     `npm run qa:compilazioni` (zero programs born while scrolling, no families) and
+     `npm run qa:indici` (WebGL2: zero draws without indices), plus `npm run qa:parallela`
+     (WebGL2: the page does not wait for compilation, nothing outside the presented scene is skipped):
+     read `qa/compilazioni.json`, `qa/indici.json` and `qa/compilazione-parallela.json` if they
+     exist, otherwise prescribe the commands.
 3. Where you cannot verify at runtime (actual fps, GPU time), say so and prescribe the exact
    measurement: `r3f-perf` overlay, DevTools Performance throttled to 4x CPU on a mid-tier mobile
    profile, Lighthouse for initial load, and a real-device pass.

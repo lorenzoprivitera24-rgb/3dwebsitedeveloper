@@ -1,6 +1,6 @@
 import type { Texture } from 'three'
 import { MeshStandardNodeMaterial } from 'three/webgpu'
-import { float } from 'three/tsl'
+import { uniform } from 'three/tsl'
 import { triplanar, triplanarDualScale } from '../tsl/triplanar'
 
 export interface PbrTriplanarOptions {
@@ -38,7 +38,10 @@ export function makePbrTriplanarMaterial({
     : (t: Texture) => triplanar(t, scale, sharpness)
 
   material.colorNode = sample(albedoMap)
-  material.roughnessNode = roughnessMap ? sample(roughnessMap).r.mul(float(roughness)) : float(roughness)
+  // uniform, non float(): la rugosità di una superficie non deve fare un programma GPU suo
+  // (vedi tsl/triplanar.ts e references/webgpu-tsl.md §4.4)
+  const uRoughness = uniform(roughness)
+  material.roughnessNode = roughnessMap ? sample(roughnessMap).r.mul(uRoughness) : uRoughness
   material.metalness = metalness
   return material
 }

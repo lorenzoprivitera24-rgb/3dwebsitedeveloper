@@ -23,6 +23,10 @@ bugs that pass the build and break on screen. Read this before claiming a 3D sce
 3. **Image-based lighting.** One HDRI via drei `<Environment>` + one key directional sun beats a
    pile of point lights. Self-host the HDRI (no CDN). Tune intensity to the mood (bright midday vs
    golden hour) — it sets the whole feel.
+   Render it inside the kit's `Stage`: three r185's node renderer never redoes the PMREM of an HDRI
+   that got disposed, and drei disposes it on every `<Environment>` unmount (StrictMode does it once
+   in dev), so a remounted or swapped-back HDRI goes black for good. `Stage` cures it
+   (`src/canvas/pmremRigenerato.ts`), `qa:ibl` proves it.
 4. **Post-processing.** Bloom on sunlit highlights + **GTAO** ambient occlusion for contact shadows.
    Tasteful, gated to capable tiers.
 5. **Tonal modelling + organic form.** Bright sunlit tops, darker shaded sides/recesses. Break boxy

@@ -1,4 +1,4 @@
-import { float, mx_noise_float, positionWorld, sin, time, vec2, vec3 } from 'three/tsl'
+import { float, mx_noise_float, positionWorld, sin, time, uniform, vec2, vec3 } from 'three/tsl'
 
 export interface WindOptions {
   /** Strati attivi (dal tier: windOctaves 1-3). 1 = solo oscillazione globale. */
@@ -29,7 +29,9 @@ export interface WindOptions {
 export function windOffset({ octaves = 3, strength = 0.12, phase, heightMask }: WindOptions = {}): any {
   const mask = heightMask ?? float(1)
   const ph = phase ?? float(0)
-  const s = float(strength)
+  // la forza è l'unica misura che cambia da un uso all'altro: uniform, così due campi con due
+  // forze condividono il programma (le costanti qui sotto sono uguali per tutti, restano letterali)
+  const s = uniform(strength)
 
   // 1 — sway globale: lento, coerente, leggermente diverso lungo X mondo per non essere un muro
   // (intermedi type-erased: i generics TSL r185 si rompono sulle catene lunghe, cfr. gradientField.ts:58)

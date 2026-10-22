@@ -66,6 +66,10 @@ Motion / Lenis / `@use-gesture` interaction is needed.
   page content (drei `<Html>` portal) — see the realism reference §C.4.
 - **Budget.** One animated background at a time; gate `ogl`/three backgrounds and heavy cursor
   canvases OFF on the low quality tier / mobile. Don't pull `three` for a CSS/Motion effect.
+- **Motion is feedback, not decoration.** Per page, at most ONE technique per family: scroll
+  (parallax, scrub or pin), entrance (fade+lift, stagger or clip reveal), hover (magnetic CTA, image
+  zoom or text shift), click (press+spring, state change Send → Sending → Sent). Every clickable
+  element must visibly respond to the click; an effect that answers no user action is cut first.
 - **Don't fight the 3D agents.** You don't edit the canvas material/camera/loop — that's the 3D
   specialists. You layer interactivity over the DOM and pick/wire components.
 

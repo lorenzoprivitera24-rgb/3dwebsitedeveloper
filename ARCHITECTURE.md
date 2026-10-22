@@ -32,6 +32,7 @@ Project: a scroll-driven and pointer/touch-driven 3D hero. A form morphs from tw
           <CameraDirector/>            canvas/CameraDirector.tsx (progressMap → sceneTargets)     [motion]
           <MorphingForm/>              canvas/MorphingForm.tsx   (TSL displacement + uniforms)    [shader + motion]
           <GradientBackdrop/>          canvas/GradientBackdrop   (damps toward sceneTargets)      [shader + motion]
+        <Riscaldamento/>               canvas/Riscaldamento.tsx  (compiles hidden objects too, before the scroll) [architect]
     (Poster fallback)                  canvas/Poster.tsx         (no-WebGL poster, no deps)       [architect/ui]
   </div>
   <main>                               DOM: 8 blueprint sections, each writes ONE progress channel
@@ -111,6 +112,18 @@ adds `gsap.ticker.add((t) => lenis.raf(t * 1000))`, and `gsap.ticker.lagSmoothin
 - The `WebGPURenderer.init()` itself falls back to WebGL2 when WebGPU is unavailable, so the same TSL
   materials run on both backends. Only WebGPU-only features (compute) need an explicit
   `renderer.isWebGPURenderer` branch (none in this starter; an extension point for the shader engineer).
+- On the WebGL2 path `Stage` applies `proteggiIndici` (canvas/indiciWebGL.ts): a three r185 defect lets
+  an object that uploads its indices and is not drawn strip them from the previous object's VAO
+  (`INVALID_OPERATION`, flicker). Gate: `npm run qa:indici`.
+- Also on WebGL2, with `KHR_parallel_shader_compile`, `Stage` compiles the scene's programs in parallel
+  (canvas/compilazioneParallela.ts): an object whose program is still linking is skipped instead of
+  freezing the page (SILKET on iOS 18: 157 programs ≈ 30 s of frozen page), with at most two links in
+  flight because in WebKit every GPU-process query queues behind them. Only the presented scene goes
+  parallel: three's one-shot renders (the HDRI's PMREM, cube conversions, on-demand shadows) and the post
+  quads stay synchronous, or a result that is never redrawn would stay incomplete. The canvas is born
+  transparent and `<Rivelazione/>` (inside Stage, `useFrame` at priority -2: it judges the previous frame
+  from the skip count and never renders) shows it at the first complete frame, with a 10 s parachute.
+  `?sincrono` turns the cure off for A/B. Gate: `npm run qa:parallela`.
 
 ## Extension points (what each agent does next)
 

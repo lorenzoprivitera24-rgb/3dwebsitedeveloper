@@ -50,7 +50,16 @@ const CanvasLayer = lazy(() => import('./canvas/CanvasLayer'))
 // esiste solo per chi apre il lab, l'entry non lo preannuncia; rapier ha un chunk suo, che
 // PhysicsStage chiede solo a fisica accesa.
 const RealismLab = lazy(() => import('./lab/RealismLab'))
+// ?lab=indici: il difetto dei VAO di three r185 riprodotto a comando, per il gate qa:indici;
+// ?lab=costanti: le misure cotte nei grafi TSL, il negativo delle «famiglie» di qa:compilazioni;
+// ?lab=compilazione: N programmi distinti al caricamento, la scala che misura qa:parallela;
+// ?lab=ibl: una sfera a specchio sotto l'HDRI del kit, l'IBL nero riprodotto a comando (qa:ibl)
+const IndiciLab = lazy(() => import('./lab/IndiciLab'))
+const CostantiLab = lazy(() => import('./lab/CostantiLab'))
+const CompilazioneLab = lazy(() => import('./lab/CompilazioneLab'))
+const IblLab = lazy(() => import('./lab/IblLab'))
 const labRequested = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('lab')
+const labScelto = labRequested ? new URLSearchParams(window.location.search).get('lab') : null
 
 export default function App() {
   const reduced = useReducedMotion()
@@ -60,7 +69,17 @@ export default function App() {
   if (labRequested && webglOk) {
     return (
       <Suspense fallback={<Poster />}>
-        <RealismLab />
+        {labScelto === 'indici' ? (
+          <IndiciLab />
+        ) : labScelto === 'costanti' ? (
+          <CostantiLab />
+        ) : labScelto === 'compilazione' ? (
+          <CompilazioneLab />
+        ) : labScelto === 'ibl' ? (
+          <IblLab />
+        ) : (
+          <RealismLab />
+        )}
       </Suspense>
     )
   }
