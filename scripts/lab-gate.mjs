@@ -3,6 +3,10 @@
 // montata) -> «basso» e «ridotto» rossi, ognuno con «la tela è caduta sul poster» e «3 errori, il
 // primo: react-three-rapier: useRapier must be used within <Physics />!», «alto» e «medio» verdi,
 // exit 1; con PhysicsBody 4/4 verdi, exit 0, e a fisica spenta il corpo resta a 3.20 (22 ott 2026).
+// Secondo negativo, lo stesso giorno: col terreno senza collider (mesh nascosto, niente
+// includeInvisible) «alto» e «medio» rossi con «il corpo è passato sotto il terreno (quota
+// -8.12, terreno 0)»; col collider il corpo si ferma a 0.27, 4/4 verdi. E col palco in `paused`
+// (rapier montato ma fermo) «alto» e «medio» rossi con «il corpo non cade (quota 3.200)».
 // lab-gate.mjs: il laboratorio di realismo (?lab=1) visitato SULLA BUILD, un caso per ramo.
 //
 // PERCHÉ ESISTE. Il 22 ott 2026 ?lab=1 cadeva sul poster («react-three-rapier: useRapier must be
@@ -17,8 +21,8 @@
 //   - nessun errore in console né eccezione di pagina, e nessun poster DENTRO la tela (quello di
 //     App è il fallback di caricamento del chunk e c'è sempre per un attimo: non è il crollo);
 //   - tier e fisica sono quelli del caso: un caso che non apre il suo ramo non prova niente;
-//   - con la fisica il primo corpo cade, senza resta alla quota del markup (le due promesse di
-//     PhysicsStage).
+//   - con la fisica il primo corpo cade e resta sopra il terreno, senza resta alla quota del
+//     markup (le due promesse di PhysicsStage, più il collider del terreno).
 //
 // La build la serve il gate stesso, con l'API di `vite preview` su una porta scelta dal sistema:
 // non può misurare il server di un'altra sessione (la 5199 dei gate è condivisa fra i worktree).
@@ -136,6 +140,8 @@ try {
       if (!Number.isFinite(drop)) why.push('quota del corpo non leggibile')
       else if (lab.physics && drop < DROP_MIN)
         why.push(`fisica accesa ma il corpo non cade (quota ${lab.y.toFixed(3)}, partenza ${lab.startY})`)
+      else if (lab.physics && !(lab.y > lab.floorY))
+        why.push(`fisica accesa ma il corpo è passato sotto il terreno (quota ${lab.y.toFixed(2)}, terreno ${lab.floorY}): nessun collider l'ha fermato`)
       else if (!lab.physics && Math.abs(drop) > STILL_TOL)
         why.push(`fisica spenta ma il corpo si è mosso di ${drop.toFixed(4)}`)
     }

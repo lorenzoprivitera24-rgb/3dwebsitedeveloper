@@ -24,6 +24,8 @@ function LabLookAt() {
 
 // Da dove parte il primo corpo che cade: la posa del markup, letta anche dalla sonda.
 const DROP_FROM: [number, number, number] = [1.6, 3.2, 0.8]
+// Il terreno è il piano y = 0: il disco che si vede e il collider che ferma i corpi.
+const FLOOR_Y = 0
 
 interface LabProbeState {
   tier: QualityTier
@@ -34,6 +36,8 @@ interface LabProbeState {
   /** quota del primo corpo: nel markup, e adesso */
   startY: number
   y: number
+  /** quota del terreno: con la fisica il corpo cade e ci resta sopra */
+  floorY: number
 }
 
 declare global {
@@ -53,7 +57,7 @@ function LabProbe({ tier, physics, body }: { tier: QualityTier; physics: boolean
   useFrame(() => {
     frames.current += 1
     const y = body.current ? body.current.getWorldPosition(world).y : Number.NaN
-    window.__lab = { tier, physics, frames: frames.current, startY: DROP_FROM[1], y }
+    window.__lab = { tier, physics, frames: frames.current, startY: DROP_FROM[1], y, floorY: FLOOR_Y }
   })
   return null
 }
@@ -171,7 +175,10 @@ export default function RealismLab() {
               <meshStandardNodeMaterial color="#3e5c76" roughness={0.5} />
             </mesh>
           </PhysicsBody>
-          <PhysicsBody type="fixed" colliders="hull">
+          {/* includeInvisible: rapier genera i collider automatici solo dai mesh VISIBILI, e
+              questo è nascosto. Senza, il terreno non aveva collider e i corpi cadevano nel
+              vuoto (quota -8 dopo 90 fotogrammi, il gate qa:lab ora lo misura) */}
+          <PhysicsBody type="fixed" colliders="hull" includeInvisible>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} visible={false}>
               <circleGeometry args={[12, 24]} />
               <meshStandardNodeMaterial />
