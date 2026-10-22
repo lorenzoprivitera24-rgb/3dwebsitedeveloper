@@ -24,15 +24,20 @@ interface Props {
 //
 // AA: antialias:true resta giusto (MSAA multicampiona il pass off-screen); SMAA in coda pulisce
 // l'aliasing da shader/alpha che l'MSAA geometrico non vede. Su 'medium' il bloom sparisce
-// (è il pezzo che costa); su 'off' non montare proprio il componente.
+// (è il pezzo che costa); su 'off' non monta nulla, e lo garantisce questo componente: prima
+// la catena registrava comunque il suo useFrame a priority 1, che spegne l'auto-render di R3F,
+// e poi non disegnava niente. Il laboratorio al tier low restava una tela vuota con zero errori
+// (22 ott 2026: 0 render per fotogramma, misurati dal gate qa:lab).
 export function PostFX({ level }: Props) {
+  return level === 'off' ? null : <PostChain level={level} />
+}
+
+function PostChain({ level }: { level: Exclude<PostLevel, 'off'> }) {
   const gl = useThree((s) => s.gl) as unknown as THREE.WebGPURenderer
   const scene = useThree((s) => s.scene)
   const camera = useThree((s) => s.camera)
 
   const pipeline = useMemo(() => {
-    if (level === 'off') return null
-
     const scenePass = pass(scene, camera)
     scenePass.setMRT(mrt({ output, normal: normalView }))
 
@@ -53,12 +58,12 @@ export function PostFX({ level }: Props) {
   }, [gl, scene, camera, level])
 
   useEffect(() => {
-    return () => pipeline?.dispose()
+    return () => pipeline.dispose()
   }, [pipeline])
 
   // priority 1: da qui in poi il frame lo presenta la pipeline, non l'auto-render di R3F
   useFrame(() => {
-    pipeline?.render()
+    pipeline.render()
   }, 1)
 
   return null

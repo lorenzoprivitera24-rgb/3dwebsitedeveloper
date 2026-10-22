@@ -24,7 +24,8 @@ function LabLookAt() {
 
 // Da dove parte il primo corpo che cade: la posa del markup, letta anche dalla sonda.
 const DROP_FROM: [number, number, number] = [1.6, 3.2, 0.8]
-// Il terreno è il piano y = 0: il disco che si vede e il collider che ferma i corpi.
+// Il terreno: il disco che si vede sta a y = 0 (il suo collider un centimetro sotto), e con la
+// fisica i corpi devono restarci sopra.
 const FLOOR_Y = 0
 
 interface LabProbeState {
@@ -38,6 +39,8 @@ interface LabProbeState {
   y: number
   /** quota del terreno: con la fisica il corpo cade e ci resta sopra */
   floorY: number
+  /** render per fotogramma dal fotogramma STEADY_FROM in poi (NaN prima): 0 = tela mai disegnata */
+  rendersPerFrame: number
 }
 
 declare global {
@@ -46,18 +49,31 @@ declare global {
   }
 }
 
+// Da qui la finestra dei render è a regime: i passaggi PMREM dell'HDRI e il primo caricamento
+// sono alle spalle, quindi quello che conta è solo il disegno di ogni fotogramma.
+const STEADY_FROM = 30
+
 // La sonda del gate qa:lab (scripts/lab-gate.mjs), armata con ?qa=1 come il ponte QA. Sta nella
 // stessa Suspense della scena, quindi conta fotogrammi solo quando HDRI, fisica e post sono
 // montati davvero: il gate aspetta fotogrammi, non un timeout (un'attesa a tempo direbbe
-// «nessun errore» anche di una scena non ancora salita). Con la fisica il corpo cade; senza,
-// resta dove il markup lo mette: le due promesse di PhysicsStage, misurate.
+// «nessun errore» anche di una scena non ancora salita). Ma un useFrame gira anche se nessuno
+// disegna, quindi la sonda conta anche i render (`info.render.calls`, cumulativo: vedi
+// QaSceneBridge). Con la fisica il corpo cade; senza, resta dove il markup lo mette.
 function LabProbe({ tier, physics, body }: { tier: QualityTier; physics: boolean; body: RefObject<Mesh | null> }) {
+  const gl = useThree((s) => s.gl) as unknown as { info: { render: { calls: number } } }
   const frames = useRef(0)
+  const callsAtSteady = useRef(0)
   const world = useMemo(() => new Vector3(), [])
   useFrame(() => {
     frames.current += 1
+    const calls = gl.info.render.calls
+    if (frames.current === STEADY_FROM) callsAtSteady.current = calls
+    const steady = frames.current - STEADY_FROM
+    const rendersPerFrame = steady > 0 ? (calls - callsAtSteady.current) / steady : Number.NaN
     const y = body.current ? body.current.getWorldPosition(world).y : Number.NaN
-    window.__lab = { tier, physics, frames: frames.current, startY: DROP_FROM[1], y, floorY: FLOOR_Y }
+    window.__lab = {
+      tier, physics, frames: frames.current, startY: DROP_FROM[1], y, floorY: FLOOR_Y, rendersPerFrame,
+    }
   })
   return null
 }

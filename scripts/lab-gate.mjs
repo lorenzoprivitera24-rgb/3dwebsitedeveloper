@@ -7,6 +7,10 @@
 // includeInvisible) «alto» e «medio» rossi con «il corpo è passato sotto il terreno (quota
 // -8.12, terreno 0)»; col collider il corpo si ferma a 0.27, 4/4 verdi. E col palco in `paused`
 // (rapier montato ma fermo) «alto» e «medio» rossi con «il corpo non cade (quota 3.200)».
+// Terzo: con PostFX che a 'off' registrava comunque il suo useFrame a priority 1 (spegne
+// l'auto-render di R3F) senza disegnare, «basso» rosso con «la tela non viene disegnata: 0.00
+// render per fotogramma a regime» mentre gli altri ne facevano 20 e 8; con PostFX che a 'off'
+// non monta niente, 2.0 e 4/4 verdi. Prima di questa misura il gate era verde su una tela vuota.
 // lab-gate.mjs: il laboratorio di realismo (?lab=1) visitato SULLA BUILD, un caso per ramo.
 //
 // PERCHÉ ESISTE. Il 22 ott 2026 ?lab=1 cadeva sul poster («react-three-rapier: useRapier must be
@@ -18,6 +22,8 @@
 // Per ogni caso asserisce, sulla sonda del laboratorio (window.__lab, armata da ?qa=1):
 //   - la scena arriva a FRAMES fotogrammi: la sonda sta nella Suspense della scena, quindi conta
 //     solo quando HDRI, fisica e post sono montati. Si aspettano fotogrammi, non un timeout;
+//   - ogni fotogramma a regime è anche DISEGNATO (almeno un render): un useFrame gira pure su
+//     una tela che nessuno presenta, e headless lo scatto WebGPU è nero comunque;
 //   - nessun errore in console né eccezione di pagina, e nessun poster DENTRO la tela (quello di
 //     App è il fallback di caricamento del chunk e c'è sempre per un attimo: non è il crollo);
 //   - tier e fisica sono quelli del caso: un caso che non apre il suo ramo non prova niente;
@@ -133,6 +139,9 @@ try {
       if (!seen.crashed) why.push(timedOut ? `nessuna sonda dopo ${TIMEOUT_MS / 1000} s` : 'nessuna sonda')
     } else {
       if (lab.frames < FRAMES) why.push(`${lab.frames} fotogrammi su ${FRAMES}`)
+      // un fotogramma che passa non è un fotogramma disegnato: almeno un render ciascuno, a regime
+      if (!(lab.rendersPerFrame >= 1))
+        why.push(`la tela non viene disegnata: ${Number.isFinite(lab.rendersPerFrame) ? lab.rendersPerFrame.toFixed(2) : 'n/d'} render per fotogramma a regime`)
       if (lab.tier !== c.tier) why.push(`tier ${lab.tier}, il caso voleva ${c.tier}: il ramo non è stato aperto`)
       if (lab.physics !== c.physics)
         why.push(`fisica ${lab.physics ? 'accesa' : 'spenta'}, il caso la voleva ${c.physics ? 'accesa' : 'spenta'}`)
@@ -149,7 +158,7 @@ try {
 
     const size = `${c.ctx.viewport.width}×${c.ctx.viewport.height}${c.ctx.reducedMotion ? ' reduced' : ''}`
     const facts = lab
-      ? `tier ${lab.tier} · fisica ${lab.physics ? 'accesa' : 'spenta'} · ${backend ?? 'backend?'} · ${lab.frames} fotogrammi · corpo ${lab.startY.toFixed(2)} → ${Number.isFinite(lab.y) ? lab.y.toFixed(2) : 'n/d'}`
+      ? `tier ${lab.tier} · fisica ${lab.physics ? 'accesa' : 'spenta'} · ${backend ?? 'backend?'} · ${lab.frames} fotogrammi · ${Number.isFinite(lab.rendersPerFrame) ? lab.rendersPerFrame.toFixed(1) : 'n/d'} render/fotogramma · corpo ${lab.startY.toFixed(2)} → ${Number.isFinite(lab.y) ? lab.y.toFixed(2) : 'n/d'}`
       : `${backend ?? 'backend?'} · nessuna sonda`
     console.log(`${why.length ? '✗' : '✓'} ${c.name.padEnd(8)} ${size.padEnd(17)} ${facts}`)
     for (const w of why) console.log(`    ${w}`)
