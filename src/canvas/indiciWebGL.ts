@@ -15,7 +15,8 @@
 // VAO di quello precedente (mesh che condividono la geometria). Nel sorgente di r185 i casi sono
 // due (`Renderer._renderObjectDirect`, `WebGLBackend.draw`):
 //  - il programma è ancora in volo (`Pipelines.isReady` falso): succede con la compilazione in
-//    parallelo nel render normale, la cura iOS di SILKET (`compilazioneParallela.ts`, 24 set 2026).
+//    parallelo nel render normale, la cura iOS di SILKET (24 set 2026), nel kit dal 21 ott 2026
+//    (`compilazioneParallela.ts`, accesa da Stage accanto a questa).
 //    SILKET, 21 ott 2026, WebKit a iPhone 15 sul sito in rete, scroll partito durante il
 //    caricamento: 3 giri su 3 con sfarfallii, 0 su 7 con questa cura;
 //  - zero istanze (`InstancedMesh.count = 0`, un pool non ancora riempito, un

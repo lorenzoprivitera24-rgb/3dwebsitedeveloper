@@ -3,3 +3,4 @@ diff/
 # report dei gate a conteggio (artefatti di run, come state-report e frame-report)
 compilazioni.json
 indici.json
+compilazione-parallela.json

@@ -15,6 +15,19 @@ if (cmd.length === 0) {
   process.exit(2)
 }
 
+// La porta deve essere LIBERA. Se risponde già qualcuno (il dev server di un'altra sessione, di un
+// altro worktree), `--strictPort` fa morire il nostro Vite, ma l'attesa qui sotto troverebbe
+// comunque un server che risponde e il gate misurerebbe il codice dell'altro, senza errori
+// (21 ott 2026: una misura partita così contro il server di un'altra sessione sulla 5198; nella
+// memoria la famiglia è la nota agenti-paralleli-risorse-condivise-nome-col-prefisso).
+try {
+  await fetch(URL, { signal: AbortSignal.timeout(1000) })
+  console.error(`✗ la porta ${PORT} risponde già: è il server di un'altra sessione o di un altro worktree, e il gate misurerebbe il suo codice. Rilancia con PORT=<libera>.`)
+  process.exit(1)
+} catch {
+  /* libera: è quello che serve */
+}
+
 // --host 127.0.0.1 esplicito: senza, Vite si lega a `localhost`, che su macOS risolve ::1 e
 // lascia il gate a bussare su 127.0.0.1 fino al timeout (sintomo: "server non raggiungibile"
 // mentre il log di Vite dice ready).
@@ -24,6 +37,10 @@ const server = spawn('npx', ['vite', '--port', String(PORT), '--strictPort', '--
 const serverLog = []
 server.stdout.on('data', (d) => serverLog.push(String(d)))
 server.stderr.on('data', (d) => serverLog.push(String(d)))
+let serverMorto = false
+server.on('exit', () => {
+  serverMorto = true
+})
 
 const stop = () => {
   if (!server.killed) server.kill('SIGTERM')
@@ -38,6 +55,8 @@ process.on('SIGINT', () => {
 const deadline = Date.now() + 60_000
 let up = false
 while (Date.now() < deadline) {
+  // il nostro Vite è morto (porta presa fra il controllo e l'avvio): chi risponde non è lui
+  if (serverMorto) break
   try {
     const r = await fetch(URL, { signal: AbortSignal.timeout(1500) })
     if (r.ok) {
@@ -50,8 +69,8 @@ while (Date.now() < deadline) {
   await new Promise((r) => setTimeout(r, 300))
 }
 
-if (!up) {
-  console.error(`✗ dev server non raggiungibile su ${URL} entro 60 s`)
+if (!up || serverMorto) {
+  console.error(serverMorto ? `✗ il dev server è uscito prima di essere pronto su ${URL} (porta presa da un altro?)` : `✗ dev server non raggiungibile su ${URL} entro 60 s`)
   console.error(serverLog.join('').slice(-2000))
   stop()
   process.exit(1)

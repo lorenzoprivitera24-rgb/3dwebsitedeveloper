@@ -50,9 +50,11 @@ const CanvasLayer = lazy(() => import('./canvas/CanvasLayer'))
 // (rapier compreso) esiste solo per chi apre il lab, l'entry non lo preannuncia.
 const RealismLab = lazy(() => import('./lab/RealismLab'))
 // ?lab=indici: il difetto dei VAO di three r185 riprodotto a comando, per il gate qa:indici;
-// ?lab=costanti: le misure cotte nei grafi TSL, il negativo delle «famiglie» di qa:compilazioni
+// ?lab=costanti: le misure cotte nei grafi TSL, il negativo delle «famiglie» di qa:compilazioni;
+// ?lab=compilazione: N programmi distinti al caricamento, la scala che misura qa:parallela
 const IndiciLab = lazy(() => import('./lab/IndiciLab'))
 const CostantiLab = lazy(() => import('./lab/CostantiLab'))
+const CompilazioneLab = lazy(() => import('./lab/CompilazioneLab'))
 const labRequested = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('lab')
 const labScelto = labRequested ? new URLSearchParams(window.location.search).get('lab') : null
 
@@ -64,7 +66,15 @@ export default function App() {
   if (labRequested && webglOk) {
     return (
       <Suspense fallback={<Poster />}>
-        {labScelto === 'indici' ? <IndiciLab /> : labScelto === 'costanti' ? <CostantiLab /> : <RealismLab />}
+        {labScelto === 'indici' ? (
+          <IndiciLab />
+        ) : labScelto === 'costanti' ? (
+          <CostantiLab />
+        ) : labScelto === 'compilazione' ? (
+          <CompilazioneLab />
+        ) : (
+          <RealismLab />
+        )}
       </Suspense>
     )
   }

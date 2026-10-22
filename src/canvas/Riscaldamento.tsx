@@ -28,11 +28,18 @@
 //     fa a ogni rAF). L'ombra si ridisegna al più una volta per frameId: così ogni compito si prende
 //     la sua passata d'ombra e ne compila le pipeline, e il render vero che segue la ridisegna intera.
 //
-// Differenze da SILKET. Il consumatore gira a priorità -1, prima di tutti, e NON possiede il render:
-// nel kit lo presenta R3F (o PostFX). Dopo l'ultimo compito un `frameId` nuovo lascia al render
-// vero la sua passata d'ombra, e le luci con l'ombra su richiesta (`shadow.autoUpdate = false`) se
-// la vedono chiedere di nuovo. I ripassi rifanno la coda anche quando cambia ciò che entra nel
-// programma a livello di scena (ambiente, nebbia, luci): l'HDRI arriva dopo il primo ripasso.
+// Differenze da SILKET. Il consumatore gira a priorità -1, dopo la sola rivelazione di Stage (-2, che
+// non disegna), e NON possiede il render: nel kit lo presenta R3F (o PostFX). Dopo l'ultimo compito
+// un `frameId` nuovo lascia al render vero la sua passata d'ombra, e le luci con l'ombra su
+// richiesta (`shadow.autoUpdate = false`) se la vedono chiedere di nuovo. I ripassi rifanno la coda
+// anche quando cambia ciò che entra nel programma a livello di scena (ambiente, nebbia, luci):
+// l'HDRI arriva dopo il primo ripasso.
+//
+// Con la compilazione in parallelo (compilazioneParallela.ts, WebGL2 con l'estensione) un compito
+// non aspetta il programma: ne lancia il link, e il render vero salta l'oggetto finché non è pronto.
+// La regola 3 resta, perché in WebKit le domande al processo GPU fanno la coda dietro i link. I
+// render dei compiti stanno fuori dal conto della rivelazione (`fuoriConto`): un oggetto saltato nel
+// bersaglio gemello non dice niente del fotogramma che arriva a schermo.
 //
 // Limite dichiarato: con PostFX il render vero passa dal bersaglio MRT del PassNode, un ALTRO
 // contesto, e i programmi scaldati qui non sono quelli. Lo dice `qa:compilazioni`, che è anche la
@@ -44,6 +51,7 @@ import { ColorManagement, Group, Mesh, RGBAFormat, RenderTarget } from 'three'
 import type { Camera, ColorSpace, Light, Material, Object3D, TextureDataType } from 'three'
 import { progressMap, type SectionKey } from '../scroll/progressMap'
 import { pointerSignal } from '../lib/pointerRef'
+import { fuoriConto } from './compilazioneParallela'
 
 /** Millisecondi di compiti in un fotogramma a scena ferma, oltre al primo compito. */
 const BUDGET_MS = 8
@@ -127,12 +135,12 @@ export function Riscaldamento() {
       }
     }
 
-    /** Un render al buio e in piccolo, nel bersaglio gemello. */
+    /** Un render al buio e in piccolo, nel bersaglio gemello, fuori dal conto della rivelazione. */
     const disegna = () => {
       const prima = r.getRenderTarget()
       try {
         r.setRenderTarget(bersaglio)
-        r.render(scena, camera)
+        fuoriConto(() => r.render(scena, camera))
       } catch {
         // un riscaldamento che fallisce non rompe il sito
       } finally {
