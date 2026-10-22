@@ -27,13 +27,17 @@
           NERA per sempre. three smaltisce il PMREM con la sua sorgente, ma il PMREMNode tiene il
           riferimento e non lo rifà, perché `pmremVersion` non è cambiata;
         - `?classico` (WebGLRenderer): la sfera torna accesa, WebGLEnvironments.getPMREM lo rifà;
-        - `?cura`: dopo la dispose `hdri.needsPMREMUpdate = true`, e il renderer a nodi lo rifà.
+        - `?cura`: dopo la dispose `hdri.needsPMREMUpdate = true`: basta su r185.1; da r186 gli oggetti
+          fermi tengono il binding del PMREM distrutto (WebGL2 nero, WebGPU «Destroyed texture»);
+        - `?curakit`: la cura del kit, src/canvas/pmremRigenerato.ts, come la accende Stage (rigenerazione
+          alla dispose + refresh completo dei binding al fotogramma dopo): accesa su r185.1 e r186.1.
       Esito in console e nel titolo: `[repro] …`.
     -->
     <script type="module">
       import * as WEBGPU from 'three/webgpu'
       import * as CLASSICO from 'three'
       import { HDRLoader } from 'three/addons/loaders/HDRLoader.js'
+      import { rigeneraPmrem, rinfrescaAmbiente, seguiScena } from '/src/canvas/pmremRigenerato.ts'
 
       const p = new URLSearchParams(location.search)
       const classico = p.has('classico')
@@ -49,6 +53,8 @@
       renderer.setSize(innerWidth, innerHeight)
       document.body.appendChild(renderer.domElement)
       if (!classico) await renderer.init()
+      const curakit = p.has('curakit')
+      if (curakit) rigeneraPmrem() // prima del primo render, come nella factory di Stage
       const motore = classico ? 'WebGLRenderer' : renderer.backend.isWebGPUBackend ? 'WebGPU' : 'WebGL2 (nodi)'
 
       const scene = new THREE.Scene()
@@ -61,14 +67,17 @@
       const hdri = await new HDRLoader().loadAsync('/hdri/studio_small_08_1k.hdr')
       hdri.mapping = THREE.EquirectangularReflectionMapping
       scene.environment = hdri
+      if (curakit) seguiScena(scene)
 
       renderer.render(scene, camera) // 1. il PMREM nasce qui
       hdri.dispose() //                  2. three smaltisce il PMREM con la sua sorgente
       if (p.has('cura')) hdri.needsPMREMUpdate = true
       let fotogrammi = 0
       renderer.setAnimationLoop(() => {
+        if (curakit) rinfrescaAmbiente() // come il useFrame a -3 di Stage
         renderer.render(scene, camera) // 3. la stessa scena, lo stesso HDRI
-        if (++fotogrammi === 30) dici(`${motore}${p.has('cura') ? ' con la cura' : ''}: 30 fotogrammi dopo la dispose`)
+        const cura = curakit ? ' con la cura del kit' : p.has('cura') ? ' con needsPMREMUpdate' : ''
+        if (++fotogrammi === 30) dici(`${motore} r${WEBGPU.REVISION}${cura}: 30 fotogrammi dopo la dispose`)
       })
     </script>
   </body>
