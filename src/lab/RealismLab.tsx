@@ -1,17 +1,17 @@
-import { useLayoutEffect, useMemo } from 'react'
+import { useLayoutEffect, useMemo, useRef, type RefObject } from 'react'
 import * as THREE from 'three/webgpu'
-import { Color, DataTexture, RGBAFormat, RepeatWrapping, SRGBColorSpace } from 'three'
-import { useThree } from '@react-three/fiber'
+import { Color, DataTexture, RGBAFormat, RepeatWrapping, SRGBColorSpace, Vector3, type Mesh } from 'three'
+import { useFrame, useThree } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
-import { RigidBody } from '@react-three/rapier'
 import { Stage } from '../canvas/Stage'
 import { PostFX } from '../canvas/PostFX'
 import { InstancedField } from '../canvas/InstancedField'
-import { PhysicsStage } from '../canvas/physics/PhysicsStage'
+import { PhysicsBody, PhysicsStage } from '../canvas/physics/PhysicsStage'
 import { makePbrTriplanarMaterial } from '../canvas/materials/pbrTriplanar'
 import { asAlphaHashed } from '../canvas/materials/alphaModes'
-import { useQualityTier } from '../hooks/useQualityTier'
+import { useQualityTier, type QualityTier } from '../hooks/useQualityTier'
 import { useReducedMotion } from '../hooks/useReducedMotion'
+import { qaEnabled } from '../qa/bridge'
 
 // La camera del lab non ha un director: una mira sola, fissata al mount.
 function LabLookAt() {
@@ -19,6 +19,62 @@ function LabLookAt() {
   useLayoutEffect(() => {
     camera.lookAt(0, 1, 0)
   }, [camera])
+  return null
+}
+
+// Da dove parte il primo corpo che cade: la posa del markup, letta anche dalla sonda.
+const DROP_FROM: [number, number, number] = [1.6, 3.2, 0.8]
+// Il terreno: il disco che si vede sta a y = 0 (il suo collider un centimetro sotto), e con la
+// fisica i corpi devono restarci sopra.
+const FLOOR_Y = 0
+
+interface LabProbeState {
+  tier: QualityTier
+  /** la fisica è montata (tier che la concede E niente reduced-motion) */
+  physics: boolean
+  /** fotogrammi passati dall'albero COMPLETO della scena */
+  frames: number
+  /** quota del primo corpo: nel markup, e adesso */
+  startY: number
+  y: number
+  /** quota del terreno: con la fisica il corpo cade e ci resta sopra */
+  floorY: number
+  /** render per fotogramma dal fotogramma STEADY_FROM in poi (NaN prima): 0 = tela mai disegnata */
+  rendersPerFrame: number
+}
+
+declare global {
+  interface Window {
+    __lab?: LabProbeState
+  }
+}
+
+// Da qui la finestra dei render è a regime: i passaggi PMREM dell'HDRI e il primo caricamento
+// sono alle spalle, quindi quello che conta è solo il disegno di ogni fotogramma.
+const STEADY_FROM = 30
+
+// La sonda del gate qa:lab (scripts/lab-gate.mjs), armata con ?qa=1 come il ponte QA. Sta nella
+// stessa Suspense della scena, quindi conta fotogrammi solo quando HDRI, fisica e post sono
+// montati davvero: il gate aspetta fotogrammi, non un timeout (un'attesa a tempo direbbe
+// «nessun errore» anche di una scena non ancora salita). Ma un useFrame gira anche se nessuno
+// disegna, quindi la sonda conta anche i render (`info.render.calls`, cumulativo: vedi
+// QaSceneBridge). Con la fisica il corpo cade; senza, resta dove il markup lo mette.
+function LabProbe({ tier, physics, body }: { tier: QualityTier; physics: boolean; body: RefObject<Mesh | null> }) {
+  const gl = useThree((s) => s.gl) as unknown as { info: { render: { calls: number } } }
+  const frames = useRef(0)
+  const callsAtSteady = useRef(0)
+  const world = useMemo(() => new Vector3(), [])
+  useFrame(() => {
+    frames.current += 1
+    const calls = gl.info.render.calls
+    if (frames.current === STEADY_FROM) callsAtSteady.current = calls
+    const steady = frames.current - STEADY_FROM
+    const rendersPerFrame = steady > 0 ? (calls - callsAtSteady.current) / steady : Number.NaN
+    const y = body.current ? body.current.getWorldPosition(world).y : Number.NaN
+    window.__lab = {
+      tier, physics, frames: frames.current, startY: DROP_FROM[1], y, floorY: FLOOR_Y, rendersPerFrame,
+    }
+  })
   return null
 }
 
@@ -70,6 +126,8 @@ function makeNoiseAlbedo(size = 256): DataTexture {
 export default function RealismLab() {
   const { tier, dpr, postLevel, particleCount, physicsEnabled, windOctaves } = useQualityTier()
   const reduced = useReducedMotion()
+  const physics = physicsEnabled && !reduced
+  const fallingBody = useRef<Mesh>(null)
 
   const groundMaterial = useMemo(
     () =>
@@ -118,28 +176,34 @@ export default function RealismLab() {
         </mesh>
 
         {/* fisica: due corpi che cadono sul collider del terreno (rapier unico owner) */}
-        <PhysicsStage enabled={physicsEnabled && !reduced}>
-          <RigidBody colliders="ball" position={[1.6, 3.2, 0.8]} restitution={0.55}>
-            <mesh>
+        {/* PhysicsBody e non RigidBody: col tier low o con reduced-motion la fisica non monta,
+            e un RigidBody senza <Physics> sopra fa cadere tutta la tela sul poster */}
+        <PhysicsStage enabled={physics}>
+          <PhysicsBody colliders="ball" position={DROP_FROM} restitution={0.55}>
+            <mesh ref={fallingBody}>
               <icosahedronGeometry args={[0.28, 2]} />
               <meshStandardNodeMaterial color="#b3542e" roughness={0.6} />
             </mesh>
-          </RigidBody>
-          <RigidBody colliders="ball" position={[2.1, 4.4, -0.4]} restitution={0.4}>
+          </PhysicsBody>
+          <PhysicsBody colliders="ball" position={[2.1, 4.4, -0.4]} restitution={0.4}>
             <mesh>
               <icosahedronGeometry args={[0.2, 2]} />
               <meshStandardNodeMaterial color="#3e5c76" roughness={0.5} />
             </mesh>
-          </RigidBody>
-          <RigidBody type="fixed" colliders="hull">
+          </PhysicsBody>
+          {/* includeInvisible: rapier genera i collider automatici solo dai mesh VISIBILI, e
+              questo è nascosto. Senza, il terreno non aveva collider e i corpi cadevano nel
+              vuoto (quota -8 dopo 90 fotogrammi, il gate qa:lab ora lo misura) */}
+          <PhysicsBody type="fixed" colliders="hull" includeInvisible>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} visible={false}>
               <circleGeometry args={[12, 24]} />
               <meshStandardNodeMaterial />
             </mesh>
-          </RigidBody>
+          </PhysicsBody>
         </PhysicsStage>
 
         <PostFX level={postLevel} />
+        {qaEnabled() && <LabProbe tier={tier} physics={physics} body={fallingBody} />}
       </Stage>
       <div
         style={{
@@ -147,7 +211,8 @@ export default function RealismLab() {
           color: '#9aa3b2', pointerEvents: 'none',
         }}
       >
-        realism lab · tier {tier} · post {postLevel} · field {particleCount} · wind ×{windOctaves}
+        realism lab · tier {tier} · post {postLevel} · field {particleCount} · wind ×{windOctaves} ·
+        physics {physics ? 'on' : 'off'}
       </div>
     </div>
   )

@@ -142,7 +142,7 @@ Verification runs on playwright-core + the cached Chrome for Testing — NOT the
 | **pixel** | `qa:shoot` (+ `qa:scrub`, `qa:reduced`) | perceptual — real GPU, empty-canvas guard | shots per section × breakpoint, vs `qa/baseline/` |
 | **frame** | `qa:frames` | statistical — long-frame tail, per render path | `qa/budget.json` |
 
-`npm run verify` = lint + build + `perf:check` + `qa:state`: deterministic, headless, always
+`npm run verify` = lint + build + `perf:check` + `qa:lab` + `qa:state`: deterministic, headless, always
 runnable. `verify:full` adds the gates that need a real GPU, two of them counts rather than times:
 `qa:compilazioni` (GPU programs born while scrolling must be zero, and no "family" of shaders that
 differ only in a number, i.e. TSL constants baked per part) and `qa:indici` (WebGL2 draws without
@@ -192,9 +192,10 @@ If the client sends JPEGs on a solid background, the job is cut-out work, not an
 definition; what follows is what it does and does not cover.
 
 Covered mechanically: the ten non-negotiables (see the table above), the scroll→scene contract
-at every checkpoint, the frame budget per render path, the empty-canvas failure, and the lazy
+at every checkpoint, the frame budget per render path, the empty-canvas failure, the lazy
 entry boundary (perf:check walks the Vite manifest from the entries: nothing importing three may
-sit in the entry's static graph — measured 599 → 156,5 KB gzip).
+sit in the entry's static graph — measured 599 → 156,5 KB gzip), and the `?lab=1` bench on the
+build in every tier and reduced-motion branch (`qa:lab`: physics off used to crash it unseen).
 
 Still judgement, and still required:
 - WebGL2 fallback exercised and a no-WebGL poster present (the gates measure whichever path the
